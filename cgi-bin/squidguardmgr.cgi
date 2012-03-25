@@ -16,7 +16,7 @@ use strict qw{vars subs};
 
 $VERSION     = '1.6',
 $AUTHOR      = 'Gilles DAROLD <gilles AT darold DOT net>';
-$COPYRIGHT   = 'Copyright &copy; 2010-2011 Gilles DAROLD, all rights reserved';
+$COPYRIGHT   = 'Copyright &copy; 2010-2012 Gilles DAROLD, all rights reserved';
 $LICENSE     = 'GPL v3';
 
 my $PROGRAM     = 'SquidGuard Manager';
@@ -858,18 +858,18 @@ sub add_item
 	}
 	if (-e "$file.db") {
 		# Now load these items dynamically into squidGuard
-		if (open(OUT, ">$file.diff")) {
+		if (open(OUT, ">$file.tmpdiff")) {
 			map { s/^/\+/; } @add;
 			print OUT join("\n", @add), "\n";
 			close OUT;
-			print `$SQUIDGUARD -u $file.diff`;
-			unlink("$file.diff");
+			print `$SQUIDGUARD -u $file.tmpdiff`;
+			unlink("$file.tmpdiff");
 			if ($KEEP_DIFF) {
 				# Store these items into a squidGuard diff history file
 				&add_hist_item("$file.diff.hist", @add);
 			}
 		} else {
-			&error("Can't open $file.diff for writing: $!<br>");
+			&error("Can't open $file.tmpdiff for writing: $!<br>");
 		}
 	} else {
 		$file =~ s#$CONFIG{dbhome}/##;
@@ -919,18 +919,18 @@ sub remove_item
 		}
 		if (-e "$file.db") {
 			# Now load these items dynamically into squidGuard
-			if (open(OUT, ">$file.diff")) {
+			if (open(OUT, ">$file.tmpdiff")) {
 				map { s/^/\-/; } @removed;
 				print OUT join("\n", @removed), "\n";
 				close OUT;
-				print `$SQUIDGUARD -u $file.diff`;
-				unlink("$file.diff");
+				print `$SQUIDGUARD -u $file.tmpdiff`;
+				unlink("$file.tmpdiff");
 				# Store these items into a squidGuard diff history file
 				if ($KEEP_DIFF) {
 					&add_hist_item("$file.diff.hist", @removed);
 				}
 			} else {
-				&error("Can't open $file.diff for writing: $!");
+				&error("Can't open $file.tmpdiff for writing: $!");
 			}
 		} else {
 			$file =~ s#$CONFIG{dbhome}/##;
@@ -2468,11 +2468,11 @@ sub save_listcontent
 	if (-e "$CONFIG{dbhome}/$bl") {
 		# Create a diff file
 		if ($DIFF) {
-			`$DIFF -U 0 $CONFIG{dbhome}/$bl $CONFIG{dbhome}/$bl.tmp  | $GREP -v "^\@\@" | $GREP -v "^--- " | $GREP -v "^+++ " > $CONFIG{dbhome}/$bl.diff`;
-			print `$SQUIDGUARD -u $CONFIG{dbhome}/$bl.diff`;
+			`$DIFF -U 0 $CONFIG{dbhome}/$bl $CONFIG{dbhome}/$bl.tmp  | $GREP -v "^\@\@" | $GREP -v "^--- " | $GREP -v "^+++ " > $CONFIG{dbhome}/$bl.tmpdiff`;
+			print `$SQUIDGUARD -u $CONFIG{dbhome}/$bl.tmpdiff`;
 			# Save diff into the historical file.
 			if ($KEEP_DIFF) {
-				if (open(IN, "$CONFIG{dbhome}/$bl.diff")) {
+				if (open(IN, "$CONFIG{dbhome}/$bl.tmpdiff")) {
 					my @text = <IN>;
 					close(IN);
 					if (open(OUT, ">>$CONFIG{dbhome}/$bl.diff.hist")) {
@@ -2482,10 +2482,10 @@ sub save_listcontent
 						&error("Can't write to file $CONFIG{dbhome}/$bl.diff.hist: $!");
 					}
 				} else {
-					&error("Can't read file $CONFIG{dbhome}/$bl.diff: $!");
+					&error("Can't read file $CONFIG{dbhome}/$bl.tmpdiff: $!");
 				}
 			}
-			unlink("$CONFIG{dbhome}/$bl.diff");
+			unlink("$CONFIG{dbhome}/$bl.tmpdiff");
 		}
 		unlink("$CONFIG{dbhome}/$bl");
 	} else {
