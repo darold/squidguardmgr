@@ -1,0 +1,44 @@
+<p>
+Les liste de contrôle d'accès, ACL, permettent de combiner les définitions pécédentes d'object dans des règles distinctes pour chaque source ou dans une acl par défaut.
+</p>
+
+<p>
+La règle par défaut définie le contrôle d'accès après toutes les autres polices définies. Par exemple, si vous définissez une régle de récriture dans cette règle, elle sera utilisée pour toutes les acl qui n'ont pas pas de règle de récriture définie. (i.e. toutes les polices ou acl définies héritent des définitions de la police par défaut). La régle par défaut est aussi utilisée pour toutes les sources ou clients qui ne sont pas concernés par les définitions de sources.
+</p>
+
+<p>
+L'option <b>Interdire les adresses Ips dans les URLs</b> peut être utilisée pour forcer l'utilisation unique de nom de domaine dans la partie host de l'URL et interdire les adresses ip.
+</p>
+
+<p>
+L'option <b>Accès par défaut</b> permet de choisir le comportement par défaut de la police ou acl. <b>Seulement les listes cochées (none)</b> est utilisé pour terminer la police uniquement si la destination demandée est trouvée dans une des listes autorisées. <b>Tout Internet (all | any)</b>, activé par dédaut est utilisé pour donné l'accès complet a Internet tant que la destination n'est pas trouvée dans l'un des groupes de blacklist definis.
+</p>
+
+<p>
+<b>Autorise l'accès vers</b> doit être utilisé si vous voulez autoriser les accès par le biais de groupes de "listes blanches" définis. L'accès sera autorisé dès que la destination sera trouvée dans l'une de ces listes.
+</p>
+
+<p>
+Les options <b>DNS Whitelist</b> permettent l'utilisation de listes blanches servies par un ou plusieurs serveurs DNSBL. Ces serveurs doivent être renseignés dans le fichier de configuration de squidguardmgr.
+</p>
+
+<p>
+<b>Interdire l'accès vers</b> est utiliser pour interdir l'accès aux destinations définies dans des groupes de "liste noire" (i.e. l'utilisateur sera redirigé vers l'URL de redirection si la destination correspond à une entrée dans l'une de ces liste). Ce qui veut dire qu'une URL de redirection doit être définie soit dans le groupe de destiantion, soitr dans l'acl actuelle soit dans l'acl par défaut.
+</p>
+
+<p>
+Les options <b>DNS Blacklist</b> permettent l'utilisation de listes noires servies par un ou plusieurs serveurs DNSBL. Ces serveurs doivent être renseignés dans le fichier de configuration de squidguardmgr.
+</p>
+
+<p>
+<b>Utiliser les régles de réécriture</b> permet de définir les règle de récriture à appliquer pour la police actuelle.
+</p>
+
+<p>
+<b>URL de redirection</b> déclare l'URL alternative à utiliser en cas de destination bloquées par la règle actuelle.
+</p>
+
+<p>
+La partie <b>sinon</b> de la declaration de l'acl peut être utilisée uniquement dans le cas ou une contrainte de temps (<b>Horaire</b>) a été définie.
+</p>
+

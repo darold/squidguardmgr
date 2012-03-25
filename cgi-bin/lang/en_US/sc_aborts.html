@@ -1,0 +1,23 @@
+<p>
+By default SquidClamav scan all HTTP stream.
+</p>
+<p>
+Add here your exceptions for virus scanning, i-e any regular expression a la grep typed here that must abort virus scanning when found in a client URL request or in the Content-Type HTTP header.
+</p>
+<p>
+Any special character must be escaped with a backslash.
+</p>
+<p>Example:</p>
+<pre>
+To abort scanning on URL matching the following extensions:
+
+	^.*\.(css|xml|xsl|js|html|jsp)$
+
+To abort scanning on content-type matching the following patterns:
+
+	^image\/.*$
+	^text\/.*$
+</pre>
+<p>
+If there's no rules defined, SquidClamav Manager allow you to automatically add rules to gain the maximum speed for Squid. Click on the button <b>Optimize for speed</b>.
+</p>

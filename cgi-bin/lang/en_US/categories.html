@@ -1,0 +1,40 @@
+<p>
+Filter, destination or target groups if you prefer, are declared by: 
+</p>
+<pre>
+	- an optional time constraint to the definition.
+	- any combination of zero or one of each of: domains list, urls list and expressions list
+</pre>
+
+<p>
+Time constraints on destination groups can be used to make these groups ignored within or outside a given time space.
+</p>
+
+<p>
+You can set for each destination group a redirect url that will be used when a client request is found in a domain, url or expression list. The redirect Url declares the altenative URL to be used for blocked destination groups.
+</p>
+<p>SquidGuard can do runtime string substitutions in the redirectors. Therefor the character "%" has special meaning in the redirector URLs: 
+</p>
+<pre>
+	%a	is replaced with IP address of the client.
+	%n	is replaced with the domainname of the client or "unknown" if not available.
+	%i	is replaced with the user ID (RFC931) or "unknown" if not available.
+	%s	is replaced with the matched source group (client group) or "unknown" if no groups were matched.
+	%t	is replaced with the matched destination group (filter) or "unknown" if no groups were matched.
+	%u	is replaced with the requested URL.
+	%p	is replaced with the REQUEST_URI, i.e. the path and the optional query string of %u, but note for convenience without the leading "/".
+	%%	is replaced with a single "%".
+</pre>
+<p>
+Thus you can pass usefull information to a more or less intelligent CGI page:
+</p>
+<pre>
+	http://proxy/cgi/squidGuard?clientaddr=%a&clientname=%n&clientident=%i&clientgroup=%s&destinationgroup=%t&url=%u
+</pre>   
+
+<p>
+The Log to file input box allow you to specify where redirects caused by match of this group should be logged. The value is is either a path relative to logdir  or an absolute path (i.e. /full/path) to a logfile
+</p>
+<p>
+If the anonymous option is specified the logged info is somewhat anonymized to protect the individual.
+</p>

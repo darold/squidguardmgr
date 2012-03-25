@@ -1,0 +1,12 @@
+<p>
+La définition des whitelists permet de désactiver l'appel au programme chainé (tel squidGuard) et l'analyse antivirale au niveau de l'URL de la requête demandéee. Lorsque le pattern donné est trouvé dans l'URL SquidClamav retourne immédiatement vers Squid sans autre opération.
+</p>
+<p>
+Par exemple:
+</p>
+<pre>
+	\.clamav\.net
+</pre>
+<p>
+délivrera tout fichier servit depuis le domaine clamav.net directement sans analyse antivirale ni passage par les blocklists de SquidGuard.
+</p>

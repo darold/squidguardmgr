@@ -1,0 +1,104 @@
+Thu Dec 22 2011 - v1.6
+
+	- Fix bug during install on searching proxy user. Thanks to John Xue for
+	  the patch.
+	- Rewrite add_items() and remove_item() method to be more reliable and
+	  remove the use of the grep system command. Thanks to Rhys Evans for
+	  the report.
+	- Add persistant storage of removed/added items into an historical diff
+	  file, that can be replayed on a fresh blocklist install. Files will
+	  takes the '.diff.hist' extension. Thanks to Gaetan Paquette for the
+	  feature request. Note that this is not a diff universal format but
+	  the +/- notation used by SquidGuard and the real historic of all the
+	  actions on the blocklist so you may encounter multiple time the same
+	  addition/remove line in the file.
+	- Add KEEP_DIFF configuration directive to enable/disable diff archiving
+	  of blocklist changes. Default is enabled.
+	- Fix "ERROR: Could not send signal 1 to process 1849: (1) Operation
+	  not permitted" with squid_wrapper by using setuid(0). Thanks to Rhys
+	  Evans for the patch.
+	- Error "Premature end of script headers" occuring when saving change
+	  into a blocklist has been fixed by displaying a close button instead
+	  of closing directly the window.
+
+UPGRADE: Changes only concern files squidguardmgr.cgi, squidguardmgr.conf and
+squid_wrapper. It is safe to perform a full install, your previous configuration
+file squidguardmgr.conf will be renamed as squidguardmgr.conf.old.
+
+Tue Apr  8 2011 - v1.5
+
+	- Fix reload of c-icap from the CGI interface. Thanks to Krzysztof Wor
+	  for the report.
+	- Add support for the dnslookup squidclamav configuration directive.
+
+UPGRADE: Only cgi-bin/squidguardmgr.cgi and cgi-bin/lang/fr_FR/menu.dat has
+changed so you can just override those file if you don't want to reinstall all.
+
+Sat Nov 17 2010 - v1.4
+
+	- Fix missing dbhome path to sources of type file (ip address and user).
+	  Thanks to Thomas Langmar for the report.
+	- Fix display of squidclamav manager menu when squidclamav configutation
+	  directive is set to 'off'.
+	- Add autodetection of squid uid/gid into Makefile if squid is running.
+	- Add support to squidclamav v6.0
+	- Modify Makefile.PL to be ready for automatic install and packaging.
+	- Fix Makefile.PL to remove squid_wrapper/squid_wrapper binary when
+	  make clean is called.
+
+UPGRADE:
+
+The easiest way is to reinstall with 'perl Mapkefile.PL' and 'make install'. Or
+manually by replacing the squidguardmgr.cgi file after editing the default path
+variable in top of the file. There's also change in cgi-bin/lang/fr_FR/menu.dat
+
+Sat Oct 16 2010 - v1.3
+
+	- Fix bad handling of schedule time in acl definition.
+	- Fix date definition in schedule time. Replace - by . as the - is
+	  not supported unlike explain in the documentation or at least not in
+	  version 1.2.x.
+	- Fix removing of acl schedule limitation.
+	- Add support to more distribution install in the Makefile.PL.
+	- Fix a syntax error from squidguard when time rules are applied
+	  directly in source|rewrite|destination definitions. For example:
+		src admin within workours {
+		    ip    1.2.3.4 1.2.3.5
+		    user    root foo bar
+		}
+	  raise an error unlike defined in the specification. The right way is:
+		src admin {
+		    ip    1.2.3.4 1.2.3.5
+		    user    root foo bar
+		    within  wokhours
+		}
+	  Thanks to Thomas Langmar for the report.
+	- Really fix this time 'all' and 'none' keywords at the end of the pass
+	  directive.
+	- Fix deny of fqnd in acls.
+	- Really fix this time bad else clause on acls.
+
+
+Sat Aug 28 2010 - v1.2
+
+	- Fix bad else clause on acls edit breaking squidGuard configuration.
+	- Fix 'all' and 'none' keyword to be in the last place in the pass
+	  acl directive breaking squidGuard configuration.
+	- Fix deletion bugs of abort/abortcontent/whitelist in squidclamav GUI.
+	- Fix chained operation when creating new list.
+	- Fix some translation mistake.
+	- Add note on ducumentation about symbolic links under the dbhome
+	  SquidGuard directory. They are not supported by SquidGuardMgr and
+	  must be removed.
+
+UPGRADE: simply overide squidguardmgr.cgi and all lang files.
+
+Tue Aug 24 2010 - v1.1
+
+	- Add GUI to manage SquidClamav configuration.
+	- Add full INSTALL and CONFIGURATION documentation.
+	- Create a dedicated site at http://squidguardmgr.darold.net/
+
+Mon Jul 26 2010 - V1.0
+
+	- Initial revision.

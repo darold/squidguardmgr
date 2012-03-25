@@ -1,0 +1,19 @@
+<p>
+Rewrite rule groups, or rewrite rule sets if you prefer, are declared like sed style substitution.
+</p>
+<p>In the 'Replace' input box you give a regular expression that will be replaced with the string you've set into the 'with' input box. For example:
+</p>
+<pre>
+	Replace : .*\.olddomain\.com with : www\.newdomain\.com
+</pre>
+<p>
+- Select the 'Case insensitive' checkbox if the pattern search must be case insensitive.<br>
+- Select the 'Show move temporary' checkbox if you want to makes the redirection visible to the user with a HTTP code 302 - Moved Temporarily.<br>
+- Select the 'Show move permanently' checkbox if you want to makes the redirection visible to the user with a HTTP code 301 - Moved Permanently.
+</p>
+<p>
+The default is to make Squid silently fetch the alternate URL.
+</p>
+<p>
+Time constraints on rewrite groups can be used to make these groups functional within or outside a given time space only;
+</p>

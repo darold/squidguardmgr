@@ -1,0 +1,14 @@
+<p>
+La définition des clients certifiés vous permet de désactiver l'appel au blocklists de SquidGuard et de l'analyse antivirale lorsque une adresse ip ou un nom d'hôte correspond à l'une des expressions régulières définies ici. Lorsque l'expression est trouvée SquidClamav retourne immédiatement vers Squid, bien sûr Squid doit utiliser une méthode d'authentification.
+</p>
+<p>
+Par exemple:
+</p>
+<pre>
+        192\.168\.1\.10
+        monpc
+        10\.18\.10\..*
+</pre>
+<p>
+autorisera les hôtes dont le nom correspond à 'monpc' ou l'adresse ip est 192.168.1.10 et toute machine sous le réseau 10.18.10.0/24 de ne pas être ennuyé par SquidGuard et l'analyse virale.
+</p>

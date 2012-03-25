@@ -1,0 +1,84 @@
+<p>
+Les groupes de sources ou groupes de clients si vous préférez, sont déclarés par des combinaisons raisonnable de :
+</p>
+
+<h4>IP adresses et/ou ranges (multiple):</h4>
+<pre>
+    xxx.xxx.xxx.xxx [...] ou xxx.xxx.xxx.xxx/nn [...] ou xxx.xxx.xxx.xxx/mmm.mmm.mmm.mmm [...] ou xxx.xxx.xxx.xxx-yyy.yyy.yyy.yyy [...] 
+
+où:
+     xxx.xxx.xxx.xxx est une adresse ip (hôte ou réseau, i.e. 10.11.12.13 ou 10.11.12.0), /nn un prefix de réseau (i.e. /23),
+
+     mmm.mmm.mmm.mmm est un netmask (i.e. 255.255.254.0)
+     et yyy.yyy.yyy.yyy une ip adresse d'un hôte (doit être >= xxx.xxx.xxx.xxx) 
+</pre>
+
+<h4>Fichier de liste d'adresse Ip/range:</h4>
+<pre>
+    La valeur doit être un simple nom de fichier. Où le nom de fichier est soit un chemin relatif à dbhome ou un chemin absolu vers le fichier.
+     Le format du fichier est simplement une liste d'adresses et/ou réseaux comme ci-dessus séparés par un caractère de nouvelle ligne.
+</pre>
+
+<h4>Recherche d'Ip dans LDAP:</h4>
+<pre>
+    Utilisé pour définir une requête LDAP pour extraire une adresse Ip d'un serveur LDAP (ou Active Directory).
+    Utilisez '%s' pour faire référence à l'ip dans la requête LDAP.
+
+Exemple:
+    ldap://ldap.example.com/ou=internetcomputers,dc=example,dc=com?iphostnumber?sub?(&(objectclass=iphost)(iphostnumber=%s))
+
+</pre>
+
+<h4>Noms de domaines (multiple):</h4>
+<pre>
+    foo.com [...]
+
+où:
+    foo.com est un domain Internet (zone).
+</pre>
+
+<h4>Utilisateurs (multiple):</h4>
+<pre>
+    user1 [...]
+
+où:
+    user1 nom d'utilisateur. Ce qui veut dire que l'utilisateur doit être authentifié par Squid pour que cela puisse fonctionner.
+</pre>
+
+<h4>Fichier de liste d'utilisateurs:</h4>
+<pre>
+    La valeur doit être un simple nom de fichier. Où le nom de fichier est soit un chemin relatif à dbhome ou un chemin absolu vers le fichier.
+    Le format du fichier est simplement une liste d'utilisateurs comme ci-dessus séparés par un caractère de nouvelle ligne.
+    Optionnellement, les noms d'utilisateur peuvent être suivi par le caractère ':' et d'un commentaire. Ceci permet l'utilisation des fichiers /etc/passwd ou .htpasswd.
+</pre>
+
+<h4>Recherche des utilisateurs dans LDAP:</h4>
+<pre>
+    Utilisé pour définir une requête LDAP pour extraire un nom d'utilisateur d'un serveur LDAP (ou Active Directory).
+    Utilisez '%s' pour faire référence au nom de l'utilisateur dans la requête LDAP.
+
+exemple:
+    ldap://ldap.example.com/cn=squidguardusers,ou=groups,dc=example,dc=com?memberUid?sub?(&(objectclass=posixGroup)(memberUid=%s))
+
+</pre>
+
+<h4>Recherche des utilisateurs dans une base MySQL:</h4>
+<pre>
+Utilisé pour definir une requête SQL pour extraire un nom utilisateur d'une base de donnée mysql. 
+
+Exemple:
+    select login from pusers
+
+Attention: la requête ne doit pas se terminer par un ";" et ne doit pas comporter plus de quatre statements.
+Gardez à l'esprit que le nom 'user' est un mot réservé de SquidGuard et qu'il ne doit pas apparaitre dans la requête.
+</pre>
+
+<h4>Programme retournant une liste d'utilisateur:</h4>
+<pre>
+Utilisé pour spécifier une commande ou programme système qui retourne une liste d'utilisateurs sur stdout.
+La valeur doit être le chemin absolu vers un programme executable par l'utilisateur executant SquidGuard (la plupart du temps squid).
+</pre>
+
+<p>
+Les contraintes de temps sur les groupes de sources peuvent être utilisées pour activer ses sources pendant ou en dehors d'un espace de temps.
+</p>

@@ -1,0 +1,40 @@
+<p>
+Les filtres, destinations ou cibles si vous préférez, sont déclarés par : 
+</p>
+<pre>
+	- un optionnelle contrainte de temps à cette definition.
+	- toute combinaision de zéro ou une de chacune des listes de: domains urls et expressions.
+</pre>
+
+<p>
+Les contraintes de temps appliquées à un groupe de destination sont utilisées pour que le filtre ainsi défini soit ignoré pendant ou en dehors de cet espace de temps.
+</p>
+
+<p>
+Vous pouvez, pour chaque groupe de destination définir une url de redirection qui sera utilisée lorsqu'une requête d'un client sera trouvée dans l'une de ces listes (domaines, urls ou expressions). L'Url de redirection déclare l'Url alternative qui doit être utilisée pour un groupe de destination bloqué.
+</p>
+<p>SquidGuard a la possibilité de réaliser des subbstitutions de caractères spéciaux à l'intérieur de cette Url:
+</p>
+<pre>
+	%a	est remplacé par l'adresse ip du client.
+	%n	est remplacé par le nom de domaine du client ou "unknown" si non disponible.
+	%i	est remplacé par le nom d'utilisateur (RFC931) ou "unknown" si non disponible.
+	%s 	est remplacé par le groupe source impliqué dans le bloquage  ou "unknown" si non disponible.
+	%t	est remplacé par le groupe de destination ou filtre impliqué dans le bloquage ou "unknown" si non disponible.
+	%u	est remplacé par l'Url demandée.
+	%p	est remplacé par la partie URI de l'Url demandée.
+	%% 	est remplacé par le caractère "%".
+</pre>
+<p>
+Ce qui veut dire que vous pouvez retourner des informations plus ou moins utiles a un script CGI. Exemple d'utilisation :
+</p>
+<pre>
+	http://proxy/cgi/squidGuard?clientaddr=%a&clientname=%n&clientident=%i&clientgroup=%s&destinationgroup=%t&url=%u
+</pre>   
+
+<p>
+La case de saisie de log dans un fichier permet de spécifier ou les redirections causées par les bloquages de ce filtre seront écrites. La valeur est soit un chemain relatif a 'logdir', soit un chemin absolu (i.e. /full/path) vers un fichier.
+</p>
+<p>
+Si l'option 'avec anonymisation' est cochée, les informations logées seront anonymisées pour protéger l'individu.
+</p>

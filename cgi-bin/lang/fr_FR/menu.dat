@@ -1,0 +1,212 @@
+# Global menu
+Globals				Général
+Schedules			Horaires
+Sources				Sources
+Url rewriting			Récriture d'URL
+Filters				Filtres
+ACLs				Polices
+View Configuration		Voir la configuration
+Manage Lists			Gestion des listes
+View logs			Voir les logs
+SquidClamav			SquidClamav
+Restart Squid			Redémarrer Squid
+
+# Globals interface
+Globals configuration		Configuration générale
+Mandatory parameters		Paramêtres obligatoire
+Log directory			Répertoire de log
+Databases home			Répertoire des bases
+Retrieving users from MySQL	Extraction des utilisateurs depuis MySQL
+MySQL Database			Base de données MySQL
+MySQL Username			Utilisateur MySQL
+MySQL Password			Mot de passe MySQL
+Retrieving users from LDAP	Extraction des utilisateurs depuis LDAP
+LDAP Bind dn			DN de connexion LDAP
+LDAP Password			Mot de passe LDAP
+LDAP Protocol (2 or 3)		Protocole LDAP (2 ou 3)
+LDAP Cache time			Durée du cache LDAP
+
+# Generic labels used in multiple interfaces
+Apply change			Appliquer
+Rule name			Nom de la rêgle
+Action				Action
+Add				Ajouter
+Add an element			Ajouter un élément
+Edit				Editer
+Remove all			Tout supprimer
+Remove				Supprimer
+Delete				Enlever
+Monday				Lundi
+Tuesday				Mardi
+Wednesday			Mercredi
+Thursday			Jeudi
+Friday				Vendredi
+Saturday			Samedi
+Sunday				Dimanche
+Everyday			Tous les jours
+Still in use			En cours d'utilisation
+All the time			Tout le temps
+within				Pendant
+outside				En dehors de
+No log file			Aucun fichier de log
+Log file			Fichier de log
+anonymized			avec anonymisation
+Within schedule			Dans l'horaire
+Outside schedule		En dehors de l'horaire
+No schedule association		Aucun horaire associé
+if schedule not match		si l'horaire ne correspond pas
+File				Fichier
+
+# Schedules interface
+Schedules Configuration		Configuration des Horaires
+Start time			Heure de départ
+End time			Heure de fin
+Days				Jours
+New Schedule			Nouvel Horaire
+Schedule Edition		Edition des Horaires
+From				De
+To				A
+Hours				Heures
+Minutes				Minutes
+Following week days		Selon les jours de la semaine
+Space separated list of date	Liste de dates séparées par un espace
+
+# Sources interface
+Sources Configuration		Configuration des Sources
+New Source			Nouvelle Source
+Sources Edition			Edition des Sources
+Source				Source
+Ip addresses or range		Ip adresses ou range
+File of Ip addresses or range	Fichier d'adresses Ip ou range
+Search ip in LDAP		Recherche des adresses dans LDAP
+Domain name			Nom de domaine
+Users				Utilisateurs
+File of users			Fichier d'utilisateurs
+Program returning user list	Programme retournant les utilisateurs
+Search users in LDAP		Recherche des utilisateurs dans LDAP
+Search User in SQL database	Recherche des utilisateurs dans MySQL
+
+# Filters interface
+Filters Configuration		Configuration des filtres
+Domains				Domaines
+Urls				Urls
+Expressions			Expressions
+Redirection			Redirection
+Log file			Fichier de log
+New Filter			Nouveau Filtre
+Filters Edition			Edition des Filtres
+Search in domains list		Recherche dans la liste de domaines
+Search in Urls list		Recherche dans la liste d'Urls
+Search in expressions list	Recherche dans la liste des expressions
+When found in list above	Lorsque trouvé dans une liste ci-dessus
+Redirect to Url			Redirection vers l'Url
+Log to file			Log dans le fichier
+Autocreate			Création automatique
+Autocreate filters from blacklist database	Création automatique des filtres a partir des bases de blacklist
+
+# Url rewrite interface
+Url rewriting Configuration	Configuration des récritures d'Url
+Pattern matching		Chaine de recherche
+Substitution			Chaine de substitution
+Replace				Remplacer
+with				par
+New Rewrite			Nouvelle Récriture
+Url Rewrite Edition		Edition des récritures d'Url
+Rewrite options			Options de récriture
+Case insensitive		Minuscule+Majuscule
+Show move temporary		Signaler comme temporaire
+Show move permanently		Signaler comme permanent
+Insensitive			Min+Maj
+Temporary			Temporaire
+Permanently			Permanent
+
+# Manage lists interface
+Lists management		Administration des listes
+List				Liste
+Rebuild all databases		Reconstruire les bases de données
+Rebuild database		Reconstruire la base de données
+Search				Rechercher
+Search results			Resultat de la recherche
+No data found			Aucune donnée trouvée
+Create a list			Créer une nouvelle liste
+Enter the new list name		Saisir le nom de la nouvelle liste
+Alias				Alias
+Description			Description
+Modify				Modifier
+
+# Acl interface
+ACLs Configuration		Configuration des Polices
+Destination			Destination
+Default ACL			Police par défault
+FQDN only			Pas d'IPs
+else				sinon
+Blocked				Interdit
+Allow				Autorise
+Allow only			Autorise seulement
+Deny				Interdit
+Ips not allowed			Ips interdites
+New Policy			Nouvelle Police
+Desactivate all filters		Desactive tous les filtres
+Policy Edition			Edition de la police
+Source name			Nom de la source
+Select a source			Selectionner une source
+Deny ip addresses in Urls	Interdire les adresses Ips dans les URLs
+Allow access to			Autorise l'accès vers
+All Internet			Tout Internet
+Deny access to			Interdire l'accès vers
+Rewrite rules			Régles de récriture
+Default access			Accès par défaut
+Redirect url			URL de redirection
+Only the selected list		Seulement les listes cochées
+
+# SquidClamav Interfaces
+Virus Scanning			Analyse des virus
+Whitelists			Listes blanches
+Trusted Users			Utilisateurs certifiés
+Trusted Clients			Clients certifiés
+View log			Voir le log
+Close				Fermer
+
+# SquidClamav Globals interface
+Squid parameters		Paramètres relatifs à Squid
+Squid Ip address		Adresse Ip du serveur Squid
+Squid port			Port d'écoute du serveur Squid
+Clamav parameters		Paramètres relatifs à Clamav
+Clamd Unix Socket		Clamd Unix Socket
+Clamd Ip address		Adresse Ip du serveur clamd
+Clamd port			Port d'écoute du serveur clamd
+SquidGuard parameters		Paramètres relatifs à SquidGuard
+SquidGuard program		Programme SquidGuard
+SquidClamav parameters		Paramètres relatifs à SquidClamav
+Redirect			Redirection
+Log redirection			Log des redirections
+Maximum scan size		Taille maximum de scan
+Maximum redirect		Nombre maximum de redirection
+Log SquidClamav performence	Montre les performences de SquidClamav
+Log debug informations		Montre les informations de debug
+SquidClamav internal timeout	Timeout interne de SquidClamav
+Trust Squid cache		Le cache Squid est sain
+Change User Agent		Modifier le user agent
+DNS lookup			Activer la résolution de nom
+
+# SquidClamav whitelist interface
+Whitelists definition		Définition des listes blanches
+List of domain or host to add	Liste de nom de domaine ou d'hôte à ajouter
+Trusted Users definition	Définition des utilisateurs certifiés
+List of user to add		Liste des utilisateurs certifiés à ajouter
+Trusted Clients definition	Listes des machines certifiées sécurisées
+List of clients to add		Liste de clients certifiées à ajouter
+
+
+# SquidClamav Virus Scanning interface
+Control Virus Scanning				Contrôle de l'analyse antivirale
+Disable virus scan following regex in URL	Désactivation suivant une expression régulière dans l'URL
+Disable scan following regex in Content-Type	Désactivation suivant une expression régulière dans le Content-Type
+Optimize for speed				Optimiser pour la vitesse
+
+# Error messages
+Configuration file doesn't exists	Le fichier de configuration n'existe pas
+Create					Créer
+You must define some sources before	Vous devez definir des sources avant
+This will remove the list from your system.	Cette action va supprimer la liste de votre system.
+Are you sure to continue?	Etes vous sur de vouloir continuer ?
