@@ -497,7 +497,7 @@ sub get_configuration
 		}
 
 		# parse global definition
-		if (grep(/^$k$/, @GLOBALVAR)) {
+		if (grep(/^\Q$k\E$/, @GLOBALVAR)) {
 			$infos{$k} = $v;
 			next;
 		}
@@ -3677,6 +3677,7 @@ sub show_help
 	my $type = shift;
 
 	my $helpstr = '';
+
 	if (-e "$LANGDIR/$LANG/$type.html") {
 		if (open(IN, "$LANGDIR/$LANG/$type.html")) {
 			$helpstr .= $_ while (<IN>);
