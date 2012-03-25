@@ -12,6 +12,7 @@
 #-----------------------------------------------------------------------------
 use vars qw($VERSION $AUTHOR $COPYRIGHT $LICENSE);
 
+use MIME::Base64;
 use strict qw{vars subs};
 
 $VERSION     = '1.6',
@@ -110,7 +111,7 @@ my $SRC  = $CGI->param('source') || '';
 my $CAT  = $CGI->param('category') || '';
 my $ACL  = $CGI->param('acl') || '';
 my $PATH = $CGI->param('path') || '';
-my $OLD  = $CGI->param('oldvalue') || '';
+my $OLD  = &decode_base64url($CGI->param('oldvalue')) || '';
 $LANG    = $CGI->param('lang') || $LANG;
 
 # Set globals variable following the content of squidguardmgr.conf 
@@ -1059,8 +1060,8 @@ sub edit_times
 	my $days = '';
 	my $hours = '';
 	if ( $CGI->param('oldvalue') ne '') {
-		my $val = $CGI->param('oldvalue');
-		($days, $hours) = split(/\|/, $CGI->param('oldvalue'));
+		my $val = &decode_base64url($CGI->param('oldvalue')) || '';
+		($days, $hours) = split(/\|/, $val);
 		my ($start,$end) = split(/\-/, $hours);
 		($starth,$startm) = split(/:/, $start);
 		($endh,$endm) = split(/:/, $end);
@@ -1171,8 +1172,8 @@ sub show_rewrites
 			$options .= &translate('Temporary') if ($opt =~ /r/);
 			$options .= ' / ' if ($opt && ($opt =~ /R/));
 			$options .= &translate('Permanently') if ($opt =~ /R/);
-			print "<tr><th>&nbsp;</th><td align=\"center\"><b>", &translate('Replace'), "</b> $pattern</td><td><b>", &translate('with'), "</b> $substitute</td><td>$options</td><th><a href=\"\" onclick=\"document.forms[0].rewrite.value='$k'; document.forms[0].oldvalue.value='$val'; document.forms[0].action.value='rewritesedit'; document.forms[0].submit(); return false;\" titlle=\"", &translate('Edit'), "\">$IMG_EDIT</a></th>";
-			print "<th><a href=\"\" onclick=\"document.forms[0].rewrite.value='$k'; document.forms[0].oldvalue.value='$val'; document.forms[0].action.value='rewritesdelete'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Delete'), "\">$IMG_DELETE</th>";
+			print "<tr><th>&nbsp;</th><td align=\"center\"><b>", &translate('Replace'), "</b> $pattern</td><td><b>", &translate('with'), "</b> $substitute</td><td>$options</td><th><a href=\"\" onclick=\"document.forms[0].rewrite.value='$k'; document.forms[0].oldvalue.value='", &encode_base64url($val), "'; document.forms[0].action.value='rewritesedit'; document.forms[0].submit(); return false;\" titlle=\"", &translate('Edit'), "\">$IMG_EDIT</a></th>";
+			print "<th><a href=\"\" onclick=\"document.forms[0].rewrite.value='$k'; document.forms[0].oldvalue.value='", &encode_base64url($val), "'; document.forms[0].action.value='rewritesdelete'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Delete'), "\">$IMG_DELETE</th>";
 			print "</tr>\n";
 		}
 		&show_log_schedule('rew', 'rewrite', $k, 3);
@@ -1189,8 +1190,8 @@ sub show_rewrites
 				$options .= ' / ' if ($opt && ($opt =~ /R/));
 				$options .= &translate('Permanently') if ($opt =~ /R/);
 				print "<tr><th>&nbsp;</th><td align=\"center\"><b>", &translate('Replace'), "</b> $pattern</td><td><b>", &translate('with'), "</b> $substitute</td><td>$options</td><th><a href=\"\" onclick=\"document.forms[0].rewrite.value='$k-else'; document.forms[0].oldvalue.value='$val'; document.forms[0].action.value='rewritesedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Edit'), "\">$IMG_EDIT</a></th>";
-				print "<th><a href=\"\" onclick=\"document.forms[0].rewrite.value='$k-else'; document.forms[0].oldvalue.value='$val'; document.forms[0].action.value='rewritesdelete'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Delete'), "\">$IMG_DELETE</th>";
-				print "</tr>\n";
+				print "<th><a href=\"\" onclick=\"document.forms[0].rewrite.value='$k-else'; document.forms[0].oldvalue.value='", &encode_base64url($val), "'; document.forms[0].action.value='rewritesdelete'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Delete'), "\">$IMG_DELETE</th>";
+ 				print "</tr>\n";
 			}
 			my $v = $CONFIG{rew}{$k}{else}{log} || '';
 			my $anon = '';
@@ -1229,7 +1230,7 @@ sub edit_rewrites
 	my $move_temp = '';
 	my $move_perm = '';
 	my $null = '';
-	my $val = $CGI->param('oldvalue');
+	my $val = &decode_base64url($CGI->param('oldvalue')) || '';
 	print "<table align=\"center\" width=\"100%\"><tr><td>\n";
 	print "<table align=\"center\">\n";
 	if (!$name) {
@@ -1341,7 +1342,7 @@ sub show_sources
 				next if (!grep(/^$key$/, @SRC_KEYWORD));
 				foreach (@{$CONFIG{src}{$k}{else}{$key}}) {
 					print "<tr><th>&nbsp;</th><td><b>", &translate($SRC_ALIAS{$key}), "</b>: ", &show_editor($key, $_), "</td><th><a href=\"\" onclick=\"document.forms[0].source.value='$k-else'; document.forms[0].oldvalue.value='$key $_'; document.forms[0].action.value='sourcesedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Edit'), "\">$IMG_EDIT</a></th>";
-					print "<th><a href=\"\" onclick=\"document.forms[0].source.value='$k-else'; document.forms[0].oldvalue.value='$key $_'; document.forms[0].action.value='sourcesdelete'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Delete'), "\">$IMG_DELETE</a></th>";
+					print "<th><a href=\"\" onclick=\"document.forms[0].source.value='$k'; document.forms[0].oldvalue.value='", &encode_base64url("$key $_"), "'; document.forms[0].action.value='sourcesdelete'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Delete'), "\">$IMG_DELETE</a></th>";
 					print "</tr>\n";
 				}
 			}
@@ -3727,6 +3728,32 @@ sub save_blacklist_description
 	}
 	close(OUT);
 
+}
+
+sub encode_base64url
+{
+	my $bytes = shift;
+
+	chomp($bytes);
+
+	$bytes = encode_base64($bytes);
+	$bytes =~ s/\+/-/;
+	$bytes =~ s/\//_/;
+	$bytes =~ s/\n\r*/!/;
+
+	return $bytes;
+}
+
+sub decode_base64url
+{
+	my $string = shift;
+
+	$string =~ s/-/\+/;
+	$string =~ s/_/\//;
+	$string =~ s/!/\n\r/;
+	$string = decode_base64($string);
+
+	return $string;
 }
 
 __END__
