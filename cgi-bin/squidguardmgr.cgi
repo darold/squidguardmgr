@@ -854,6 +854,10 @@ sub add_item
 	if (open(OUT, ">>$file")) {
 		print OUT join("\n", @add), "\n";
 		close OUT;
+		if ($KEEP_DIFF) {
+			# Store these items into a squidGuard diff history file
+			&add_hist_item("$file.diff.hist", '+', @add);
+		}
 	} else {
 		&error("Can't open $file for writing: $!");
 	}
@@ -865,10 +869,6 @@ sub add_item
 			close OUT;
 			print `$SQUIDGUARD -u $file.tmpdiff`;
 			unlink("$file.tmpdiff");
-			if ($KEEP_DIFF) {
-				# Store these items into a squidGuard diff history file
-				&add_hist_item("$file.diff.hist", @add);
-			}
 		} else {
 			&error("Can't open $file.tmpdiff for writing: $!<br>");
 		}
@@ -912,10 +912,18 @@ sub remove_item
 			if (open(OUT, ">$file")) {
 				print OUT "$txt";
 				close OUT;
+				# Store these items into a squidGuard diff history file
+				if ($KEEP_DIFF) {
+					&add_hist_item("$file.diff.hist", '-', @removed);
+				}
 			} else {
 				&error("Can't open $file for writing: $!");
 			}
 		} else {
+			# Store these items into a squidGuard diff history file
+			if ($KEEP_DIFF) {
+				&add_hist_item("$file.diff.hist", '-', @removed);
+			}
 			unlink($file);
 		}
 		if (-e "$file.db") {
@@ -926,10 +934,6 @@ sub remove_item
 				close OUT;
 				print `$SQUIDGUARD -u $file.tmpdiff`;
 				unlink("$file.tmpdiff");
-				# Store these items into a squidGuard diff history file
-				if ($KEEP_DIFF) {
-					&add_hist_item("$file.diff.hist", @removed);
-				}
 			} else {
 				&error("Can't open $file.tmpdiff for writing: $!");
 			}
@@ -945,7 +949,7 @@ sub remove_item
 
 sub add_hist_item
 {
-	my ($file, @items) = @_;
+	my ($file, $prefix, @items) = @_;
 
 	my @exists = ();
 	map { $_ =~ s///; } @items;
@@ -974,6 +978,7 @@ sub add_hist_item
 		push(@add, $i) if (!grep($i eq $_, @exists));
 	}
 	if (open(OUT, ">>$file")) {
+		map { s/^/$prefix/ } @add;
 		print OUT join("\n", @add), "\n";
 		close OUT;
 	} else {
