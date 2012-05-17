@@ -1,7 +1,7 @@
 <p>
 Par défaut SquidClamav déclenche l'analyse antivirale sur l'intégralité du flux HTTP.
 <p>
-Ajouter ici les exceptions à l'analyse antivirale, i-e n'importe quelle expression régulière à la grep peut être saisie ici pour désactiver l'antivirus si elle est trouvée dans l'URL demandée ou dans le Content-Type de l'entête HTTP.
+Ajouter ici les exceptions à l'analyse antivirale, par ex. n'importe quelle expression régulière à la grep peut être saisie ici pour désactiver l'antivirus si elle est trouvée dans l'URL demandée ou dans le Content-Type de l'entête HTTP.
 </p>
 <p>
 Tout caractère special doit être préfixé d'un backslash.
@@ -10,12 +10,12 @@ Tout caractère special doit être préfixé d'un backslash.
 <pre>
 Pour désactiver l'antivirus sur les URL suivant les extensions :
 
-	^.*\.(css|xml|xsl|js|html|jsp)$
+    ^.*\.(css|xml|xsl|js|html|jsp)$
 
 Pour désactiver l'antivirus suivant le content-type :
 
-	^image\/.*$
-	^text\/.*$
+    ^image\/.*$
+    ^text\/.*$
 </pre>
 <p>
 Si aucune exception n'est définie, SquidClamav Manager offre la possibilité d'activer des règles par défaut permettant d'optimiser l'analyse pour un gain de vitesse maximum pour Squid. Pour cela cliquez sur le bouton <b>Optimiser pour la vitesse</b>

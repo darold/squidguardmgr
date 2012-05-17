@@ -1,27 +1,27 @@
 <p>
-Les espaces de temps, horaires or zones de temps si vous preferez, sont déclarés
-par jours de la semaine ou dates avec une contrainte horaire optionnelle qui
+Les espaces de temps, horaires ou zones de temps si vous preferez, sont déclarés
+par jours de la semaine ou par dates avec une contrainte horaire optionnelle qui
 s'appliquera à chaque définition de jour de la semaine ou de date.
 </p>
 <p>Chaque zone de temps créée pourra être utilisée ultérieurement pour definir
 des contraintes temporelles aux différents objets comme les sources, les reécriture d'Url et les filtres.
 </p>
 <p>
-Le recouvrement de dates/heures entre les différentes éléments d'une règle definie sont permis et résulterons en une union.
+Le recouvrement de dates/heures entre les différentes éléments d'une règle definie sont permis et résulteront en une union.
 </p>
 <p>
-Si vous utilisez les dates, vous pouvez utiliser une liste de dates séparées par un espace et/ou un range de date avec des dates fixes ou comportant des wildcard.
+Si vous utilisez les dates, vous pouvez utiliser une liste de dates séparées par un espace et/ou une plage de date avec des dates fixes ou comportant des jokers.
 </p>
 <pre>
 Par exemple pour Noël et le Jour de l'An:
 
-	2010.12.25 2011.01.01
+    2010.12.25 2011.01.01
 
 ou la semaine entre ces dates:
 
-	2010.12.25-2011.01.01
+    2010.12.25-2011.01.01
 
 ou ces jours dans les prochaines années:
 
-	*.12.25 *.01.01
+    *.12.25 *.01.01
 </pre>
