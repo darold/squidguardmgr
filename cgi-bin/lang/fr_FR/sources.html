@@ -2,21 +2,21 @@
 Les groupes de sources ou groupes de clients si vous préférez, sont déclarés par des combinaisons raisonnable de :
 </p>
 
-<h4>Adresses IP et/ou plages (multiple):</h4>
+<h4>IP adresses et/ou ranges (multiple):</h4>
 <pre>
-    xxx.xxx.xxx.xxx [...] ou xxx.xxx.xxx.xxx/nn [...] ou xxx.xxx.xxx.xxx/mmm.mmm.mmm.mmm [...] ou xxx.xxx.xxx.xxx-yyy.yyy.yyy.yyy [...]
+    xxx.xxx.xxx.xxx [...] ou xxx.xxx.xxx.xxx/nn [...] ou xxx.xxx.xxx.xxx/mmm.mmm.mmm.mmm [...] ou xxx.xxx.xxx.xxx-yyy.yyy.yyy.yyy [...] 
 
 où:
-     xxx.xxx.xxx.xxx est une adresse ip (hôte ou réseau, par ex. 10.11.12.13 ou 10.11.12.0), /nn un prefix de réseau (par ex. /23),
+     xxx.xxx.xxx.xxx est une adresse ip (hôte ou réseau, i.e. 10.11.12.13 ou 10.11.12.0), /nn un prefix de réseau (i.e. /23),
 
-     mmm.mmm.mmm.mmm est un netmask (par ex. 255.255.254.0)
-     et yyy.yyy.yyy.yyy l'adresse ip d'un hôte (doit être >= xxx.xxx.xxx.xxx)
+     mmm.mmm.mmm.mmm est un netmask (i.e. 255.255.254.0)
+     et yyy.yyy.yyy.yyy une ip adresse d'un hôte (doit être >= xxx.xxx.xxx.xxx) 
 </pre>
 
-<h4>Fichier de liste d'adresse Ip/plage:</h4>
+<h4>Fichier de liste d'adresse Ip/range:</h4>
 <pre>
-    La valeur doit être un simple nom de fichier, où le nom de fichier est soit un chemin relatif à dbhome, soit un chemin absolu vers le fichier.
-    Le format du fichier est simplement une liste d'adresses, et/ou de réseaux comme ci-dessus, séparés par un caractère de nouvelle ligne.
+    La valeur doit être un simple nom de fichier. Où le nom de fichier est soit un chemin relatif à dbhome ou un chemin absolu vers le fichier.
+     Le format du fichier est simplement une liste d'adresses et/ou réseaux comme ci-dessus séparés par un caractère de nouvelle ligne.
 </pre>
 
 <h4>Recherche d'Ip dans LDAP:</h4>
@@ -42,12 +42,12 @@ où:
     user1 [...]
 
 où:
-    user1 est un nom d'utilisateur. Ce qui veut dire que l'utilisateur doit être authentifié par Squid pour que cela puisse fonctionner.
+    user1 nom d'utilisateur. Ce qui veut dire que l'utilisateur doit être authentifié par Squid pour que cela puisse fonctionner.
 </pre>
 
 <h4>Fichier de liste d'utilisateurs:</h4>
 <pre>
-    La valeur doit être un simple nom de fichier, où le nom de fichier est soit un chemin relatif à dbhome, soit un chemin absolu vers le fichier.
+    La valeur doit être un simple nom de fichier. Où le nom de fichier est soit un chemin relatif à dbhome ou un chemin absolu vers le fichier.
     Le format du fichier est simplement une liste d'utilisateurs comme ci-dessus séparés par un caractère de nouvelle ligne.
     Optionnellement, les noms d'utilisateur peuvent être suivi par le caractère ':' et d'un commentaire. Ceci permet l'utilisation des fichiers /etc/passwd ou .htpasswd.
 </pre>
@@ -64,7 +64,7 @@ exemple:
 
 <h4>Recherche des utilisateurs dans une base MySQL:</h4>
 <pre>
-Utilisé pour definir une requête SQL pour extraire un nom utilisateur d'une base de donnée mysql.
+Utilisé pour definir une requête SQL pour extraire un nom utilisateur d'une base de donnée mysql. 
 
 Exemple:
     select login from pusers

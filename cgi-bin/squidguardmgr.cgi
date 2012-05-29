@@ -15,7 +15,7 @@ use vars qw($VERSION $AUTHOR $COPYRIGHT $LICENSE);
 use MIME::Base64;
 use strict qw{vars subs};
 
-$VERSION     = '1.6',
+$VERSION     = '1.7',
 $AUTHOR      = 'Gilles DAROLD <gilles AT darold DOT net>';
 $COPYRIGHT   = 'Copyright &copy; 2010-2012 Gilles DAROLD, all rights reserved';
 $LICENSE     = 'GPL v3';
@@ -629,7 +629,7 @@ sub smgr_header
 	print "<a href=\"\" onclick=\"document.forms[0].oldvalue.value=''; document.forms[0].action.value='times'; document.forms[0].submit(); return false;\">", &translate('Schedules'), "</a> |\n";
 	print "<a href=\"\" onclick=\"document.forms[0].oldvalue.value=''; document.forms[0].action.value='sources'; document.forms[0].submit(); return false;\">", &translate('Sources'), "</a> |\n";
 	print "<a href=\"\" onclick=\"document.forms[0].oldvalue.value=''; document.forms[0].action.value='rewrites'; document.forms[0].submit(); return false;\">", &translate('Url rewriting'), "</a> |\n";
-	print "<a href=\"\" onclick=\"document.forms[0].oldvalue.value=''; document.forms[0].action.value='categories'; document.forms[0].submit(); return false;\">", &translate('Filters'), "</a> |\n";
+	print "<a href=\"\" onclick=\"document.forms[0].oldvalue.value=''; document.forms[0].action.value='categories'; document.forms[0].blacklist.value=''; document.forms[0].submit(); return false;\">", &translate('Filters'), "</a> |\n";
 	print "<a href=\"\" onclick=\"document.forms[0].oldvalue.value=''; document.forms[0].action.value='acl'; document.forms[0].submit(); return false;\">", &translate('ACLs'), "</a> |\n";
 	print "<a href=\"\" onclick=\"document.forms[0].oldvalue.value=''; document.forms[0].action.value='blacklists'; document.forms[0].submit(); return false;\">", &translate('Manage Lists'), "</a> |\n";
 	print "<br><hr>\n";
@@ -662,16 +662,23 @@ sub smgr_footer
 
 sub get_blacklists
 {
+	my $ldir = shift;
 
-	if (not opendir(DIR, "$CONFIG{dbhome}")) {
-		$ERROR = "Can't open blacklist directory $CONFIG{dbhome}: $!\n";
+	$ldir = '/' . $ldir if ($ldir);
+	if (not opendir(DIR, "$CONFIG{dbhome}$ldir")) {
+		$ERROR = "Can't open blacklist directory $CONFIG{dbhome}$ldir: $!\n";
 		return;
 	}
-	my @dirs = grep { !/^\..*$/ && -d "$CONFIG{dbhome}/$_" && !-l "$CONFIG{dbhome}/$_" } readdir(DIR);
+	my @dirs = grep { !/^\..*$/ && -d "$CONFIG{dbhome}$ldir/$_" && !-l "$CONFIG{dbhome}$ldir/$_" } readdir(DIR);
 	closedir(DIR);
+	# search for subdirectories
+	foreach my $d (@dirs) {
+		my @tmpdirs = &get_blacklists($d);
+		map { s/^/$d\//; } @tmpdirs;
+		push(@dirs, @tmpdirs);
+	}
 
 	return sort @dirs;
-
 }
 
 sub get_blacklists_description
@@ -690,7 +697,6 @@ sub get_blacklists_description
 	}
 
 	return %infos;
-
 }
 
 sub show_blacklists
