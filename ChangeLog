@@ -1,3 +1,11 @@
+Thu May 29 2012 - v1.8
+
+	- Fix major bug on most of the editing interface using the oldvalue CGI
+	  parameter. Thanks to John Xue for the report.
+	- Fix bug that duplicate blocklist in subfolder with wrong path. Thanks
+	  to Todd Hank.
+
+
 Sat Apr 28 2012 - v1.7
 
 	- Add support to subdirectory in blacklists, like from Shalla. Thanks

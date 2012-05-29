@@ -15,7 +15,7 @@ use vars qw($VERSION $AUTHOR $COPYRIGHT $LICENSE);
 use MIME::Base64;
 use strict qw{vars subs};
 
-$VERSION     = '1.7',
+$VERSION     = '1.8',
 $AUTHOR      = 'Gilles DAROLD <gilles AT darold DOT net>';
 $COPYRIGHT   = 'Copyright &copy; 2010-2012 Gilles DAROLD, all rights reserved';
 $LICENSE     = 'GPL v3';
