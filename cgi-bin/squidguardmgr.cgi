@@ -673,7 +673,7 @@ sub get_blacklists
 	closedir(DIR);
 	# search for subdirectories
 	foreach my $d (@dirs) {
-		my @tmpdirs = &get_blacklists($d);
+		my @tmpdirs = &get_blacklists("$ldir/$d");
 		map { s/^/$d\//; } @tmpdirs;
 		push(@dirs, @tmpdirs);
 	}
@@ -703,10 +703,10 @@ sub show_blacklists
 {
 
 	print "<h2>", &translate('Lists management'), "</h2>\n";
-	print "<table width=\"100%\">\n";
 	my %blinfo = &get_blacklists_description();
 	my @bl = &get_blacklists();
 	my $i = 0;
+	print "<table width=\"100%\">\n";
 	foreach ($i = 0; $i <= $#bl; $i++) {
 		if (($i % 10) == 0) {
 			print "<tr>\n";
