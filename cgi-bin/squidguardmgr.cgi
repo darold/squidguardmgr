@@ -326,10 +326,11 @@ if ($ERROR) {
 	&error($ERROR);
 }
 
+my $valold = &encode_base64url($OLD);
 print qq{
 <input type="hidden" name="apply" value="" />
 <input type="hidden" name="blacklist" value="$BL" />
-<input type="hidden" name="oldvalue" value="$OLD" />
+<input type="hidden" name="oldvalue" value="$valold" />
 };
 
 #if (!$ACTION) {
@@ -3746,6 +3747,8 @@ sub encode_base64url
 	my $bytes = shift;
 
 	chomp($bytes);
+
+	return $bytes if (!$bytes);
 
 	$bytes = encode_base64($bytes);
 	$bytes =~ s/\+/-/;
