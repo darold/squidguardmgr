@@ -712,9 +712,10 @@ sub show_blacklists
 		if (($i % 10) == 0) {
 			print "<tr>\n";
 		}
+		my $in_use = &acl_in_use($bl[$i]);
 		print "<td align=\"left\" title=\"$blinfo{$bl[$i]}{description}\"><a href=\"\" onclick=\"document.forms[0].action.value='bledit'; document.forms[0].blacklist.value='$bl[$i]'; document.forms[0].submit(); return false;\" style=\"font-weight: normal;\">", ($blinfo{$bl[$i]}{alias} || $bl[$i]), "</a>";
-		print "<a href=\"\" onclick=\"if (confirm('WARNING: ", &translate('This will remove the list from your system.'), &translate('Are you sure to continue?'), "')) { document.forms[0].action.value='bldelete'; document.forms[0].blacklist.value='$bl[$i]'; document.forms[0].submit(); } return false;\" title=\"", &translate('Remove'), "\">$IMG_SMALL_REMOVE</a>" if (!exists $CONFIG{dest}{$bl[$i]});
-		print "<font title=\"", &translate('Still in use'), "\">$IMG_SMALL_NOREMOVE</font>" if (exists $CONFIG{dest}{$bl[$i]});
+		print "<a href=\"\" onclick=\"if (confirm('WARNING: ", &translate('This will remove the list from your system.'), &translate('Are you sure to continue?'), "')) { document.forms[0].action.value='bldelete'; document.forms[0].blacklist.value='$bl[$i]'; document.forms[0].submit(); } return false;\" title=\"", &translate('Remove'), "\">$IMG_SMALL_REMOVE</a>" if (!$in_use);
+		print "<font title=\"", &translate('still in use'), "\">$IMG_SMALL_NOREMOVE</font>" if ($in_use);
 		print "</td>\n";
 		if ($i =~ /9$/) {
 			print "</tr>\n";
@@ -3768,6 +3769,27 @@ sub decode_base64url
 	$string = decode_base64($string);
 
 	return $string;
+}
+
+sub acl_in_use
+{
+	my $blname = shift;
+
+	my $found = 0;
+
+	foreach my $d (keys %{$CONFIG{dest}}) {
+		if (grep(/^$blname\/(domains|expressions|urls)$/, $CONFIG{dest}{$d}{'domainlist'},
+				$CONFIG{dest}{$d}{else}{'domainlist'},
+				$CONFIG{dest}{$d}{'expressionlist'},
+				$CONFIG{dest}{$d}{else}{'expressionlist'},
+				$CONFIG{dest}{$d}{'urllist'},
+				$CONFIG{dest}{$d}{else}{'urllist'})
+		) {
+			$found = 1;
+			last;
+		}
+	}
+	return $found;
 }
 
 __END__
