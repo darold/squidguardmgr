@@ -1,3 +1,12 @@
+Wed Jun 06 2012 - v1.9
+
+	- Fix a problem in the detection of blacklist in use in the
+	  "Manage Lists" interface.
+	- Fix a bug on creating the default squidGuard.conf file when
+	  the file doesn't exists.
+	- Fix a bug in schedule interface that duplicate schedule instead
+	  of modifying it.
+
 Thu May 29 2012 - v1.8
 
 	- Fix major bug on most of the editing interface using the oldvalue CGI
