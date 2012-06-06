@@ -223,6 +223,10 @@ if ($ACTION eq 'squidclamav') {
 	exit 0;
 }
 
+if (! -e $CONF_FILE && ($ACTION eq 'init') ) {
+	&create_default_config();
+}
+
 if (! -e $CONF_FILE) {
 	&smgr_header();
 	if ($ERROR) {
@@ -264,10 +268,6 @@ if ($ACTION eq 'squid') {
 		$ERROR = `$SQUID_WRAPPER`;
 	}
 	$ACTION = '';
-}
-
-if (! -e $CONF_FILE && ($ACTION eq 'init') ) {
-	&create_default_config();
 }
 
 if ($ACTION eq 'autocreate') {
