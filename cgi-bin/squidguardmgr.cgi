@@ -2690,6 +2690,7 @@ sub apply_change
 		if ($oldval) {
 			my ($key, $val) = split(/\s/, $oldval, 2);
 			if (grep(/^$key$/, @SRC_KEYWORD)) {
+				$val = quotemeta($val);
 				if ($else) {
 					@{$CONFIG{src}{$name}{else}{$key}} = grep(!/^$val$/, @{$CONFIG{src}{$name}{else}{$key}});
 				} else {
@@ -2739,6 +2740,7 @@ sub apply_change
 		if ($oldval) {
 			my ($key, $val) = split(/\s/, $oldval, 2);
 			if (grep(/^$key$/, @SRC_KEYWORD)) {
+				$val = quotemeta($val);
 				if ($else) {
 					@{$CONFIG{src}{$name}{else}{$key}} = grep(!/^$val$/, @{$CONFIG{src}{$name}{else}{$key}});
 				} else {
