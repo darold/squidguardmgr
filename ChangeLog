@@ -1,3 +1,8 @@
+Thu Jun 21 2012 - v1.10
+
+	- Fix an issue with username containing non alphanumeric character in
+	  sources - Thank to John Xue for the report.
+
 Wed Jun 06 2012 - v1.9
 
 	- Fix a problem in the detection of blacklist in use in the
