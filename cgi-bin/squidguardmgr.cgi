@@ -111,7 +111,7 @@ my $SRC  = $CGI->param('source') || '';
 my $CAT  = $CGI->param('category') || '';
 my $ACL  = $CGI->param('acl') || '';
 my $PATH = $CGI->param('path') || '';
-my $OLD  = &decode_base64url($CGI->param('oldvalue')) || '';
+my $OLD  = &decode_url($CGI->param('oldvalue')) || '';
 $LANG    = $CGI->param('lang') || $LANG;
 
 # Set globals variable following the content of squidguardmgr.conf 
@@ -326,7 +326,7 @@ if ($ERROR) {
 	&error($ERROR);
 }
 
-my $valold = &encode_base64url($OLD);
+my $valold = &encode_url($OLD);
 print qq{
 <input type="hidden" name="apply" value="" />
 <input type="hidden" name="blacklist" value="$BL" />
@@ -1044,9 +1044,9 @@ sub show_times
 			} else {
 				$show_days = $days;
 			}
-			print "<tr><th>&nbsp;</th><td align=\"center\">$start</td><td>$end</td><td>$show_days</td><th><a href=\"\" onclick=\"document.forms[0].schedule.value='$k';document.forms[0].oldvalue.value='", &encode_base64url($val), "'; document.forms[0].action.value='timesedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Edit'), "\">$IMG_EDIT</a></th>";
+			print "<tr><th>&nbsp;</th><td align=\"center\">$start</td><td>$end</td><td>$show_days</td><th><a href=\"\" onclick=\"document.forms[0].schedule.value='$k';document.forms[0].oldvalue.value='", &encode_url($val), "'; document.forms[0].action.value='timesedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Edit'), "\">$IMG_EDIT</a></th>";
 			if ($delete) {
-				print "<th><a href=\"\" onclick=\"document.forms[0].schedule.value='$k';document.forms[0].oldvalue.value='", &encode_base64url($val), "'; document.forms[0].action.value='timesdelete'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Delete'), "\">$IMG_DELETE</a></th>";
+				print "<th><a href=\"\" onclick=\"document.forms[0].schedule.value='$k';document.forms[0].oldvalue.value='", &encode_url($val), "'; document.forms[0].action.value='timesdelete'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Delete'), "\">$IMG_DELETE</a></th>";
 			} else {
 				print "<th title=\"", &translate('Still in use'), "\">$IMG_NODELETE</th>";
 			}
@@ -1185,8 +1185,8 @@ sub show_rewrites
 			$options .= &translate('Temporary') if ($opt =~ /r/);
 			$options .= ' / ' if ($opt && ($opt =~ /R/));
 			$options .= &translate('Permanently') if ($opt =~ /R/);
-			print "<tr><th>&nbsp;</th><td align=\"center\"><b>", &translate('Replace'), "</b> $pattern</td><td><b>", &translate('with'), "</b> $substitute</td><td>$options</td><th><a href=\"\" onclick=\"document.forms[0].rewrite.value='$k'; document.forms[0].oldvalue.value='", &encode_base64url($val), "'; document.forms[0].action.value='rewritesedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Edit'), "\">$IMG_EDIT</a></th>";
-			print "<th><a href=\"\" onclick=\"document.forms[0].rewrite.value='$k'; document.forms[0].oldvalue.value='", &encode_base64url($val), "'; document.forms[0].action.value='rewritesdelete'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Delete'), "\">$IMG_DELETE</th>";
+			print "<tr><th>&nbsp;</th><td align=\"center\"><b>", &translate('Replace'), "</b> $pattern</td><td><b>", &translate('with'), "</b> $substitute</td><td>$options</td><th><a href=\"\" onclick=\"document.forms[0].rewrite.value='$k'; document.forms[0].oldvalue.value='", &encode_url($val), "'; document.forms[0].action.value='rewritesedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Edit'), "\">$IMG_EDIT</a></th>";
+			print "<th><a href=\"\" onclick=\"document.forms[0].rewrite.value='$k'; document.forms[0].oldvalue.value='", &encode_url($val), "'; document.forms[0].action.value='rewritesdelete'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Delete'), "\">$IMG_DELETE</th>";
 			print "</tr>\n";
 		}
 		&show_log_schedule('rew', 'rewrite', $k, 3);
@@ -1202,8 +1202,8 @@ sub show_rewrites
 				$options .= &translate('Temporary') if ($opt =~ /r/);
 				$options .= ' / ' if ($opt && ($opt =~ /R/));
 				$options .= &translate('Permanently') if ($opt =~ /R/);
-				print "<tr><th>&nbsp;</th><td align=\"center\"><b>", &translate('Replace'), "</b> $pattern</td><td><b>", &translate('with'), "</b> $substitute</td><td>$options</td><th><a href=\"\" onclick=\"document.forms[0].rewrite.value='$k-else'; document.forms[0].oldvalue.value='", &encode_base64url($val), "'; document.forms[0].action.value='rewritesedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Edit'), "\">$IMG_EDIT</a></th>";
-				print "<th><a href=\"\" onclick=\"document.forms[0].rewrite.value='$k-else'; document.forms[0].oldvalue.value='", &encode_base64url($val), "'; document.forms[0].action.value='rewritesdelete'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Delete'), "\">$IMG_DELETE</th>";
+				print "<tr><th>&nbsp;</th><td align=\"center\"><b>", &translate('Replace'), "</b> $pattern</td><td><b>", &translate('with'), "</b> $substitute</td><td>$options</td><th><a href=\"\" onclick=\"document.forms[0].rewrite.value='$k-else'; document.forms[0].oldvalue.value='", &encode_url($val), "'; document.forms[0].action.value='rewritesedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Edit'), "\">$IMG_EDIT</a></th>";
+				print "<th><a href=\"\" onclick=\"document.forms[0].rewrite.value='$k-else'; document.forms[0].oldvalue.value='", &encode_url($val), "'; document.forms[0].action.value='rewritesdelete'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Delete'), "\">$IMG_DELETE</th>";
  				print "</tr>\n";
 			}
 			my $v = $CONFIG{rew}{$k}{else}{log} || '';
@@ -1217,8 +1217,8 @@ sub show_rewrites
 				print "<tr><th>&nbsp;</th><td colspan=\"3\"><b>", &translate('No log file'), "</b>";
 			}
 			print "$v $anon";
-			print "</td><th><a href=\"\" onclick=\"document.forms[0].rewrite.value='$k-else'; document.forms[0].oldvalue.value='", &encode_base64url("log $CONFIG{rew}{$k}{else}{log}"), "'; document.forms[0].action.value='rewritesedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Edit'), "\">$IMG_EDIT</a></th>";
-			print "<th><a href=\"\" onclick=\"document.forms[0].rewrite.value='$k-else'; document.forms[0].oldvalue.value='", &encode_base64url("log $CONFIG{rew}{$k}{else}{log}"), "'; document.forms[0].action.value='rewritesdelete'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Delete'), "\">$IMG_DELETE</a></th>";
+			print "</td><th><a href=\"\" onclick=\"document.forms[0].rewrite.value='$k-else'; document.forms[0].oldvalue.value='", &encode_url("log $CONFIG{rew}{$k}{else}{log}"), "'; document.forms[0].action.value='rewritesedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Edit'), "\">$IMG_EDIT</a></th>";
+			print "<th><a href=\"\" onclick=\"document.forms[0].rewrite.value='$k-else'; document.forms[0].oldvalue.value='", &encode_url("log $CONFIG{rew}{$k}{else}{log}"), "'; document.forms[0].action.value='rewritesdelete'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Delete'), "\">$IMG_DELETE</a></th>";
 			print "</tr>\n";
 		}
 		print "<tr><td style=\"border: none;\" colspan=\"6\"><hr></td></tr>\n";
@@ -1341,8 +1341,8 @@ sub show_sources
 		foreach my $key (sort keys %{$CONFIG{src}{$k}}) {
 			next if (!grep(/^$key$/, @SRC_KEYWORD));
 			foreach (@{$CONFIG{src}{$k}{$key}}) {
-				print "<tr><th>&nbsp;</th><td><b>", &translate($SRC_ALIAS{$key}), "</b>: ", &show_editor($key, $_), "</td><th><a href=\"\" onclick=\"document.forms[0].source.value='$k'; document.forms[0].oldvalue.value='", &encode_base64url("$key $_"), "'; document.forms[0].action.value='sourcesedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Edit'), "\">$IMG_EDIT</a></th>";
-				print "<th><a href=\"\" onclick=\"document.forms[0].source.value='$k'; document.forms[0].oldvalue.value='", &encode_base64url("$key $_"), "'; document.forms[0].action.value='sourcesdelete'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Delete'), "\">$IMG_DELETE</a></th>";
+				print "<tr><th>&nbsp;</th><td><b>", &translate($SRC_ALIAS{$key}), "</b>: ", &show_editor($key, $_), "</td><th><a href=\"\" onclick=\"document.forms[0].source.value='$k'; document.forms[0].oldvalue.value='", &encode_url("$key $_"), "'; document.forms[0].action.value='sourcesedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Edit'), "\">$IMG_EDIT</a></th>";
+				print "<th><a href=\"\" onclick=\"document.forms[0].source.value='$k'; document.forms[0].oldvalue.value='", &encode_url("$key $_"), "'; document.forms[0].action.value='sourcesdelete'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Delete'), "\">$IMG_DELETE</a></th>";
 				print "</tr>\n";
 			}
 		}
@@ -1354,8 +1354,8 @@ sub show_sources
 			foreach my $key (sort keys %{$CONFIG{src}{$k}{else}}) {
 				next if (!grep(/^$key$/, @SRC_KEYWORD));
 				foreach (@{$CONFIG{src}{$k}{else}{$key}}) {
-					print "<tr><th>&nbsp;</th><td><b>", &translate($SRC_ALIAS{$key}), "</b>: ", &show_editor($key, $_), "</td><th><a href=\"\" onclick=\"document.forms[0].source.value='$k-else'; document.forms[0].oldvalue.value='", &encode_base64url("$key $_"), "'; document.forms[0].action.value='sourcesedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Edit'), "\">$IMG_EDIT</a></th>";
-					print "<th><a href=\"\" onclick=\"document.forms[0].source.value='$k'; document.forms[0].oldvalue.value='", &encode_base64url("$key $_"), "'; document.forms[0].action.value='sourcesdelete'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Delete'), "\">$IMG_DELETE</a></th>";
+					print "<tr><th>&nbsp;</th><td><b>", &translate($SRC_ALIAS{$key}), "</b>: ", &show_editor($key, $_), "</td><th><a href=\"\" onclick=\"document.forms[0].source.value='$k-else'; document.forms[0].oldvalue.value='", &encode_url("$key $_"), "'; document.forms[0].action.value='sourcesedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Edit'), "\">$IMG_EDIT</a></th>";
+					print "<th><a href=\"\" onclick=\"document.forms[0].source.value='$k'; document.forms[0].oldvalue.value='", &encode_url("$key $_"), "'; document.forms[0].action.value='sourcesdelete'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Delete'), "\">$IMG_DELETE</a></th>";
 					print "</tr>\n";
 				}
 			}
@@ -1370,8 +1370,8 @@ sub show_sources
 				print "<tr><th>&nbsp;</th><td><b>", &translate('No log file'), "</b>";
 			}
 			print "$v $anon";
-			print "</td><th><a href=\"\" onclick=\"document.forms[0].source.value='$k-else'; document.forms[0].oldvalue.value='", &encode_base64url("log $CONFIG{src}{$k}{else}{log}"), "'; document.forms[0].action.value='sourcesedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Edit'), "\">$IMG_EDIT</a></th>";
-			print "<th><a href=\"\" onclick=\"document.forms[0].source.value='$k-else'; document.forms[0].oldvalue.value='", &encode_base64url("log $CONFIG{src}{$k}{else}{log}"), "'; document.forms[0].action.value='sourcesdelete'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Delete'), "\">$IMG_DELETE</a></th>";
+			print "</td><th><a href=\"\" onclick=\"document.forms[0].source.value='$k-else'; document.forms[0].oldvalue.value='", &encode_url("log $CONFIG{src}{$k}{else}{log}"), "'; document.forms[0].action.value='sourcesedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Edit'), "\">$IMG_EDIT</a></th>";
+			print "<th><a href=\"\" onclick=\"document.forms[0].source.value='$k-else'; document.forms[0].oldvalue.value='", &encode_url("log $CONFIG{src}{$k}{else}{log}"), "'; document.forms[0].action.value='sourcesdelete'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Delete'), "\">$IMG_DELETE</a></th>";
 			print "</tr>\n";
 
 		}
@@ -3004,9 +3004,9 @@ sub show_log_schedule
 		print "<tr><th>&nbsp;</th><td $colspan><b>", &translate('No log file'), "</b>";
 	}
 	print "$v $anon";
-	print "</td><th><a href=\"\" onclick=\"document.forms[0].$elt.value='$key'; document.forms[0].oldvalue.value='", &encode_base64url("log $CONFIG{$type}{$key}{log}"), "'; document.forms[0].action.value='${elt}sedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Edit'), "\">$IMG_EDIT</a></th>";
+	print "</td><th><a href=\"\" onclick=\"document.forms[0].$elt.value='$key'; document.forms[0].oldvalue.value='", &encode_url("log $CONFIG{$type}{$key}{log}"), "'; document.forms[0].action.value='${elt}sedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Edit'), "\">$IMG_EDIT</a></th>";
 	if ($v) {
-		print "<th><a href=\"\" onclick=\"document.forms[0].$elt.value='$key'; document.forms[0].oldvalue.value='", &encode_base64url("log $CONFIG{$type}{$key}{log}"), "'; document.forms[0].action.value='${elt}sdelete'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Delete'), "\">$IMG_DELETE</a></th>";
+		print "<th><a href=\"\" onclick=\"document.forms[0].$elt.value='$key'; document.forms[0].oldvalue.value='", &encode_url("log $CONFIG{$type}{$key}{log}"), "'; document.forms[0].action.value='${elt}sdelete'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Delete'), "\">$IMG_DELETE</a></th>";
 	} else {
 		print "<th>&nbsp;</th>\n";
 	}
@@ -3023,9 +3023,9 @@ sub show_log_schedule
 	}
 	print "<tr><th>&nbsp;</th><td $colspan><b>", &translate($label), "</b> $CONFIG{$type}{$key}{$sched}</td>";
 	my $prefix = $sched || 'within';
-	print "</td><th><a href=\"\" onclick=\"document.forms[0].$elt.value='$key'; document.forms[0].oldvalue.value='", &encode_base64url("$prefix $CONFIG{$type}{$key}{$sched}"), "'; document.forms[0].action.value='${elt}sedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Edit'), "\">$IMG_EDIT</a></th>";
+	print "</td><th><a href=\"\" onclick=\"document.forms[0].$elt.value='$key'; document.forms[0].oldvalue.value='", &encode_url("$prefix $CONFIG{$type}{$key}{$sched}"), "'; document.forms[0].action.value='${elt}sedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Edit'), "\">$IMG_EDIT</a></th>";
 	if ($sched) {
-		print "<th><a href=\"\" onclick=\"document.forms[0].$elt.value='$key'; document.forms[0].oldvalue.value='", &encode_base64url("$prefix $CONFIG{$type}{$key}{$sched}"), "'; document.forms[0].action.value='${elt}sdelete'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Delete'), "\">$IMG_DELETE</a></th>";
+		print "<th><a href=\"\" onclick=\"document.forms[0].$elt.value='$key'; document.forms[0].oldvalue.value='", &encode_url("$prefix $CONFIG{$type}{$key}{$sched}"), "'; document.forms[0].action.value='${elt}sdelete'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Delete'), "\">$IMG_DELETE</a></th>";
 	} else {
 		print "<th>&nbsp;</th>\n";
 	}
@@ -3428,7 +3428,7 @@ sub sc_show_whitelist
 	for ($i = 0; $i <= $#{$CONFIG{whitelist}}; $i++) {
 		my $old = $CONFIG{whitelist}[$i];
 		$old =~ s/\\/\\\\/g;
-		print "<tr><td><input type=\"text\" size=\"60\" name=\"whitelist$i\" value=\"$CONFIG{whitelist}[$i]\"/></td><th><a href=\"\" onclick=\"document.forms[0].oldvalue.value='", &encode_base64url($old), "'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Remove'), "\">$IMG_REMOVE</a></th></tr>";
+		print "<tr><td><input type=\"text\" size=\"60\" name=\"whitelist$i\" value=\"$CONFIG{whitelist}[$i]\"/></td><th><a href=\"\" onclick=\"document.forms[0].oldvalue.value='", &encode_url($old), "'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Remove'), "\">$IMG_REMOVE</a></th></tr>";
 	}
 	print "<tr><td align=\"left\">", &translate('List of domain or host to add'), "</td><th>&nbsp;</th></tr>";
 	print "<tr><th align=\"left\"><textarea name=\"whitelist$i\" cols=\"50\" rows=\"5\" wrap=\"off\"></textarea></th><th>&nbsp;</th></tr>";
@@ -3459,7 +3459,7 @@ sub sc_show_trustuser
 	for ($i = 0; $i <= $#{$CONFIG{trustuser}}; $i++) {
 		my $old = $CONFIG{trustuser}[$i];
 		$old =~ s/\\/\\\\/g;
-		print "<tr><td><input type=\"text\" size=\"60\" name=\"trustuser$i\" value=\"$CONFIG{trustuser}[$i]\"/></td><th><a href=\"\" onclick=\"document.forms[0].oldvalue.value='", &encode_base64url($old), "'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Remove'), "\">$IMG_REMOVE</a></th></tr>";
+		print "<tr><td><input type=\"text\" size=\"60\" name=\"trustuser$i\" value=\"$CONFIG{trustuser}[$i]\"/></td><th><a href=\"\" onclick=\"document.forms[0].oldvalue.value='", &encode_url($old), "'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Remove'), "\">$IMG_REMOVE</a></th></tr>";
 	}
 	print "<tr><td align=\"left\">", &translate('List of user to add'), "</td><th>&nbsp;</th></tr>";
 	print "<tr><th align=\"left\"><textarea name=\"trustuser$i\" cols=\"50\" rows=\"5\" wrap=\"off\"></textarea></th><th>&nbsp;</th></tr>";
@@ -3483,7 +3483,7 @@ sub sc_show_trustclient
 	for ($i = 0; $i <= $#{$CONFIG{trustclient}}; $i++) {
 		my $old = $CONFIG{trustclient}[$i];
 		$old =~ s/\\/\\\\/g;
-		print "<tr><td><input type=\"text\" size=\"60\" name=\"trustclient$i\" value=\"$CONFIG{trustclient}[$i]\"/></td><th><a href=\"\" onclick=\"document.forms[0].oldvalue.value='", &encode_base64url($old), "'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Remove'), "\">$IMG_REMOVE</a></th></tr>";
+		print "<tr><td><input type=\"text\" size=\"60\" name=\"trustclient$i\" value=\"$CONFIG{trustclient}[$i]\"/></td><th><a href=\"\" onclick=\"document.forms[0].oldvalue.value='", &encode_url($old), "'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Remove'), "\">$IMG_REMOVE</a></th></tr>";
 	}
 	print "<tr><td align=\"left\">", &translate('List of clients to add'), "</td><th>&nbsp;</th></tr>";
 	print "<tr><th align=\"left\"><textarea name=\"trustclient$i\" cols=\"50\" rows=\"5\" wrap=\"off\"></textarea></th><th>&nbsp;</th></tr>";
@@ -3508,7 +3508,7 @@ sub sc_show_abort
 	for ($i = 0; $i <= $#{$CONFIG{abort}}; $i++) {
 		my $old = $CONFIG{abort}[$i];
 		$old =~ s/\\/\\\\/g;
-		print "<tr><td><input type=\"text\" size=\"60\" name=\"abort$i\" value=\"$CONFIG{abort}[$i]\"/></td><th><a href=\"\" onclick=\"document.forms[0].oldvalue.value='", &encode_base64url($old), "'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Remove'), "\">$IMG_REMOVE</a></th></tr>";
+		print "<tr><td><input type=\"text\" size=\"60\" name=\"abort$i\" value=\"$CONFIG{abort}[$i]\"/></td><th><a href=\"\" onclick=\"document.forms[0].oldvalue.value='", &encode_url($old), "'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Remove'), "\">$IMG_REMOVE</a></th></tr>";
 		$found++;
 	}
 	print "<tr><th align=\"left\"><textarea name=\"abort$i\" cols=\"50\" rows=\"5\" wrap=\"off\"></textarea></th><th>&nbsp;</th></tr>";
@@ -3517,7 +3517,7 @@ sub sc_show_abort
 	for ($i = 0; $i <= $#{$CONFIG{abortcontent}}; $i++) {
 		my $old = $CONFIG{abortcontent}[$i];
 		$old =~ s/\\/\\\\/g;
-		print "<tr><td><input type=\"text\" size=\"60\" name=\"abortcontent$i\" value=\"$CONFIG{abortcontent}[$i]\"/></td><th><a href=\"\" onclick=\"document.forms[0].oldvalue.value='", &encode_base64url($old), "'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Remove'), "\">$IMG_REMOVE</a></th></tr>";
+		print "<tr><td><input type=\"text\" size=\"60\" name=\"abortcontent$i\" value=\"$CONFIG{abortcontent}[$i]\"/></td><th><a href=\"\" onclick=\"document.forms[0].oldvalue.value='", &encode_url($old), "'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Remove'), "\">$IMG_REMOVE</a></th></tr>";
 		$found++;
 	}
 	print "<tr><th align=\"left\"><textarea name=\"abortcontent$i\" cols=\"50\" rows=\"5\" wrap=\"off\"></textarea></th><th>&nbsp;</th></tr>";
@@ -3745,7 +3745,7 @@ sub save_blacklist_description
 
 }
 
-sub encode_base64url
+sub encode_url
 {
 	my $bytes = shift;
 
@@ -3753,24 +3753,15 @@ sub encode_base64url
 
 	return $bytes if (!$bytes);
 
-	$bytes = encode_base64($bytes);
-	$bytes =~ s/\+/-/;
-	$bytes =~ s/\//_/;
-	$bytes =~ s/\n\r*/!/;
-
-	return $bytes;
+	return $CGI->escape($bytes);
 }
 
-sub decode_base64url
+sub decode_url
 {
 	my $string = shift;
 
-	$string =~ s/-/\+/;
-	$string =~ s/_/\//;
-	$string =~ s/!/\n\r/;
-	$string = decode_base64($string);
+	return $CGI->unescape($string);
 
-	return $string;
 }
 
 sub acl_in_use
