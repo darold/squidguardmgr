@@ -1,3 +1,12 @@
+Tue Jun 26 2012 - v1.11
+
+	- Replace patch on base64 encoding/decoding of CGI parameters by Perl
+	  CGI standard URI encoding/decoding to prevent javascript code break
+	  with multiline encoding base64. Thanks to Gaetan Paquette for the
+	  report.
+
+UPGRADE: Replacing squidguardmgr.cgi from previous version is enough.
+
 Thu Jun 21 2012 - v1.10
 
 	- Fix an issue with username containing non alphanumeric character in
