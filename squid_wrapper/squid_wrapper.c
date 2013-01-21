@@ -10,7 +10,7 @@
 #include <sys/types.h> 
 #include <stdlib.h>
 
-#define SQUID_BINARY "/usr/sbin/squid3"
+#define SQUID_BINARY "/usr/sbin/squid"
 
 int main(int argc, char **argv, char **envp) {
   char *squidprog[] = { SQUID_BINARY, "-k", "reconfigure", NULL };
