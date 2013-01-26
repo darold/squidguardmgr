@@ -171,6 +171,9 @@ if (!-e $squid) {
 	}
 }
 $squid =~ s/\//\\\//g;
+# Change default path to squid binary
+`perl -p -i -e 's/#define SQUID_BINARY.*/#define SQUID_BINARY "$squid"/' squid_wrapper/squid_wrapper.c`;
+
 
 my $squid_user = $SQUIDUSR || `ps auxw | grep "(squid)" | grep -v grep | awk '{print \$1}'`;
 chomp($squid_user);
@@ -320,7 +323,6 @@ install -m 644 --owner=$squid_user --group=$squid_group htdocs/squidguardmgr.css
 install -m 644 --owner=$squid_user --group=$squid_group htdocs/squidguardmgr.js $DESTDIR$WWWDIR$HTMLDIR
 cp -rf htdocs/images/ $DESTDIR$WWWDIR$HTMLDIR
 chown -R $squid_user:$squid_group $DESTDIR$WWWDIR$HTMLDIR
-perl -p -i -e 's/#define SQUID_BINARY.*/#define SQUID_BINARY "$squid"/' squid_wrapper/squid_wrapper.c
 install -m 755 --owner=0 --group=0 squid_wrapper/squid_wrapper $DESTDIR$WWWDIR$CGIDIR
 chmod +s $DESTDIR$WWWDIR$CGIDIR/squid_wrapper
 };
