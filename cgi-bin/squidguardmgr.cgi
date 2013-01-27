@@ -7,16 +7,16 @@
 #
 # Programing language: Perl
 # Author: Gilles DAROLD <gilles AT darold DOT net>
-# Copyright: Gilles DAROLD, all rights reserved
+# Copyright: 2010-2013 Gilles DAROLD, all rights reserved
 # License: GPL v3
 #-----------------------------------------------------------------------------
 use vars qw($VERSION $AUTHOR $COPYRIGHT $LICENSE);
 
 use strict qw{vars subs};
 
-$VERSION     = '1.11',
+$VERSION     = '1.12',
 $AUTHOR      = 'Gilles DAROLD <gilles AT darold DOT net>';
-$COPYRIGHT   = 'Copyright &copy; 2010-2012 Gilles DAROLD, all rights reserved';
+$COPYRIGHT   = 'Copyright &copy; 2010-2013 Gilles DAROLD, all rights reserved';
 $LICENSE     = 'GPL v3';
 
 my $PROGRAM     = 'SquidGuard Manager';

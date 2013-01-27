@@ -1,3 +1,16 @@
+Sun Jan 27 2013 - v1.12
+
+	- Add more debug information about squidGuard.conf and squidclamav.conf
+	  configuration file when squidguardmgr can not write to it.
+	- Fix delete error of items in squidclamav virus scanning, whitelists
+	  and trusted users definitions. Thanks to John Xue for the report.
+	- Fix a long standing bug in Makefile.PL when trying to change the path
+	  to the squid binary into the squid_wrapper.c file. Thanks a lot to
+	  John Xue for the reports.
+	- Change path to default squid binary into /usr/sbin/squid.
+
+UPGRADE: Replacing squidguardmgr.cgi should be enough.
+
 Tue Jun 26 2012 - v1.11
 
 	- Replace patch on base64 encoding/decoding of CGI parameters by Perl
