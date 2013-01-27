@@ -395,7 +395,10 @@ sub normalize_configfile
 	@txt = ();
 	$content =~ s/\n[\s\t]*\{/ \{/gs;
 	if (not open(OUT, ">$CONF_FILE")) {
-		$ERROR = "Can't write to configuration file $CONF_FILE: $!\n";
+		$ERROR = "Can't write to configuration file $CONF_FILE: $!<br>\n";
+		$ERROR .= "File grants: " . `ls -la $CONF_FILE` . "<br>\n";
+		my $username = getpwuid( $< );
+		$ERROR .= "SquidGuardMgr is running under user: $username\n";
 		return 0;
 	}
 	print OUT $content;
