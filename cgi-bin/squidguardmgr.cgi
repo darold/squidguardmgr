@@ -3556,7 +3556,9 @@ sub sc_apply_change
 			next if ($p !~ /^abort/);
 			my $val = $CGI->param($p) || '';
 			next if (!$val);
-			next if ($OLD && ($val eq $OLD));
+			my $tmp = $val;
+			$tmp =~ s/([^\\])\\/$1\\\\/g;
+			next if ($OLD && ($tmp eq $OLD));
 			push(@{$CONFIG{'abort'}}, $val) if ($p =~ /^abort\d+$/);
 			push(@{$CONFIG{'abortcontent'}}, $val) if ($p =~ /^abortcontent\d+$/);
 			map { s/([^\\])\//$1\\\//g } @{$CONFIG{'abort'}};
@@ -3570,7 +3572,8 @@ sub sc_apply_change
 		foreach my $p ($CGI->param()) {
 			next if ($p !~ /^whitelist/);
 			my $tmp = $CGI->param($p);
-			next if ($OLD && ($OLD =~ /^$tmp$/));
+			$tmp =~ s/([^\\])\\/$1\\\\/g;
+			next if ($OLD && ($OLD eq $tmp));
 			push(@{$CONFIG{'whitelist'}}, $CGI->param($p)) if ($p =~ /^whitelist\d+$/);
 			map { s/([^\\])\//$1\\\//g } @{$CONFIG{'whitelist'}};
 		}
@@ -3582,7 +3585,8 @@ sub sc_apply_change
 		foreach my $p ($CGI->param()) {
 			next if ($p !~ /^trustuser/);
 			my $tmp = $CGI->param($p);
-			next if ($OLD && ($OLD =~ /^$tmp$/));
+			$tmp =~ s/([^\\])\\/$1\\\\/g;
+			next if ($OLD && ($OLD eq $tmp));
 			push(@{$CONFIG{'trustuser'}}, $CGI->param($p)) if ($p =~ /^trustuser\d+$/);
 		}
 	}
@@ -3593,7 +3597,8 @@ sub sc_apply_change
 		foreach my $p ($CGI->param()) {
 			next if ($p !~ /^trustclient/);
 			my $tmp = $CGI->param($p);
-			next if ($OLD && ($OLD =~ /^$tmp$/));
+			$tmp =~ s/([^\\])\\/$1\\\\/g;
+			next if ($OLD && ($OLD eq $tmp));
 			push(@{$CONFIG{'trustclient'}}, $CGI->param($p)) if ($p =~ /^trustclient\d+$/);
 		}
 	}
