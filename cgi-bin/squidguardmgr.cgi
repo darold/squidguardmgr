@@ -3267,7 +3267,11 @@ sub sc_create_default_config
 {
 
 	if (not open(OUT, ">$SC_CONF_FILE")) {
-		return "Can't write configuration file $SC_CONF_FILE: $!";
+		my $err_msg = "Can't write configuration file $SC_CONF_FILE: $!";
+		$err_msg .= "File grants: " . `ls -la $CONF_FILE` . "<br>\n";
+		my $username = getpwuid( $< );
+		$err_msg .= "SquidGuardMgr is running under user: $username\n";
+		return $err_msg;
 	}
 	print OUT qq{
 #-----------------------------------------------------------------------------
