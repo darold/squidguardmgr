@@ -884,7 +884,7 @@ sub add_item
 		}
 	} else {
 		$file =~ s#$CONFIG{dbhome}/##;
-		$ERROR = `$SQUIDGUARD -C $file`;
+		&rebuild_database($file);
 	}
 }
 
@@ -949,7 +949,7 @@ sub remove_item
 			}
 		} else {
 			$file =~ s#$CONFIG{dbhome}/##;
-			$ERROR = `$SQUIDGUARD -C $file`;
+			&rebuild_database($file);
 		}
 	} else {
 		print "WARNING: remove patterns not found in file $file<br>\n";
@@ -2509,7 +2509,7 @@ sub save_listcontent
 	}
 	rename("$CONFIG{dbhome}/$bl.tmp", "$CONFIG{dbhome}/$bl");
 	if (!$DIFF) {
-		$ERROR = `$SQUIDGUARD -C $bl`;
+		&rebuild_database($bl);
 	}
 	print "<h2>", &translate('List'), " : $bl</h2>\n";
 
@@ -3193,6 +3193,7 @@ sub autocreate_filters
 sub rebuild_database
 {
 	my $bl = shift;
+
 	if ($bl eq 'all') {
 		$ERROR = `$SQUIDGUARD -C all`;
 	} else {
