@@ -3098,7 +3098,7 @@ sub show_filecontent
 					print "</textarea>\n";
 					print "</th></tr>\n";
 					print "<tr><th align=\"center\"></th></tr>\n";
-					print "<tr><th><input type=\"button\" name=\"save\" value=\"", &translate('Apply change'), "\" onclick=\"document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\"></th></tr>\n";
+					print "<tr><th><input type=\"button\" name=\"save\" value=\"", &translate('Apply change'), "\" onclick=\"document.forms[0].apply.value='1'; document.forms[0].submit(); window.close(); return false;\"></th></tr>\n";
 				} else {
 					print "<th align=\"left\" style=\"font-weight: normal;\"><pre>\n";
 					while (<IN>) {
