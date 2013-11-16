@@ -3138,25 +3138,6 @@ sub save_filecontent
 		close(OUT);
 	}
 
-	print $CGI->header();
-	print $CGI->start_html(
-		-title  => "$PROGRAM v$VERSION",
-		-author => "$AUTHOR",
-		-meta   => { 'copyright' => $COPYRIGHT },
-		-style  => { -src => $CSS_FILE },
-		-script  => { -src => $JS_FILE },
-	);
-	print $CGI->start_form();
-	print "<input type=\"hidden\" name=\"apply\" value=\"\" />\n";
-	print "<input type=\"hidden\" name=\"filename\" value=\"$file\" />\n";
-
-	print "<h2>", &translate('File'), " : $file</h2>\n";
-
-	print "<table><tr><th><input type=\"button\" name=\"save\" value=\"", &translate('Close'), "\" onclick=\"window.close(); return false;\"></th></tr></table>\n";
-
-	print $CGI->end_form();
-	print $CGI->end_html();
-
 }
 
 sub create_default_config
