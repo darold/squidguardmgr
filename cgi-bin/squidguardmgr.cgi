@@ -2118,7 +2118,7 @@ sub edit_acls
 	print "<tr><th nowrap=\"1\" style=\"text-align: right;\">", &translate('Default access'), "</ht><td><input type=\"radio\" name=\"edest\" value=\"none\" $sel>", &translate('Only the selected list'), " (none)";
 	$sel = '';
 	$sel = 'checked="1" ' if (grep(/^all$/, @{$CONFIG{acl}{$name}{else}{pass}}));
-	print "<input type=\"radio\" name=\"radio\" value=\"all\" $sel>", &translate('All Internet'), " (all | any)</td><th></tr>\n";
+	print "<input type=\"radio\" name=\"edest\" value=\"all\" $sel>", &translate('All Internet'), " (all | any)</td><th></tr>\n";
 
 	print "<tr><th nowrap=\"1\" style=\"text-align: right;\">", &translate('Allow access to'), "</th><th>\n";
 	$i = 0;
