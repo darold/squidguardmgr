@@ -3104,7 +3104,7 @@ sub show_filecontent
 					print "</textarea>\n";
 					print "</th></tr>\n";
 					print "<tr><th align=\"center\"></th></tr>\n";
-					print "<tr><th><input type=\"button\" name=\"save\" value=\"", &translate('Apply change'), "\" onclick=\"document.forms[0].apply.value='1'; document.forms[0].submit(); window.close(); return false;\"></th></tr>\n";
+					print "<tr><th><input type=\"button\" name=\"save\" value=\"", &translate('Apply change'), "\" onclick=\"document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\"></th></tr>\n";
 				} else {
 					print "<th align=\"left\" style=\"font-weight: normal;\"><pre>\n";
 					while (<IN>) {
@@ -3143,6 +3143,25 @@ sub save_filecontent
 		}
 		close(OUT);
 	}
+
+	print $CGI->header();
+	print $CGI->start_html(
+		-title  => "$PROGRAM v$VERSION",
+		-author => "$AUTHOR",
+		-meta   => { 'copyright' => $COPYRIGHT },
+		-style  => { -src => $CSS_FILE },
+		-script  => { -src => $JS_FILE },
+	);
+	print $CGI->start_form();
+	print "<input type=\"hidden\" name=\"apply\" value=\"\" />\n";
+	print "<input type=\"hidden\" name=\"filename\" value=\"$file\" />\n";
+
+	print "<h2>", &translate('File'), " : $file</h2>\n";
+
+	print "<table><tr><th><input type=\"button\" name=\"save\" value=\"", &translate('Close'), "\" onclick=\"window.close(); return false;\"></th></tr></table>\n";
+
+	print $CGI->end_form();
+	print $CGI->end_html();
 
 }
 
