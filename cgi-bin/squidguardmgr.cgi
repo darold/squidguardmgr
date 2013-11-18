@@ -48,6 +48,7 @@ our $SC_CONF_FILE  = '/etc/squidclamav.conf';
 our $SQUID_WRAPPER = '/var/www/squidguardmgr/squid_wrapper';
 our $C_ICAP_SOCKET = '/var/run/c-icap/c-icap.ctl';
 our $KEEP_DIFF  = 1;
+our $BLUMASK    = 0027;
 
 # Configuration file
 my $SGM_CONF    = 'squidguardmgr.conf';
@@ -251,11 +252,13 @@ if ($ACTION eq 'viewlist') {
 }
 
 if ( $APPLY && $CGI->param('filelist')) {
+	umask($BLUMASK);
 	&save_listcontent($CGI->param('filelist'));
 	exit 0;
 }
 
 if ( $APPLY && $CGI->param('filename')) {
+	umask($BLUMASK);
 	&save_filecontent($CGI->param('filename'));
 	exit 0;
 }
@@ -296,6 +299,7 @@ if ($BL && ($ACTION eq 'bldelete') ) {
 }
 
 if ($BL && ($ACTION eq 'rebuild') ) {
+	umask($BLUMASK);
 	&rebuild_database($BL);
 	if ($BL eq 'all') {
 		$ACTION = 'blacklists';
@@ -311,6 +315,7 @@ if ($APPLY && ($ACTION eq 'bledit') ) {
 	if ($APPLY eq 'descr') {
 		&save_blacklist_description();
 	} else {
+		umask($BLUMASK);
 		&save_blacklist();
 	}
 } elsif ($APPLY) {
