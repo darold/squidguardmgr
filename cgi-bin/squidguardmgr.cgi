@@ -587,6 +587,9 @@ sub get_configuration
 				if ($l =~ /^(rew|rewrite)[\s\t]+(.*)/) {
 					push(@{$infos{acl}{$cur_acl}{'rewrite'}}, $2);
 				}
+				if ($l =~ /^log[\s\t]+(.*)/) {
+					$infos{acl}{$cur_acl}{'log'} = $1;
+				}
 			} else {
 				if ($l =~ /^pass[\s\t]+(.*)/) {
 					push(@{$infos{acl}{$cur_acl}{else}{'pass'}}, split(/[\s\t]+/, $1));
@@ -596,6 +599,9 @@ sub get_configuration
 				}
 				if ($l =~ /^rewrite[\s\t]+(.*)/) {
 					push(@{$infos{acl}{$cur_acl}{else}{'rewrite'}}, $1);
+				}
+				if ($l =~ /^log[\s\t]+(.*)/) {
+					$infos{acl}{$cur_acl}{else}{'log'} = $1;
 				}
 			}
 		}
