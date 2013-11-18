@@ -2350,7 +2350,7 @@ sub dump_config
 				$config .= "$last\n";
 			}
 		}
-		if (exists $CONFIG{acl}{$t}{else}) {
+		if (exists $CONFIG{acl}{$t}{else} && (scalar keys %{$CONFIG{acl}{$t}{else}} > 0) ) {
 			$config .= "\t} else {\n";
 			foreach my $v (sort keys %{$CONFIG{acl}{$t}{else}}) {
 				if ($v ne 'pass') {
