@@ -389,7 +389,8 @@ sub normalize_configfile
 	}
 	my @txt = <IN>;
 	close(IN);
-	map { s///gs } @txt;
+	map { s/
+//gs } @txt;
 	
 	my $content = join('', @txt);
 	@txt = ();
@@ -805,7 +806,8 @@ sub save_blacklist
 			$expressions = $CGI->param($p) || '';
 		}
 	}
-	$domains =~ s///gs;
+	$domains =~ s/
+//gs;
 	if ($domains) {
 		if ($action eq 'add') {
 			&add_item("$CONFIG{dbhome}/$bl/domains", split(/[\s\n]+/s, $domains) );
@@ -813,7 +815,8 @@ sub save_blacklist
 			&remove_item("$CONFIG{dbhome}/$bl/domains", split(/[\s\n]+/s, $domains) );
 		}
 	}
-	$urls =~ s///gs;
+	$urls =~ s/
+//gs;
 	if ($urls) {
 		if ($action eq 'add') {
 			&add_item("$CONFIG{dbhome}/$bl/urls", split(/[\s\n]+/s, $urls) );
@@ -821,7 +824,8 @@ sub save_blacklist
 			&remove_item("$CONFIG{dbhome}/$bl/urls", split(/[\s\n]+/s, $urls) );
 		}
 	}
-	$expressions =~ s///gs;
+	$expressions =~ s/
+//gs;
 	if ($expressions) {
 		if ($action eq 'add') {
 			&add_item("$CONFIG{dbhome}/$bl/expressions", split(/[\s\n]+/s, $expressions) );
@@ -836,12 +840,14 @@ sub add_item
 	my ($file, @items) = @_;
 
 	my @exists = ();
-	map { $_ =~ s///; } @items;
+	map { $_ =~ s/
+//; } @items;
 	if (-e "$file") {
 		if (open(IN, "$file")) {
 			while (my $l = <IN>) {
 				chomp($l);
-				$l =~ s///;
+				$l =~ s/
+//;
 				next if (!$l);
 				# check if item already exists
 				if (grep($_ eq $l, @items)) {
@@ -899,11 +905,13 @@ sub remove_item
 
 	my @removed = ();
 	my $txt = '';
-	map { $_ =~ s///; } @items;
+	map { $_ =~ s/
+//; } @items;
 	if (open(IN, "$file")) {
 		while (my $l = <IN>) {
 			chomp($l);
-			$l =~ s///;
+			$l =~ s/
+//;
 			next if (!$l);
 			# check if item exists
 			if (grep($_ eq $l, @items)) {
@@ -962,12 +970,14 @@ sub add_hist_item
 	my ($file, $prefix, @items) = @_;
 
 	my @exists = ();
-	map { $_ =~ s///; } @items;
+	map { $_ =~ s/
+//; } @items;
 	if (-e "$file") {
 		if (open(IN, "$file")) {
 			while (my $l = <IN>) {
 				chomp($l);
-				$l =~ s///;
+				$l =~ s/
+//;
 				next if (!$l);
 				# check if item already exists
 				if (grep($_ eq $l, @items)) {
@@ -2182,9 +2192,21 @@ sub show_config
 	print "<table align=\"center\" width=\"80%\">\n";
 	print "<tr><th align=\"left\">File: $CONF_FILE</th></tr>\n";
 	print "<tr><th><hr /></th></tr>\n";
-	print "<tr><th  align=\"left\"><pre>\n";
+	print "<tr><td align=\"left\"><pre>\n";
 
-	print &dump_config() if (-e $CONF_FILE);
+	if (-e $CONF_FILE) {
+		if (not open(IN, $CONF_FILE)) {
+			print "Can't open configuration file $CONF_FILE: $!\n";
+		} else {
+			my $l;
+			while ($l = <IN>) {
+				print $CGI->escapeHTML($l);
+			}
+			close(IN);
+		}
+	} else {
+		print "&nbsp;";
+	}
 
 	print "</pre></td></tr>\n";
 	print "</table>\n";
@@ -2469,7 +2491,8 @@ sub save_listcontent
 	print "<input type=\"hidden\" name=\"filelist\" value=\"$bl\" />\n";
 
 	my $content = $CGI->param('content') || '';
-	$content =~ s///gs;
+	$content =~ s/
+//gs;
 	my @datas = split(/\n+/, $content);
 	$content = '';
 	map { s/^[\s]+//; s/[\s]+$//; } @datas;
@@ -2930,7 +2953,8 @@ sub get_translation
 	if (open(IN, "$basedir/menu.dat")) {
 		while (<IN>) {
 			chomp;
-			s///;
+			s/
+//;
 			next if (/^#/ || !$_);
 			my ($key, $val) = split(/\t+/);
 			$translate{$key} = $val;
@@ -3111,7 +3135,8 @@ sub save_filecontent
 	my $file = shift;
 
 	my $content = $CGI->param('content') || '';
-	$content =~ s///gs;
+	$content =~ s/
+//gs;
 	my @datas = split(/\n+/, $content);
 	$content = '';
 	map { s/^[\s]+//; s/[\s]+$//; } @datas;
@@ -3689,7 +3714,8 @@ sub read_sgm_config
 	} else {
 		while (my $l = <IN>) {
 			chomp($l);
-			$l =~ s///;
+			$l =~ s/
+//;
 			$l =~ s/[\s\t]*\#.*//;
 			next if (!$l);
 			my ($key, $val) = split(/[\s\t]+/, $l, 2);
