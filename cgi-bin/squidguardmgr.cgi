@@ -1686,7 +1686,7 @@ sub edit_categories
 	print "</th></tr>\n";
 	print "<tr><td colspan=\"2\" align=\"left\">", &translate('When found in list above'), "</td></tr>\n";
 
-	print "<tr><th align=\"right\">", &translate('Redirect to Url'), "</th><th align=\"left\"><input type=\"text\" size=\"50\" name=\"redirect\" value=\"$redirect\" /></th></tr>\n";
+	print "<tr><th align=\"right\">", &translate('Redirect to Url'), "</th><th align=\"left\"><input type=\"text\" size=\"50\" name=\"redirect\" value=\"", $CGI->escapeHTML($redirect), "\" /></th></tr>\n";
 	my $anon = '';
 	if ($log =~ s/anonymous[\s\t]+//) {
 		$anon = 'checked="1"';
@@ -2111,7 +2111,7 @@ sub edit_acls
 	}
 	print "</td></tr>\n";
 
-	print "<tr><th align=\"right\">", &translate('Redirect url'), "</th><td><input type=\"text\" size=\"50\" name=\"redirect\" value=\"$CONFIG{acl}{$name}{redirect}\" /></td></tr>\n";
+	print "<tr><th align=\"right\">", &translate('Redirect url'), "</th><td><input type=\"text\" size=\"50\" name=\"redirect\" value=\"", $CGI->escapeHTML($CONFIG{acl}{$name}{redirect}), "\" /></td></tr>\n";
 	print "<tr><th align=\"right\">", &translate('Log file'), "</th><td><input type=\"text\" size=\"50\" name=\"log\" value=\"$CONFIG{acl}{$name}{log}\" /></td></tr>\n";
 
 	print "<tr><th colspan=\"2\"><hr /></th></tr>\n";
@@ -2184,7 +2184,7 @@ sub edit_acls
 	}
 	print "</td></tr>\n";
 
-	print "<tr><th align=\"right\">", &translate('Redirect url'), "</th><td><input type=\"text\" size=\"50\" name=\"eredirect\" value=\"$CONFIG{acl}{$name}{else}{redirect}\" /></td></tr>\n";
+	print "<tr><th align=\"right\">", &translate('Redirect url'), "</th><td><input type=\"text\" size=\"50\" name=\"eredirect\" value=\"", $CGI->escapeHTML($CONFIG{acl}{$name}{else}{redirect}), "\" /></td></tr>\n";
 	print "<tr><th align=\"right\">", &translate('Log file'), "</th><td><input type=\"text\" size=\"50\" name=\"elog\" value=\"$CONFIG{acl}{$name}{else}{log}\" /></td></tr>\n";
 	print "<tr><th colspan=\"2\"><hr /></th></tr>\n";
 
