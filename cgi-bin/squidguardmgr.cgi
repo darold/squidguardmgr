@@ -2052,7 +2052,7 @@ sub edit_acls
 
 	$sel = '';
 	$sel = 'checked="1" ' if (grep(/^none$/, @{$CONFIG{acl}{$name}{pass}}));
-	print "<tr><th nowrap=\"1\" style=\"text-align: right;\">", &translate('Default access'), "</ht><td>",
+	print "<tr><th nowrap=\"1\" style=\"text-align: right;\">", &translate('Default access'), "</th><td>",
 	"<input type=\"radio\" name=\"dest\" value=\"none\" $sel>", &translate('Only the selected list'), " (none)";
 	$sel = '';
 	$sel = 'checked="1" ' if (!grep(/^none$/, @{$CONFIG{acl}{$name}{pass}}));
@@ -2126,7 +2126,7 @@ sub edit_acls
 
 	$sel = '';
 	$sel = 'checked="1" ' if (grep(/^none$/, @{$CONFIG{acl}{$name}{else}{pass}}));
-	print "<tr><th nowrap=\"1\" style=\"text-align: right;\">", &translate('Default access'), "</ht><td><input type=\"radio\" name=\"edest\" value=\"none\" $sel>", &translate('Only the selected list'), " (none)";
+	print "<tr><th nowrap=\"1\" style=\"text-align: right;\">", &translate('Default access'), "</th><td><input type=\"radio\" name=\"edest\" value=\"none\" $sel>", &translate('Only the selected list'), " (none)";
 	$sel = '';
 	$sel = 'checked="1" ' if (grep(/^all$/, @{$CONFIG{acl}{$name}{else}{pass}}));
 	print "<input type=\"radio\" name=\"edest\" value=\"all\" $sel>", &translate('All Internet'), " (all | any)</td><th></tr>\n";
