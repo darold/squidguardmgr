@@ -112,6 +112,7 @@ my $CAT  = $CGI->param('category') || '';
 my $ACL  = $CGI->param('acl') || '';
 my $PATH = $CGI->param('path') || '';
 my $OLD  = &decode_url($CGI->param('oldvalue')) || '';
+my $OPENER = $CGI->param('opener') || '';
 $LANG    = $CGI->param('lang') || $LANG;
 
 # Set globals variable following the content of squidguardmgr.conf 
@@ -248,6 +249,9 @@ if ($ACTION eq 'viewlist') {
 	exit 0;
 } elsif (($ACTION eq 'editfile') || ($ACTION eq 'viewfile')) {
 	&show_filecontent($PATH, $CGI->param('tail'));
+	exit 0;
+} elsif ($ACTION eq 'redirectlist') {
+	&show_redirectlist($OPENER);
 	exit 0;
 }
 
@@ -1676,7 +1680,9 @@ sub edit_categories
 	print "</th></tr>\n";
 	print "<tr><td colspan=\"2\" align=\"left\">", &translate('When found in list above'), "</td></tr>\n";
 
-	print "<tr><th align=\"right\">", &translate('Redirect to Url'), "</th><th align=\"left\"><input type=\"text\" size=\"50\" name=\"redirect\" value=\"", $CGI->escapeHTML($redirect), "\" /></th></tr>\n";
+	print "<tr><th align=\"right\">", &translate('Redirect to Url'), "</th><th align=\"left\"><input type=\"text\" size=\"50\" name=\"redirect\" value=\"", $CGI->escapeHTML($redirect), "\" />";
+	print "&nbsp;<input type=\"button\" name=\"redirectlist\" value=\"", &translate('From list'), "\" onclick=\"window.open('$ENV{SCRIPT_NAME}?action=redirectlist&category=$CAT&opener=redirect&lang=$LANG','redlistwin','scrollbars=yes,status=no,toolbar=no,width=600,height=400,resizable=yes'); return false;\">";
+	print "</th></tr>\n";
 	my $anon = '';
 	if ($log =~ s/anonymous[\s\t]+//) {
 		$anon = 'checked="1"';
@@ -2101,7 +2107,9 @@ sub edit_acls
 	}
 	print "</td></tr>\n";
 
-	print "<tr><th align=\"right\">", &translate('Redirect url'), "</th><td><input type=\"text\" size=\"50\" name=\"redirect\" value=\"", $CGI->escapeHTML($CONFIG{acl}{$name}{redirect}), "\" /></td></tr>\n";
+	print "<tr><th align=\"right\">", &translate('Redirect url'), "</th><td><input type=\"text\" size=\"50\" name=\"redirect\" value=\"", $CGI->escapeHTML($CONFIG{acl}{$name}{redirect}), "\" />";
+	print "&nbsp;<input type=\"button\" name=\"redirectlist\" value=\"", &translate('From list'), "\" onclick=\"window.open('$ENV{SCRIPT_NAME}?action=redirectlist&acl=$ACL&opener=redirect&lang=$LANG','redlistwin','scrollbars=yes,status=no,toolbar=no,width=600,height=400,resizable=yes'); return false;\">";
+	print "</td></tr>\n";
 	print "<tr><th align=\"right\">", &translate('Log file'), "</th><td><input type=\"text\" size=\"50\" name=\"log\" value=\"$CONFIG{acl}{$name}{log}\" /></td></tr>\n";
 
 	print "<tr><th colspan=\"2\"><hr /></th></tr>\n";
@@ -2174,7 +2182,9 @@ sub edit_acls
 	}
 	print "</td></tr>\n";
 
-	print "<tr><th align=\"right\">", &translate('Redirect url'), "</th><td><input type=\"text\" size=\"50\" name=\"eredirect\" value=\"", $CGI->escapeHTML($CONFIG{acl}{$name}{else}{redirect}), "\" /></td></tr>\n";
+	print "<tr><th align=\"right\">", &translate('Redirect url'), "</th><td><input type=\"text\" size=\"50\" name=\"eredirect\" value=\"", $CGI->escapeHTML($CONFIG{acl}{$name}{else}{redirect}), "\" />";
+	print "&nbsp;<input type=\"button\" name=\"eredirectlist\" value=\"", &translate('From list'), "\" onclick=\"window.open('$ENV{SCRIPT_NAME}?action=redirectlist&acl=$ACL&opener=eredirect&lang=$LANG','eredlistwin','scrollbars=yes,status=no,toolbar=no,width=600,height=400,resizable=yes'); return false;\">";
+	print "</td></tr>\n";
 	print "<tr><th align=\"right\">", &translate('Log file'), "</th><td><input type=\"text\" size=\"50\" name=\"elog\" value=\"$CONFIG{acl}{$name}{else}{log}\" /></td></tr>\n";
 	print "<tr><th colspan=\"2\"><hr /></th></tr>\n";
 
@@ -2941,6 +2951,80 @@ sub apply_change
 		$CGI->delete($_);
 	}
 
+}
+
+sub show_redirectlist
+{
+	my @redirects = ();
+	my @nonuniq = ();
+	my %chk = ();
+	my @topobjects = ("src","dest","acl");
+	my ($curval,$v,$k,$o) = ('','','','');
+
+	if ($CAT ne '') {
+		if ($OPENER eq 'eredirect') {
+			$curval = $CONFIG{'dest'}{$CAT}{'else'}{'redirect'} || '';
+		} else {
+			$curval = $CONFIG{'dest'}{$CAT}{'redirect'} || '';
+		}
+	} elsif ($SRC ne '') {
+		if ($OPENER eq 'eredirect') {
+			$curval = $CONFIG{'src'}{$SRC}{'else'}{'redirect'} || '';
+		} else {
+			$curval = $CONFIG{'src'}{$SRC}{'redirect'} || '';
+		}
+	} else {
+		if ($OPENER eq 'eredirect') {
+			$curval = $CONFIG{'acl'}{$ACL}{'else'}{'redirect'} || '';
+		} else {
+			$curval = $CONFIG{'acl'}{$ACL}{'redirect'} || '';
+		}
+	}
+
+	foreach $o (@topobjects) {
+		foreach $k (keys %{$CONFIG{$o}}) {
+			if ($CONFIG{$o}{$k}{'redirect'}) {
+				push(@nonuniq, $CONFIG{$o}{$k}{'redirect'});
+			}
+			if ($CONFIG{$o}{$k}{else}{'redirect'}) {
+				push(@nonuniq, $CONFIG{$o}{$k}{'else'}{'redirect'});
+			}
+		}
+	}
+	@redirects = grep (++$chk{$_} < 2, @nonuniq);
+
+	print $CGI->header();
+	print $CGI->start_html(
+		-title  => "$PROGRAM v$VERSION",
+		-author => "$AUTHOR",
+		-meta   => { 'copyright' => $COPYRIGHT },
+		-style  => { -src => $CSS_FILE },
+		-script  => { -src => $JS_FILE },
+	);
+	print $CGI->start_form();
+	print "<h2>", &translate('Known redirects'), "</h2>\n";
+	print "<table width=\"100%\"><tr><th align=\"left\">\n";
+
+	if (scalar @redirects <= 0) {
+		print "No known redirects</th></tr>\n";
+	} else {
+		print "</th></tr>\n";
+		my $sel = '';
+		$sel = ' checked="1"' if ($curval eq '');
+		$v = '';
+		foreach $v (@redirects) {
+			$sel = ' checked="1"' if ($v eq $curval);
+			print "<tr><td><input type=\"radio\" name=\"redirect\" id=\"redirect\" value=\"", $CGI->escapeHTML($v), "\"$sel/>", $CGI->escapeHTML($v), "</td></tr>\n";
+			$sel = '';
+		}
+		print "<tr><th>&nbsp;</th></tr>\n";
+		print "<tr><th align=\"center\"><input type=\"button\" name=\"select\" value=\"", &translate('Select'), "\" onclick=\"window.opener.document.forms[0].$OPENER.value=pick_redirect(); window.close(); return false;\"></th></tr>\n";
+	}
+	print "<tr><th align=\"center\"><input type=\"button\" name=\"close\" value=\"", &translate('Close'), "\" onclick=\"window.close(); return false;\"></th></tr>\n";
+	print "</table>\n";
+
+	print $CGI->end_form();
+	print $CGI->end_html();
 }
 
 sub get_translation
