@@ -1,0 +1,15 @@
+Alias /squidguardmgr/ "/var/www/sgmgr/"
+
+<Directory "/var/www/sgmgr">
+    AllowOverride None
+    #AuthUserFile conf/.htpasswd
+    #AuthType Basic
+    #AuthName "squid-gui"
+    #Require user sgmgradm
+    PerlResponseHandler ModPerl::Registry
+    Options +ExecCGI
+    DirectoryIndex squidguardmgr.cgi
+    Order deny,allow
+    Deny from all
+    Allow from 127.0.0.1
+</Directory>
