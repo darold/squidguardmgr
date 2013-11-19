@@ -1,4 +1,3 @@
-
 function validate_schedule ()
 {
 	if (document.forms[0].time.value == '') {
@@ -123,7 +122,7 @@ function validate_policy ()
 		return false;
 	}
 
-	if (document.forms[0].redirect.value == '') {
+	if ( (document.forms[0].log.value != '') && (document.forms[0].redirect.value == '') ) {
 		alert('You must set a redirection URL');
 		return false;
 	}
