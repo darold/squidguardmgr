@@ -2203,9 +2203,21 @@ sub show_config
 	print "<table align=\"center\" width=\"80%\">\n";
 	print "<tr><th align=\"left\">File: $CONF_FILE</th></tr>\n";
 	print "<tr><th><hr /></th></tr>\n";
-	print "<tr><th  align=\"left\"><pre>\n";
+	print "<tr><td align=\"left\"><pre>\n";
 
-	print &dump_config() if (-e $CONF_FILE);
+	if (-e $CONF_FILE) {
+		if (not open(IN, $CONF_FILE)) {
+			print "Can't open configuration file $CONF_FILE: $!\n";
+		} else {
+			my $l;
+			while ($l = <IN>) {
+				print $CGI->escapeHTML($l);
+			}
+			close(IN);
+		}
+	} else {
+		print "&nbsp;";
+	}
 
 	print "</pre></td></tr>\n";
 	print "</table>\n";
