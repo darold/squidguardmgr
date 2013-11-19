@@ -394,8 +394,7 @@ sub normalize_configfile
 	}
 	my @txt = <IN>;
 	close(IN);
-	map { s/
-//gs } @txt;
+	map { s/\r//gs } @txt;
 	
 	my $content = join('', @txt);
 	@txt = ();
@@ -817,8 +816,7 @@ sub save_blacklist
 			$expressions = $CGI->param($p) || '';
 		}
 	}
-	$domains =~ s/
-//gs;
+	$domains =~ s/\r//gs;
 	if ($domains) {
 		if ($action eq 'add') {
 			&add_item("$CONFIG{dbhome}/$bl/domains", split(/[\s\n]+/s, $domains) );
@@ -826,8 +824,7 @@ sub save_blacklist
 			&remove_item("$CONFIG{dbhome}/$bl/domains", split(/[\s\n]+/s, $domains) );
 		}
 	}
-	$urls =~ s/
-//gs;
+	$urls =~ s/\r//gs;
 	if ($urls) {
 		if ($action eq 'add') {
 			&add_item("$CONFIG{dbhome}/$bl/urls", split(/[\s\n]+/s, $urls) );
@@ -835,8 +832,7 @@ sub save_blacklist
 			&remove_item("$CONFIG{dbhome}/$bl/urls", split(/[\s\n]+/s, $urls) );
 		}
 	}
-	$expressions =~ s/
-//gs;
+	$expressions =~ s/\r//gs;
 	if ($expressions) {
 		if ($action eq 'add') {
 			&add_item("$CONFIG{dbhome}/$bl/expressions", split(/[\s\n]+/s, $expressions) );
@@ -851,14 +847,12 @@ sub add_item
 	my ($file, @items) = @_;
 
 	my @exists = ();
-	map { $_ =~ s/
-//; } @items;
+	map { $_ =~ s/\r//gs; } @items;
 	if (-e "$file") {
 		if (open(IN, "$file")) {
 			while (my $l = <IN>) {
 				chomp($l);
-				$l =~ s/
-//;
+				$l =~ s/\r//gs;
 				next if (!$l);
 				# check if item already exists
 				if (grep($_ eq $l, @items)) {
@@ -916,13 +910,11 @@ sub remove_item
 
 	my @removed = ();
 	my $txt = '';
-	map { $_ =~ s/
-//; } @items;
+	map { $_ =~ s/\r//gs; } @items;
 	if (open(IN, "$file")) {
 		while (my $l = <IN>) {
 			chomp($l);
-			$l =~ s/
-//;
+			$l =~ s/\r//gs;
 			next if (!$l);
 			# check if item exists
 			if (grep($_ eq $l, @items)) {
@@ -981,14 +973,12 @@ sub add_hist_item
 	my ($file, $prefix, @items) = @_;
 
 	my @exists = ();
-	map { $_ =~ s/
-//; } @items;
+	map { $_ =~ s/\r//gs; } @items;
 	if (-e "$file") {
 		if (open(IN, "$file")) {
 			while (my $l = <IN>) {
 				chomp($l);
-				$l =~ s/
-//;
+				$l =~ s/\r//gs;
 				next if (!$l);
 				# check if item already exists
 				if (grep($_ eq $l, @items)) {
@@ -2502,8 +2492,7 @@ sub save_listcontent
 	print "<input type=\"hidden\" name=\"filelist\" value=\"$bl\" />\n";
 
 	my $content = $CGI->param('content') || '';
-	$content =~ s/
-//gs;
+	$content =~ s/\r//gs;
 	my @datas = split(/\n+/, $content);
 	$content = '';
 	map { s/^[\s]+//; s/[\s]+$//; } @datas;
@@ -2964,8 +2953,7 @@ sub get_translation
 	if (open(IN, "$basedir/menu.dat")) {
 		while (<IN>) {
 			chomp;
-			s/
-//;
+			s/\r//gs;
 			next if (/^#/ || !$_);
 			my ($key, $val) = split(/\t+/);
 			$translate{$key} = $val;
@@ -3146,8 +3134,7 @@ sub save_filecontent
 	my $file = shift;
 
 	my $content = $CGI->param('content') || '';
-	$content =~ s/
-//gs;
+	$content =~ s/\r//gs;
 	my @datas = split(/\n+/, $content);
 	$content = '';
 	map { s/^[\s]+//; s/[\s]+$//; } @datas;
@@ -3744,8 +3731,7 @@ sub read_sgm_config
 	} else {
 		while (my $l = <IN>) {
 			chomp($l);
-			$l =~ s/
-//;
+			$l =~ s/\r//gs;
 			$l =~ s/[\s\t]*\#.*//;
 			next if (!$l);
 			my ($key, $val) = split(/[\s\t]+/, $l, 2);
@@ -3854,4 +3840,3 @@ sub acl_in_use
 }
 
 __END__
-
