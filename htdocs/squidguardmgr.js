@@ -163,3 +163,16 @@ function conditional_status (idx)
 		}
 	}
 }
+
+function pick_redirect ()
+{
+	var str = '';
+	var radioList = document.forms[0].redirect;
+	for (var i=0; i<radioList.length; i++) {
+		if (radioList[i].checked) {
+			str = radioList[i].value;
+			break;
+		}
+	}
+	return str;
+}
