@@ -1,5 +1,22 @@
 NAME
-    SquidGuard Manager - Web GUI for squidGuard and SquidClamav administration
+    SquidGuard Manager - Web GUI for squidGuard and SquidClamav
+    administration
+
+REQUIREMENT
+    SquidGuard Manager may run on any Unix like OS with any modern Perl
+    installation using the perl CGI module. It must be run on a proxy server
+    hosting squidGuard.
+
+    You need to run this CGI script using Apache HTTP server and the httpd
+    daemon must run be run as uid and gid holding SquidGuard (most of the
+    time this is squid cache effective user/group). This is to allow
+    SquidGuard Manager to read and write into the configuration files to
+    manage blocklists and acls. If you use SquidClamav, it must also be run
+    under the same user.
+
+    SquidGuard Manager use some system commands to manage blocklists and log
+    files. Your system must have the following binariesi installed: diff,
+    grep, find, rm and tail.
 
 INSTALLATION
     To install SquidGuard Manager you must be root as you need to set
@@ -16,9 +33,9 @@ INSTALLATION
     squidguard and squidclamav are run. Most of the time this is the Squid
     cache effective user.
 
-            chmod -R squid:squid /usr/local/squidGuard
-            or
-            chmod -R squid:squid /etc/squidguard.conf /var/lib/squidguard
+            chown -R squid:squid /usr/local/squidGuard
+    or
+            chown -R squid:squid /etc/squidguard.conf /var/lib/squidguard
 
     To allow httpd to run squidguardmgr.cgi as a different user or group you
     must edit your httpd.conf file and change the User/Group directive to
@@ -29,9 +46,9 @@ INSTALLATION
     may support this feature or will need to do that by hand.
 
     IMPORTANT: SquidGuard Manager do not support symbolic link into the
-    SquidGuard dbhome directory. You need to remove these symbolic links from
-    your system and modify your squidguard.conf file to replace them by the
-    directories real names.
+    SquidGuard dbhome directory. You need to remove these symbolic links
+    from your system and modify your squidguard.conf file to replace them by
+    the directories real names.
 
   Automatic installation
     Execute the install script and answer to the questions as follow:
@@ -57,6 +74,9 @@ INSTALLATION
             BASEURL => Base url where css,js and images files will be found. Default: /squidguardmgr
             SQUIDUSR => User running Squid
             SQUIDGRP => Group running Squid
+            SQUIDCLAMAV => Path to squidclamav binary (v5.x only)
+            CICAP_SOCKET => c-icap server control socket (v6.x only)
+            SQUIDCLAMAVCONF => Path to squidclamav.conf file
 
     For packaging there's two more configuration variables:
 
@@ -69,7 +89,9 @@ INSTALLATION
             DBHOME=/usr/local/squidguard/database \
             LOGDIR=/usr/local/logs/squidguard \
             WWWDIR=/usr/local/apache CGIDIR=cgi-bin/admin HTMLDIR=htdocs/admin \
-            LANGDIR=fr_FR BASEURL=/admin/ SQUIDUSR=squid SQUIDGRP=squid
+            LANGDIR=fr_FR BASEURL=/admin/ SQUIDUSR=squid SQUIDGRP=squid \
+            SQUIDCLAMAV=/usr/local/bin/squidclamav \
+            SQUIDCLAMAVCONF=/etc/squidclamav.conf
 
             make && make install
 
@@ -113,13 +135,13 @@ INSTALLATION
 
 CONFIGURATION
 
-    See README file or got to http://squidguardmgr.darold.net/
+    See README file or go to http://squidguardmgr.darold.net/
 
 AUTHOR
     Gilles Darold <gilles @nospam@ darold.net>
 
 COPYRIGHT
-    Copyright (c) 2010-2011 Gilles Darold - All rights reserved.
+    Copyright (c) 2010-2013 Gilles Darold - All rights reserved.
 
             This program is free software: you can redistribute it and/or modify
             it under the terms of the GNU General Public License as published by
@@ -133,4 +155,8 @@ COPYRIGHT
 
             You should have received a copy of the GNU General Public License
             along with this program.  If not, see < http://www.gnu.org/licenses/ >.
+
+BUGS
+    Your volontee to help construct a better software by submitting bug
+    report or feature request as well as code contribution are welcome.
 

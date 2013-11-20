@@ -146,9 +146,9 @@ squidclamav.conf file as well as the log file.
 For that SquidGuard Manager must be run as the user under which squidguard and
 squidclamav are run. Most of the time this is the Squid cache effective user.
 
-	chmod -R squid:squid /usr/local/squidGuard
+	chown -R squid:squid /usr/local/squidGuard
 or
-	chmod -R squid:squid /etc/squidguard.conf /var/lib/squidguard
+	chown -R squid:squid /etc/squidguard.conf /var/lib/squidguard
 
 To allow httpd to run squidguardmgr.cgi as a different user or group you must
 edit your httpd.conf file and change the User/Group directive to the user and
@@ -324,7 +324,7 @@ Gilles Darold <gilles @nospam@ darold.net>
 
 =head1 COPYRIGHT
 
-Copyright (c) 2010-2011 Gilles Darold - All rights reserved.
+Copyright (c) 2010-2013 Gilles Darold - All rights reserved.
 
 	This program is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
