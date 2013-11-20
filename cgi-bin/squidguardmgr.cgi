@@ -251,7 +251,7 @@ if ($ACTION eq 'viewlist') {
 	&show_filecontent($PATH, $CGI->param('tail'));
 	exit 0;
 } elsif ($ACTION eq 'redirectlist') {
-	&show_redirectlist($OPENER);
+	&show_redirectlist();
 	exit 0;
 }
 
