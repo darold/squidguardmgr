@@ -2130,7 +2130,9 @@ sub edit_acls
 
 	print "<tr><th colspan=\"2\"><hr /></th></tr>\n";
 
-	print "<tr><th colspan=\"2\" align=\"left\">", &translate('else'), " ", &translate('if schedule not match'), "</th></tr>\n";
+	print "<tr><th colspan=\"2\" align=\"left\">", &translate('else'), " ", &translate('if schedule not match'), "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+	print "<input type=\"checkbox\" name=\"delelse\" value=\"0\" onchange=\"toggle_conditional(this);\" />";
+	print " ", &translate('Delete else clause'), "</th></tr>\n";
 	print "<tr><th colspan=\"2\"><hr></th></tr>\n";
 	print "<tr><th nowrap=\"1\" align=\"left\">&nbsp;</th>";;
 	$sel = '';

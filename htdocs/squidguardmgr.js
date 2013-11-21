@@ -164,6 +164,15 @@ function conditional_status (idx)
 	}
 }
 
+function toggle_conditional (ctrl)
+{
+	if (ctrl.checked == true) {
+		conditional_status(0);
+	} else {
+		conditional_status(1);
+	}
+}
+
 function pick_redirect ()
 {
 	var str = '';
