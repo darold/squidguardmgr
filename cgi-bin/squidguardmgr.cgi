@@ -1203,7 +1203,7 @@ sub show_rewrites
 			$options .= ' / ' if ($opt && ($opt =~ /R/));
 			$options .= &translate('Permanently') if ($opt =~ /R/);
 			print "<tr><th>&nbsp;</th><td align=\"center\"><b>", &translate('Replace'), "</b> $pattern</td><td><b>", &translate('with'), "</b> $substitute</td><td>$options</td><th><a href=\"\" onclick=\"document.forms[0].rewrite.value='$k'; document.forms[0].oldvalue.value='", &encode_url($val), "'; document.forms[0].action.value='rewritesedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Edit'), "\">$IMG_EDIT</a></th>";
-			print "<th><a href=\"\" onclick=\"document.forms[0].rewrite.value='$k'; document.forms[0].oldvalue.value='", &encode_url($val), "'; document.forms[0].action.value='rewritesdelete'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Delete'), "\">$IMG_DELETE</th>";
+			print "<th><a href=\"\" onclick=\"document.forms[0].rewrite.value='$k'; document.forms[0].oldvalue.value='", &encode_url($val), "'; document.forms[0].action.value='rewritesdelete'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Delete'), "\">$IMG_DELETE</a></th>";
 			print "</tr>\n";
 		}
 		&show_log_schedule('rew', 'rewrite', $k, 3);
