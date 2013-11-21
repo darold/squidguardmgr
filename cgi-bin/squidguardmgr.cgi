@@ -2392,7 +2392,9 @@ sub dump_config
 		if (exists $CONFIG{acl}{$t}{else} && (scalar keys %{$CONFIG{acl}{$t}{else}} > 0) ) {
 			$config .= "\t} else {\n";
 			foreach my $v (sort keys %{$CONFIG{acl}{$t}{else}}) {
-				if ($v ne 'pass') {
+				if ($v eq 'rewrite') {
+					$config .= "\t\t$v\t" . join(' ', @{$CONFIG{acl}{$t}{else}{$v}}) . "\n";
+				} elsif ($v ne 'pass') {
 					$config .= "\t\t$v\t$CONFIG{acl}{$t}{else}{$v}\n";
 				} else {
 					$config .= "\t\t$v\t";
@@ -2431,7 +2433,9 @@ sub dump_config
 	if (exists $CONFIG{acl}{default}{else} && (scalar keys %{$CONFIG{acl}{default}{else}} > 0)) {
 		$config .= "\t} else {\n";
 		foreach my $v (sort keys %{$CONFIG{acl}{default}{else}}) {
-			if ($v ne 'pass') {
+			if ($v eq 'rewrite') {
+				$config .= "\t\t$v\t" . join(' ', @{$CONFIG{acl}{default}{else}{$v}}) . "\n";
+			} elsif ($v ne 'pass') {
 				$config .= "\t\t$v\t$CONFIG{acl}{default}{else}{$v}\n";
 			} else {
 				$config .= "\t\t$v\t" . join(' ', @{$CONFIG{acl}{default}{else}{$v}}) . "\n";
