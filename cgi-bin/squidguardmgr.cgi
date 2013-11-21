@@ -1141,7 +1141,7 @@ sub edit_times
 	print "</select> ", &translate('Minutes'), "</td></tr>";
 	print "<tr><th colspan=\"2\">&nbsp;</th></tr>\n";
 	print "<tr><th align=\"left\" colspan=\"2\">", &translate('Following week days'), "</th></tr>\n";
-	print "<td colspan=\"2\" nowrap=\"1\">\n";
+	print "<tr><td colspan=\"2\" nowrap=\"1\">\n";
 	foreach my $d ('Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday') {
 		my $sel = '';
 		if ($days !~ /\-/) {
@@ -1157,7 +1157,7 @@ sub edit_times
 	print "<tr><th colspan=\"2\"><hr /></th></tr>\n";
 	print "<tr><th align=\"left\" colspan=\"2\">", &translate('Space separated list of date'), "</th></tr>\n";
 	print "<tr><td colspan=\"2\">(Format: yyyy.mm.dd yyyy.mm.dd yyyy.mm.dd-yyyy.mm.dd *.mm.dd *.*.dd *.mm.*)</td></tr>\n";
-	print "<td colspan=\"2\" nowrap=\"1\">\n";
+	print "<tr><td colspan=\"2\" nowrap=\"1\">\n";
 	print "<input type=\"text\" size=\"80\" name=\"date\" value=\"$days\" />\n";
 	print "</td></tr>\n";
 	print "<tr><th colspan=\"2\"><hr /></th></tr>\n";
@@ -1783,6 +1783,9 @@ sub show_acl
 		$rewrite = join(' ', @{$CONFIG{acl}{$k}{rewrite}}) if (exists $CONFIG{acl}{$k}{rewrite});
 		my $img = '&nbsp;';
 		$img = $IMG_REDIRECT if ($CONFIG{acl}{$k}{redirect});
+		$schedule = '&nbsp;' if ($schedule eq "");
+		$fqdn = '&nbsp;' if ($fqdn eq "");
+		$rewrite = '&nbsp;' if ($rewrite eq "");
 		print "<tr><th align=\"left\">$k</th><td>$schedule</td><td>$allowed<br>$blocked$whitelist$blacklist</td><td style=\"text-align: center;\">$fqdn</td><td>$rewrite</td><td title=\"$CONFIG{acl}{$k}{redirect}\" style=\"text-align: center;\">$img</td><th><a href=\"\" onclick=\"document.forms[0].acl.value='$k'; document.forms[0].action.value='aclsedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Edit'), "\">$IMG_EDIT</a></th><th><a href=\"\" onclick=\"document.forms[0].acl.value='$k'; document.forms[0].action.value='aclsdelete'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Delete'), "\">$IMG_DELETE</a></th></tr>\n";
 		my $sources = '';
 		if (exists $CONFIG{acl}{$k}{else}) {
@@ -1843,7 +1846,9 @@ sub show_acl
 			$rewrite = join(' ', @{$CONFIG{acl}{$k}{else}{rewrite}}) if (exists $CONFIG{acl}{$k}{else}{rewrite});
 			$img = '&nbsp;';
 			$img = $IMG_REDIRECT if ($CONFIG{acl}{$k}{else}{redirect});
-			print "<tr><th align=\"right\">", &translate('else'), "</th><td>&nbsp;</td><td>$allowed<br>$blocked$whitelist$blacklist</td><td style=\"text-align: center;\">$fqdn</td><td>", join(' ', $CONFIG{acl}{$k}{else}{rewrite}), "</td><td title=\"$CONFIG{acl}{$k}{else}{redirect}\" style=\"text-align: center;\">$img</td><td colspan=\"2\">&nbsp;</td></tr>\n";
+			$fqdn = '&nbsp;' if ($fqdn eq "");
+			$rewrite = '&nbsp;' if ($rewrite eq "");
+			print "<tr><th align=\"right\">", &translate('else'), "</th><td>&nbsp;</td><td>$allowed<br>$blocked$whitelist$blacklist</td><td style=\"text-align: center;\">$fqdn</td><td>$rewrite</td><td title=\"$CONFIG{acl}{$k}{else}{redirect}\" style=\"text-align: center;\">$img</td><th colspan=\"2\">&nbsp;</th></tr>\n";
 		}
 		print "<tr><th align=\"left\" colspan=\"8\"><hr></th></tr>\n";
 	}
@@ -1914,6 +1919,9 @@ sub show_acl
 	$rewrite = join(' ', @{$CONFIG{acl}{default}{rewrite}}) if (exists $CONFIG{acl}{default}{rewrite});
 	my $img = '&nbsp;';
 	$img = $IMG_REDIRECT if ($CONFIG{acl}{default}{redirect});
+	$schedule = '&nbsp;' if ($schedule eq "");
+	$fqdn = '&nbsp;' if ($fqdn eq "");
+	$rewrite = '&nbsp;' if ($rewrite eq "");
 	print "<tr><th align=\"left\">", &translate('Default ACL'), "</th><td>$schedule</td><td>$allowed<br>$blocked$whitelist$blacklist</td><td style=\"text-align: center;\">$fqdn</td><td>$rewrite</td><td title=\"$CONFIG{acl}{default}{redirect}\" style=\"text-align: center;\">$img</td><th><a href=\"\" onclick=\"document.forms[0].acl.value='default'; document.forms[0].action.value='aclsedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Edit'), "\">$IMG_EDIT</a></th><th>&nbsp;</th></tr>\n";
 	my $sources = '';
 	if (exists $CONFIG{acl}{default}{else}) {
@@ -1974,10 +1982,11 @@ sub show_acl
 		$rewrite = join(' ', @{$CONFIG{acl}{default}{else}{rewrite}}) if (exists $CONFIG{acl}{default}{else}{rewrite});
 		$img = '&nbsp;';
 		$img = $IMG_REDIRECT if ($CONFIG{acl}{default}{else}{redirect});
-		print "<tr><th align=\"right\">", &translate('else'), "</th><td>&nbsp;</td><td>$allowed<br>$blocked$whitelist$blacklist</td><td style=\"text-align: center;\">$fqdn</td><td>", join(' ', $CONFIG{acl}{default}{else}{rewrite}), "</td><td title=\"$CONFIG{acl}{default}{else}{redirect}\" style=\"text-align: center;\">$img</td><td colspan=\"2\">&nbsp;</td></tr>\n";
+		$fqdn = '&nbsp;' if ($fqdn eq "");
+		$rewrite = '&nbsp;' if ($rewrite eq "");
+		print "<tr><th align=\"right\">", &translate('else'), "</th><td>&nbsp;</td><td>$allowed<br>$blocked$whitelist$blacklist</td><td style=\"text-align: center;\">$fqdn</td><td>$rewrite</td><td title=\"$CONFIG{acl}{default}{else}{redirect}\" style=\"text-align: center;\">$img</td><td colspan=\"2\">&nbsp;</td></tr>\n";
 	}
 	print "<tr><th align=\"left\" colspan=\"8\"><hr></th></tr>\n";
-
 
 	print "<tr><th colspan=\"8\" align=\"right\"><input type=\"button\" name=\"new\" value=\"", &translate('New Policy'), "\" onclick=\"document.forms[0].acl.value=''; document.forms[0].action.value='aclsedit'; document.forms[0].submit(); return false;\"></th></tr>\n";
 	print "</table>\n";
