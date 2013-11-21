@@ -3043,7 +3043,7 @@ sub show_redirectlist
 			} else {
 				$sel = '';
 			}
-			print "<tr><td><input type=\"radio\" name=\"redirect\" id=\"redirect\" value=\"", $CGI->escapeHTML($v), "\"$sel />", $CGI->escapeHTML($v), "</td></tr>\n";
+			print "<tr><td style=\"word-break: break-all; word-wrap: break-word;\"><input type=\"radio\" name=\"redirect\" id=\"redirect\" value=\"", $CGI->escapeHTML($v), "\"$sel />", $CGI->escapeHTML($v), "</td></tr>\n";
 		}
 		print "<tr><th>&nbsp;</th></tr>\n";
 		print "<tr><th align=\"center\"><input type=\"button\" name=\"select\" value=\"", &translate('Select'), "\" onclick=\"window.opener.document.forms[0].$OPENER.value=pick_redirect(); window.close(); return false;\"></th></tr>\n";
