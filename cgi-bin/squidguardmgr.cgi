@@ -1220,7 +1220,7 @@ sub show_rewrites
 				$options .= ' / ' if ($opt && ($opt =~ /R/));
 				$options .= &translate('Permanently') if ($opt =~ /R/);
 				print "<tr><th>&nbsp;</th><td align=\"center\"><b>", &translate('Replace'), "</b> $pattern</td><td><b>", &translate('with'), "</b> $substitute</td><td>$options</td><th><a href=\"\" onclick=\"document.forms[0].rewrite.value='$k-else'; document.forms[0].oldvalue.value='", &encode_url($val), "'; document.forms[0].action.value='rewritesedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Edit'), "\">$IMG_EDIT</a></th>";
-				print "<th><a href=\"\" onclick=\"document.forms[0].rewrite.value='$k-else'; document.forms[0].oldvalue.value='", &encode_url($val), "'; document.forms[0].action.value='rewritesdelete'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Delete'), "\">$IMG_DELETE</th>";
+				print "<th><a href=\"\" onclick=\"document.forms[0].rewrite.value='$k-else'; document.forms[0].oldvalue.value='", &encode_url($val), "'; document.forms[0].action.value='rewritesdelete'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Delete'), "\">$IMG_DELETE</a></th>";
  				print "</tr>\n";
 			}
 			my $v = $CONFIG{rew}{$k}{else}{log} || '';
@@ -1519,8 +1519,10 @@ sub show_categories
 			if ($list) {
 				$list =~ s/\/.*//;
 				$list = $blinfo{$list}{alias} || $list;
+				print "<td>$list</td>";
+			} else {
+				print "<td>&nbsp;</td>";
 			}
-			print "<td>$list</td>";
 		}
 		my $img = '&nbsp;';
 		$img = $IMG_REDIRECT if ($CONFIG{dest}{$k}{redirect});
@@ -1537,7 +1539,7 @@ sub show_categories
 		}
 		print "</td><th><a href=\"\" onclick=\"document.forms[0].category.value='$k'; document.forms[0].action.value='categoriesedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Edit'), "\">$IMG_EDIT</a></th>";
 		if ($delete) {
-			print "<th><a href=\"\" onclick=\"document.forms[0].category.value='$k'; document.forms[0].action.value='categoriesdelete'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Delete'), "\">$IMG_DELETE</th>";
+			print "<th><a href=\"\" onclick=\"document.forms[0].category.value='$k'; document.forms[0].action.value='categoriesdelete'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Delete'), "\">$IMG_DELETE</a></th>";
 		} else {
 			print "<th title=\"", &translate('Still in use'), "\">$IMG_NODELETE</th>";
 		}
@@ -1556,8 +1558,10 @@ sub show_categories
 					if ($list) {
 						$list =~ s/\/.*//;
 						$list = $blinfo{$list}{alias} || $list;
+						print "<td>$list</td>";
+					} else {
+						print "<td>&nbsp;</td>";
 					}
-					print "<td>$list</td>";
 				}
 				print "<td nowrap=\"1\" title=\"$CONFIG{dest}{$k}{else}{redirect}\">", substr($CONFIG{dest}{$k}{else}{redirect}, 0, 60), "</td><td nowrap=\"1\">";
 				my $v = $CONFIG{dest}{$k}{else}{log} || '';
@@ -1571,7 +1575,7 @@ sub show_categories
 					print "&nbsp;";
 				}
 				print "</td><th><a href=\"\" onclick=\"document.forms[0].category.value='$k-else'; document.forms[0].action.value='categoriesedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Edit'), "\">$IMG_EDIT</a></th>";
-				print "<th><a href=\"\" onclick=\"document.forms[0].category.value='$k-else'; document.forms[0].action.value='categoriesdelete'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Delete'), "\">$IMG_DELETE</th>";
+				print "<th><a href=\"\" onclick=\"document.forms[0].category.value='$k-else'; document.forms[0].action.value='categoriesdelete'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Delete'), "\">$IMG_DELETE</a></th>";
 				print "</tr>\n";
 			}
 
@@ -1689,7 +1693,7 @@ sub edit_categories
 	}
 	print "<tr><th align=\"right\">", &translate('Log to file'), "</th><th align=\"left\"><input type=\"text\" size=\"50\" name=\"log\" value=\"$log\" /> ", &translate('anonymized'), "<input type=\"checkbox\" name=\"anonymous\" $anon /></th></tr>\n";
 	print "<tr><th colspan=\"2\"><hr /></th></tr>\n";
-	print "<tr><th colspan=\"2\" align=\"right\"><input type=\"button\" name=\"save\" value=\"", &translate('Apply change'), "\" onclick=\"if (validate_filter() == true) { document.forms[0].apply.value='1'; document.forms[0].submit(); } return false;\"></td></tr>\n";
+	print "<tr><th colspan=\"2\" align=\"right\"><input type=\"button\" name=\"save\" value=\"", &translate('Apply change'), "\" onclick=\"if (validate_filter() == true) { document.forms[0].apply.value='1'; document.forms[0].submit(); } return false;\"></th></tr>\n";
 	print "</table>\n";
 	print "</td></tr><tr><td>\n";
 	print &show_help('categories');
@@ -1841,7 +1845,7 @@ sub show_acl
 			$img = $IMG_REDIRECT if ($CONFIG{acl}{$k}{else}{redirect});
 			print "<tr><th align=\"right\">", &translate('else'), "</th><td>&nbsp;</td><td>$allowed<br>$blocked$whitelist$blacklist</td><td style=\"text-align: center;\">$fqdn</td><td>", join(' ', $CONFIG{acl}{$k}{else}{rewrite}), "</td><td title=\"$CONFIG{acl}{$k}{else}{redirect}\" style=\"text-align: center;\">$img</td><td colspan=\"2\">&nbsp;</td></tr>\n";
 		}
-		print "<tr><th align=\"left\" colspan=\"8\"><hr></tr></tr>\n";
+		print "<tr><th align=\"left\" colspan=\"8\"><hr></th></tr>\n";
 	}
 
 	# Show the default ACL
@@ -1972,7 +1976,7 @@ sub show_acl
 		$img = $IMG_REDIRECT if ($CONFIG{acl}{default}{else}{redirect});
 		print "<tr><th align=\"right\">", &translate('else'), "</th><td>&nbsp;</td><td>$allowed<br>$blocked$whitelist$blacklist</td><td style=\"text-align: center;\">$fqdn</td><td>", join(' ', $CONFIG{acl}{default}{else}{rewrite}), "</td><td title=\"$CONFIG{acl}{default}{else}{redirect}\" style=\"text-align: center;\">$img</td><td colspan=\"2\">&nbsp;</td></tr>\n";
 	}
-	print "<tr><th align=\"left\" colspan=\"8\"><hr></tr></tr>\n";
+	print "<tr><th align=\"left\" colspan=\"8\"><hr></th></tr>\n";
 
 
 	print "<tr><th colspan=\"8\" align=\"right\"><input type=\"button\" name=\"new\" value=\"", &translate('New Policy'), "\" onclick=\"document.forms[0].acl.value=''; document.forms[0].action.value='aclsedit'; document.forms[0].submit(); return false;\"></th></tr>\n";
@@ -2188,7 +2192,7 @@ sub edit_acls
 	print "<tr><th align=\"right\">", &translate('Log file'), "</th><td><input type=\"text\" size=\"50\" name=\"elog\" value=\"$CONFIG{acl}{$name}{else}{log}\" /></td></tr>\n";
 	print "<tr><th colspan=\"2\"><hr /></th></tr>\n";
 
-	print "<tr><th colspan=\"2\" align=\"right\"><input type=\"button\" name=\"save\" value=\"", &translate('Apply change'), "\" onclick=\"if (validate_policy() == true) { document.forms[0].apply.value='1'; document.forms[0].submit(); } return false;\"></td></tr>\n";
+	print "<tr><th colspan=\"2\" align=\"right\"><input type=\"button\" name=\"save\" value=\"", &translate('Apply change'), "\" onclick=\"if (validate_policy() == true) { document.forms[0].apply.value='1'; document.forms[0].submit(); } return false;\"></th></tr>\n";
 	print "</table>\n";
 	print "</td><td valign=\"top\">\n";
 	print &show_help('acl');
