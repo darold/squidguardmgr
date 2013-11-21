@@ -1,0 +1,37 @@
+# contrib/EL6/README
+This is sample configuration files to drive an Apache 2.2 instance for 
+SquidGuard Manager on RHEL/CentOS 6.x.  Many files were borrowed  from 
+CentOS 6 distribution.
+
+# Structure
+
+/etc/httpd/
+    \_ conf/               -- This is ServerRoot of the httpd daemon.
+        squidguardmgr.conf -- Apache configuration file.
+        .htpasswd          -- Optional but recommended. See note.
+    \_ conf.d/
+        squidguardmgr.cf   -- Directory and Alias settings for SquidGuard 
+                              Manager WWWDIR
+        perl.conf          -- May be provided by distribution's mod_perl pkg.
+/etc/sysconfig/
+    squidguardmgr          -- httpd runtime options read by init-file below.
+/etc/init.d/
+    squidguardmgr          -- Init file for httpd driving SquidGuard Manager. 
+                              Rename rc_squidguardmgr file and set permission
+                              root:root 755.
+/var/www/
+    \_ squid-gui/          -- This is httpd's DocumentRoot. Can be empty.
+    \_ sgmgr/              -- WWWDIR = CGIDIR of SquidGuard Manager, automatically
+                              made through installation of SquidGuard Manager if
+                              you give proper arguments to Makefile.PL.
+/var/log/httpd/
+    \_ squidguardmgr/      -- httpd's log directory.
+/etc/logrotate.d/
+    squidguardmgr          -- logrotate configuration file.
+
+Note:
+You don't need to permit read nor write access to these files for squid account.
+If you want (may be you do want) to limit access to  SquidGuard Manager Web GUI,
+generate .htpasswd file using htpasswd command, then look into the commented-out 
+lines in squidguardmgr.cf.
+Enjoy ;-)
