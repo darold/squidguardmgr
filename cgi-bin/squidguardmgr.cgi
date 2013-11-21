@@ -439,39 +439,39 @@ sub get_configuration
 	my $rew_else = '';
 	while (my $l = <IN>) {
 		chomp($l);
-		$l =~ s/\#.*//;
-		$l =~ s/^[\s\t]+//;
+		$l =~ s/\#.*//o;
+		$l =~ s/^[\s\t]+//o;
 		$acl_else = 0, $src_else = 0, $dest_else = 0, $rew_else = 0 if ($l =~ /\}$/);
 		next if ( !$l || ($l eq '}') );
-		if ($l =~ /^acl[\s\t]+\{/) {
+		if ($l =~ /^acl[\s\t]+\{/o) {
 			$enter_acl = 1;
 			$cur_src = '';
 			$cur_rew = '';
 			$cur_time = '';
 			$cur_dest = '';
 			next;
-		} elsif ($l =~ /^(src|source)[\s\t]+([^\s\t]+)[\s\t]+\{/) {
+		} elsif ($l =~ /^(src|source)[\s\t]+([^\s\t]+)[\s\t]+\{/o) {
 			$cur_src = $2;
 			$enter_acl = 0;
 			$cur_rew = '';
 			$cur_time = '';
 			$cur_dest = '';
 			next;
-		} elsif ($l =~ /^(rew|rewrite)[\s\t]+([^\s\t]+)[\s\t]+\{/) {
+		} elsif ($l =~ /^(rew|rewrite)[\s\t]+([^\s\t]+)[\s\t]+\{/o) {
 			$cur_rew = $2;
 			$enter_acl = 0;
 			$cur_src = '';
 			$cur_time = '';
 			$cur_dest = '';
 			next;
-		} elsif ($l =~ /^time[\s\t]+([^\s\t]+)[\s\t]+\{/) {
+		} elsif ($l =~ /^time[\s\t]+([^\s\t]+)[\s\t]+\{/o) {
 			$cur_time = $1;
 			$enter_acl = 0;
 			$cur_src = '';
 			$cur_rew = '';
 			$cur_dest = '';
 			next;
-		} elsif ($l =~ /^(dest|destination)[\s\t]+([^\s\t]+)[\s\t]+\{/) {
+		} elsif ($l =~ /^(dest|destination)[\s\t]+([^\s\t]+)[\s\t]+\{/o) {
 			$cur_dest = $2;
 			$cur_time = '';
 			$enter_acl = 0;
@@ -479,30 +479,30 @@ sub get_configuration
 			$cur_rew = '';
 			next;
 		}
-		if ($enter_acl && ($l =~ /\belse\b/)) {
+		if ($enter_acl && ($l =~ /\belse\b/o)) {
 			$acl_else = 1;
 			next;
 		}
-		if ($cur_src && ($l =~ /\belse\b/)) {
+		if ($cur_src && ($l =~ /\belse\b/o)) {
 			$src_else = 1;
 			next;
 		}
-		if ($cur_dest && ($l =~ /\belse\b/)) {
+		if ($cur_dest && ($l =~ /\belse\b/o)) {
 			$dest_else = 1;
 			next;
 		}
-		if ($cur_rew && ($l =~ /\belse\b/)) {
+		if ($cur_rew && ($l =~ /\belse\b/o)) {
 			$rew_else = 1;
 			next;
 		}
-		if ($enter_acl && ($l =~ /^([^\s\t]+)[\s\t]+(outside|within)[\s\t]+([^\s\t]+)[\s\t]+\{/) ) {
+		if ($enter_acl && ($l =~ /^([^\s\t]+)[\s\t]+(outside|within)[\s\t]+([^\s\t]+)[\s\t]+\{/o) ) {
 			$cur_acl = $1;
 			$infos{acl}{$cur_acl}{'extended'}{$2} = $3;
-		} elsif ($enter_acl && ($l =~ /^([^\s\t]+)[\s\t]+\{/) ) {
+		} elsif ($enter_acl && ($l =~ /^([^\s\t]+)[\s\t]+\{/o) ) {
 			$cur_acl = $1;
 		}
 
-		my ($k, $v) = split(/[\t\s]+/, $l, 2);
+		my ($k, $v) = split(/[\t\s]+/o, $l, 2);
 
 		# replace synonyme
 		if ( ($cur_dest || $cur_src || $cur_rew) && ($k eq 'logfile')) {
@@ -531,7 +531,7 @@ sub get_configuration
 				} else {
 					$infos{rew}{$cur_rew}{else}{$k} = $v;
 				}
-			} elsif ($k =~ /(within|outside)/) {
+			} elsif ($k =~ /(within|outside)/o) {
 				$infos{rew}{$cur_rew}{$k} = $v;
 			} else {
 				if (!$rew_else) {
@@ -560,10 +560,10 @@ sub get_configuration
 		}
 		# Parse time rules
 		if ($cur_time && grep(/^$k$/, @TIME_KEYWORD)) {
-			$v =~ s/(\d+)[\s\t]+\-[\s\t]+(\d+)/$1\-$2/g;
-			my @datas = split(/[\s\t]+/, $v);
+			$v =~ s/(\d+)[\s\t]+\-[\s\t]+(\d+)/$1\-$2/go;
+			my @datas = split(/[\s\t]+/o, $v);
 			my $hours = '';
-			if ($datas[-1] =~ /\d+:\d+\-\d+:\d+/) {
+			if ($datas[-1] =~ /\d+:\d+\-\d+:\d+/o) {
 				$hours = pop(@datas);
 			}
 			my $days = '';
@@ -586,29 +586,29 @@ sub get_configuration
 		# Parse ACL definitions
 		if ($cur_acl) {
 			if (!$acl_else) {
-				if ($l =~ /^pass[\s\t]+(.*)/) {
-					push(@{$infos{acl}{$cur_acl}{'pass'}}, split(/[\s\t]+/, $1));
+				if ($l =~ /^pass[\s\t]+(.*)/o) {
+					push(@{$infos{acl}{$cur_acl}{'pass'}}, split(/[\s\t]+/o, $1));
 				}
-				if ($l =~ /^redirect[\s\t]+(.*)/) {
+				if ($l =~ /^redirect[\s\t]+(.*)/o) {
 					$infos{acl}{$cur_acl}{'redirect'} = $1;
 				}
-				if ($l =~ /^(rew|rewrite)[\s\t]+(.*)/) {
+				if ($l =~ /^(rew|rewrite)[\s\t]+(.*)/o) {
 					push(@{$infos{acl}{$cur_acl}{'rewrite'}}, $2);
 				}
-				if ($l =~ /^log[\s\t]+(.*)/) {
+				if ($l =~ /^log[\s\t]+(.*)/o) {
 					$infos{acl}{$cur_acl}{'log'} = $1;
 				}
 			} else {
-				if ($l =~ /^pass[\s\t]+(.*)/) {
+				if ($l =~ /^pass[\s\t]+(.*)/o) {
 					push(@{$infos{acl}{$cur_acl}{else}{'pass'}}, split(/[\s\t]+/, $1));
 				}
-				if ($l =~ /^redirect[\s\t]+(.*)/) {
+				if ($l =~ /^redirect[\s\t]+(.*)/o) {
 					$infos{acl}{$cur_acl}{else}{'redirect'} = $1;
 				}
-				if ($l =~ /^rewrite[\s\t]+(.*)/) {
+				if ($l =~ /^rewrite[\s\t]+(.*)/o) {
 					push(@{$infos{acl}{$cur_acl}{else}{'rewrite'}}, $1);
 				}
-				if ($l =~ /^log[\s\t]+(.*)/) {
+				if ($l =~ /^log[\s\t]+(.*)/o) {
 					$infos{acl}{$cur_acl}{else}{'log'} = $1;
 				}
 			}
@@ -707,7 +707,7 @@ sub get_blacklists_description
 	if (open(IN, "$LANGDIR/$LANG/$BLDESC")) {
 		while (<IN>) {
 			chomp;
-			my ($k, $a, $v) = split(/\t+/);
+			my ($k, $a, $v) = split(/\t+/o);
 			$infos{$k}{alias} = $a if ($v);
 			$infos{$k}{description} = $v || $a;
 		}
@@ -856,7 +856,7 @@ sub add_item
 		if (open(IN, "$file")) {
 			while (my $l = <IN>) {
 				chomp($l);
-				$l =~ s/\r//gs;
+				$l =~ s/\r//gso;
 				next if (!$l);
 				# check if item already exists
 				if (grep($_ eq $l, @items)) {
@@ -918,7 +918,7 @@ sub remove_item
 	if (open(IN, "$file")) {
 		while (my $l = <IN>) {
 			chomp($l);
-			$l =~ s/\r//gs;
+			$l =~ s/\r//gso;
 			next if (!$l);
 			# check if item exists
 			if (grep($_ eq $l, @items)) {
@@ -982,7 +982,7 @@ sub add_hist_item
 		if (open(IN, "$file")) {
 			while (my $l = <IN>) {
 				chomp($l);
-				$l =~ s/\r//gs;
+				$l =~ s/\r//gso;
 				next if (!$l);
 				# check if item already exists
 				if (grep($_ eq $l, @items)) {
@@ -1050,11 +1050,11 @@ sub show_times
 		}
 		print "</tr>\n";
 		foreach my $val (@{$CONFIG{time}{$k}{days}}) {
-			my ($days, $hours) = split(/\|/, $val);
-			my ($start,$end) = split(/\-/, $hours);
+			my ($days, $hours) = split(/\|/o, $val);
+			my ($start,$end) = split(/\-/o, $hours);
 			my $show_days = '';
-			if ($days !~ /\./) {
-				while ($days =~ s/^([a-z])//) {
+			if ($days !~ /\./o) {
+				while ($days =~ s/^([a-z])//o) {
 					$show_days .= &translate($abbrday{$1}) . " ";
 				}
 				$show_days = &translate('Everyday') if ($days eq '*');
@@ -1195,13 +1195,13 @@ sub show_rewrites
 		}
 		print "</tr>\n";
 		foreach my $val (@{$CONFIG{rew}{$k}{rewrite}}) {
-			my ($null, $pattern, $substitute, $opt) = split(/\@/, $val);
+			my ($null, $pattern, $substitute, $opt) = split(/\@/o, $val);
 			my $options = '';
-			$options = &translate('Insensitive') if ($opt =~ /i/);
-			$options .= ' / ' if ($opt && ($opt =~ /r/));
-			$options .= &translate('Temporary') if ($opt =~ /r/);
-			$options .= ' / ' if ($opt && ($opt =~ /R/));
-			$options .= &translate('Permanently') if ($opt =~ /R/);
+			$options = &translate('Insensitive') if ($opt =~ /i/o);
+			$options .= ' / ' if ($opt && ($opt =~ /r/o));
+			$options .= &translate('Temporary') if ($opt =~ /r/o);
+			$options .= ' / ' if ($opt && ($opt =~ /R/o));
+			$options .= &translate('Permanently') if ($opt =~ /R/o);
 			print "<tr><th>&nbsp;</th><td align=\"center\"><b>", &translate('Replace'), "</b> $pattern</td><td><b>", &translate('with'), "</b> $substitute</td><td>$options</td><th><a href=\"\" onclick=\"document.forms[0].rewrite.value='$k'; document.forms[0].oldvalue.value='", &encode_url($val), "'; document.forms[0].action.value='rewritesedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Edit'), "\">$IMG_EDIT</a></th>";
 			print "<th><a href=\"\" onclick=\"document.forms[0].rewrite.value='$k'; document.forms[0].oldvalue.value='", &encode_url($val), "'; document.forms[0].action.value='rewritesdelete'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Delete'), "\">$IMG_DELETE</a></th>";
 			print "</tr>\n";
@@ -1212,13 +1212,13 @@ sub show_rewrites
 			print "<tr><th>", &translate('if schedule not match'), "</th><th colspan=\"3\">&nbsp;</th><th><a href=\"\" onclick=\"document.forms[0].rewrite.value='$k-else'; document.forms[0].action.value='rewritesedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Add an element'), "\">$IMG_ADD</a></th>";
 			print "<th><a href=\"\" onclick=\"document.forms[0].rewrite.value='$k-else'; document.forms[0].action.value='rewritesdelete'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Remove all'), "\">$IMG_REMOVE</a></th></tr>\n";
 			foreach my $val (@{$CONFIG{rew}{$k}{else}{rewrite}}) {
-				my ($null, $pattern, $substitute, $opt) = split(/\@/, $val);
+				my ($null, $pattern, $substitute, $opt) = split(/\@/o, $val);
 				my $options = '';
-				$options = &translate('Insensitive') if ($opt =~ /i/);
-				$options .= ' / ' if ($opt && ($opt =~ /r/));
-				$options .= &translate('Temporary') if ($opt =~ /r/);
-				$options .= ' / ' if ($opt && ($opt =~ /R/));
-				$options .= &translate('Permanently') if ($opt =~ /R/);
+				$options = &translate('Insensitive') if ($opt =~ /i/o);
+				$options .= ' / ' if ($opt && ($opt =~ /r/o));
+				$options .= &translate('Temporary') if ($opt =~ /r/o);
+				$options .= ' / ' if ($opt && ($opt =~ /R/o));
+				$options .= &translate('Permanently') if ($opt =~ /R/o);
 				print "<tr><th>&nbsp;</th><td align=\"center\"><b>", &translate('Replace'), "</b> $pattern</td><td><b>", &translate('with'), "</b> $substitute</td><td>$options</td><th><a href=\"\" onclick=\"document.forms[0].rewrite.value='$k-else'; document.forms[0].oldvalue.value='", &encode_url($val), "'; document.forms[0].action.value='rewritesedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Edit'), "\">$IMG_EDIT</a></th>";
 				print "<th><a href=\"\" onclick=\"document.forms[0].rewrite.value='$k-else'; document.forms[0].oldvalue.value='", &encode_url($val), "'; document.forms[0].action.value='rewritesdelete'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Delete'), "\">$IMG_DELETE</a></th>";
  				print "</tr>\n";
@@ -1517,7 +1517,7 @@ sub show_categories
 		foreach my $type ('domain', 'url', 'expression') {
 			my $list = $CONFIG{dest}{$k}{$type . 'list'} || '';
 			if ($list) {
-				$list =~ s/\/.*//;
+				$list =~ s/\/.*//o;
 				$list = $blinfo{$list}{alias} || $list;
 				print "<td>$list</td>";
 			} else {
@@ -1556,7 +1556,7 @@ sub show_categories
 				foreach my $type ('domain', 'url', 'expression') {
 					my $list = $CONFIG{dest}{$k}{else}{$type . 'list'} || '';
 					if ($list) {
-						$list =~ s/\/.*//;
+						$list =~ s/\/.*//o;
 						$list = $blinfo{$list}{alias} || $list;
 						print "<td>$list</td>";
 					} else {
@@ -1709,6 +1709,9 @@ sub show_acl
 
 	my %blinfo = &get_blacklists_description();
 	my @bl = &get_blacklists();
+	my $rex_dnsbl = qr/^dnsbl:/;
+	my $rex_notdnsbl = qr/^\!dnsbl:/;
+	my $rex_bang = qr/^\!/;
 
 	print "<h2>", &translate('ACLs Configuration'), "</h2>\n";
 	print "<input type=\"hidden\" name=\"acl\" value=\"\" />\n";
@@ -1732,15 +1735,15 @@ sub show_acl
 				next;
 			}
 			my $tmp = $s;
-			$tmp =~ s/\!//g;
+			$tmp =~ s/\!//go;
 			if (($tmp eq 'any') || ($tmp eq 'all')) {
 				$tmp = &translate('All Internet');
 			}
 			next if ($tmp eq 'none');
-			if ($tmp =~ /^dnsbl:/) {
+			if ($tmp =~ $rex_dnsbl) {
 				push(@dnsbl, $s);
 			} else {
-				if ($s =~ /^\!/) {
+				if ($s =~ $rex_bang) {
 					$blocked .= ($blinfo{$tmp}{alias} || $tmp) . ", ";
 				} else {
 					$allowed .= ($blinfo{$tmp}{alias} || $tmp) . ", ";
@@ -1761,9 +1764,9 @@ sub show_acl
 			}
 		}
 		foreach my $bl (@dnsbl) {
-			if ($bl =~ s/^\!dnsbl://) {
+			if ($bl =~ s/$rex_notdnsbl//) {
 				$blacklist .= "$bl, ";
-			} elsif ($bl =~ s/^dnsbl://) {
+			} elsif ($bl =~ s/$rex_dnsbl//) {
 				$whitelist .= "$bl, ";
 			}
 		}
@@ -1801,15 +1804,15 @@ sub show_acl
 					next;
 				}
 				my $tmp = $s;
-				$tmp =~ s/\!//g;
+				$tmp =~ s/\!//go;
 				if (($tmp eq 'any') || ($tmp eq 'all')) {
 					$tmp = &translate('All Internet');
 				}
 				next if ($tmp eq 'none');
-				if ($tmp =~ /^dnsbl:/) {
+				if ($tmp =~ $rex_dnsbl) {
 					push(@dnsbl, $s);
 				} else {
-					if ($s =~ /^\!/) {
+					if ($s =~ $rex_bang) {
 						$blocked .= ($blinfo{$tmp}{alias} || $tmp) . ", ";
 					} else {
 						$allowed .= ($blinfo{$tmp}{alias} || $tmp) . ", ";
@@ -1830,9 +1833,9 @@ sub show_acl
 				}
 			}
 			foreach my $bl (@dnsbl) {
-				if ($bl =~ s/^\!dnsbl://) {
+				if ($bl =~ s/$rex_notdnsbl//) {
 					$blacklist .= "$bl, ";
-				} elsif ($bl =~ s/^dnsbl://) {
+				} elsif ($bl =~ s/$rex_dnsbl//) {
 					$whitelist .= "$bl, ";
 				}
 			}
@@ -1869,15 +1872,15 @@ sub show_acl
 			next;
 		}
 		my $tmp = $s;
-		$tmp =~ s/\!//g;
+		$tmp =~ s/\!//go;
 		if (($tmp eq 'any') || ($tmp eq 'all')) {
 			$tmp = &translate('All Internet');
 		}
 		next if ($tmp eq 'none');
-		if ($tmp =~ /^dnsbl:/) {
+		if ($tmp =~ $rex_dnsbl) {
 			push(@dnsbl, $s);
 		} else {
-			if ($s =~ /^\!/) {
+			if ($s =~ $rex_bang) {
 				$blocked .= ($blinfo{$tmp}{alias} || $tmp) . ", ";
 			} else {
 				$allowed .= ($blinfo{$tmp}{alias} || $tmp) . ", ";
@@ -1898,9 +1901,9 @@ sub show_acl
 		}
 	}
 	foreach my $bl (@dnsbl) {
-		if ($bl =~ s/^\!dnsbl://) {
+		if ($bl =~ s/$rex_notdnsbl//) {
 			$blacklist .= "$bl, ";
-		} elsif ($bl =~ s/^dnsbl://) {
+		} elsif ($bl =~ s/$rex_dnsbl//) {
 			$whitelist .= "$bl, ";
 		}
 	}
@@ -1937,15 +1940,15 @@ sub show_acl
 				next;
 			}
 			my $tmp = $s;
-			$tmp =~ s/\!//g;
+			$tmp =~ s/\!//go;
 			if (($tmp eq 'any') || ($tmp eq 'all')) {
 				$tmp = &translate('All Internet');
 			}
 			next if ($tmp eq 'none');
-			if ($tmp =~ /^dnsbl:/) {
+			if ($tmp =~ $rex_dnsbl) {
 				push(@dnsbl, $s);
 			} else {
-				if ($s =~ /^\!/) {
+				if ($s =~ $rex_bang) {
 					$blocked .= ($blinfo{$tmp}{alias} || $tmp) . ", ";
 				} else {
 					$allowed .= ($blinfo{$tmp}{alias} || $tmp) . ", ";
@@ -1966,9 +1969,9 @@ sub show_acl
 			}
 		}
 		foreach my $bl (@dnsbl) {
-			if ($bl =~ s/^\!dnsbl://) {
+			if ($bl =~ s/$rex_notdnsbl//) {
 				$blacklist .= "$bl, ";
-			} elsif ($bl =~ s/^dnsbl://) {
+			} elsif ($bl =~ s/$rex_dnsbl//) {
 				$whitelist .= "$bl, ";
 			}
 		}
@@ -2001,12 +2004,12 @@ sub edit_acls
 	my @BLDNS = split(/[,;\s\t]+/, $DNSBL);
 	foreach my $a (%{$CONFIG{acl}}) {
 		foreach my $d (@{$CONFIG{acl}{$a}{pass}}) {
-			if ($d =~ /^[^:]+:(.*)/) {
+			if ($d =~ /^[^:]+:(.*)/o) {
 				push(@BLDNS, $1) if (!grep(/^$1$/, @BLDNS));
 			}
 		}
 		foreach my $d (@{$CONFIG{acl}{$a}{else}{pass}}) {
-			if ($d =~ /^[^:]+:(.*)/) {
+			if ($d =~ /^[^:]+:(.*)/o) {
 				push(@BLDNS, $1) if (!grep(/^$1$/, @BLDNS));
 			}
 		}
@@ -2252,8 +2255,8 @@ sub dump_config
 	foreach my $t (sort keys %{$CONFIG{time}}) {
 		$config .= "time $t {\n";
 		foreach my $v (@{$CONFIG{time}{$t}{days}}) {
-			$v =~ s/\|/ /;
-			if ($v =~ /^[0-9\*]+\.[0-9\*]+\.[0-9\*]+/) {
+			$v =~ s/\|/ /o;
+			if ($v =~ /^[0-9\*]+\.[0-9\*]+\.[0-9\*]+/o) {
 				$config .= "\tdate $v\n";
 			} else {
 				$config .= "\tweekly $v\n";
@@ -3056,9 +3059,9 @@ sub get_translation
 	if (open(IN, "$basedir/menu.dat")) {
 		while (<IN>) {
 			chomp;
-			s/\r//gs;
-			next if (/^#/ || !$_);
-			my ($key, $val) = split(/\t+/);
+			s/\r//gso;
+			next if (/^#/o || !$_);
+			my ($key, $val) = split(/\t+/o);
 			$translate{$key} = $val;
 		}
 		close(IN);
@@ -3536,11 +3539,11 @@ sub sc_get_configuration
 	}
 	while (my $l = <IN>) {
 		chomp($l);
-		$l =~ s/\#.*//;
-		$l =~ s/^[\s\t]+//;
-		$l =~ s/[\s\t]+$//;
+		$l =~ s/\#.*//o;
+		$l =~ s/^[\s\t]+//o;
+		$l =~ s/[\s\t]+$//o;
 		next if (!$l);
-		my ($key, $val) = split(/[\s\t]+/, $l, 2);
+		my ($key, $val) = split(/[\s\t]+/o, $l, 2);
 		if ( ($key eq 'abort') || ($key eq 'abortcontent') ) {
 			push(@{$infos{$key}}, $val);
 		} elsif ( ($key eq 'whitelist') ) {
@@ -3579,7 +3582,7 @@ sub sc_show_whitelist
 	my $i = 0;
 	for ($i = 0; $i <= $#{$CONFIG{whitelist}}; $i++) {
 		my $old = $CONFIG{whitelist}[$i];
-		$old =~ s/\\/\\\\/g;
+		$old =~ s/\\/\\\\/go;
 		print "<tr><td><input type=\"text\" size=\"60\" name=\"whitelist$i\" value=\"$CONFIG{whitelist}[$i]\"/></td><th><a href=\"\" onclick=\"document.forms[0].oldvalue.value='", &encode_url($old), "'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Remove'), "\">$IMG_REMOVE</a></th></tr>";
 	}
 	print "<tr><td align=\"left\">", &translate('List of domain or host to add'), "</td><th>&nbsp;</th></tr>";
@@ -3610,7 +3613,7 @@ sub sc_show_trustuser
 	my $i = 0;
 	for ($i = 0; $i <= $#{$CONFIG{trustuser}}; $i++) {
 		my $old = $CONFIG{trustuser}[$i];
-		$old =~ s/\\/\\\\/g;
+		$old =~ s/\\/\\\\/go;
 		print "<tr><td><input type=\"text\" size=\"60\" name=\"trustuser$i\" value=\"$CONFIG{trustuser}[$i]\"/></td><th><a href=\"\" onclick=\"document.forms[0].oldvalue.value='", &encode_url($old), "'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Remove'), "\">$IMG_REMOVE</a></th></tr>";
 	}
 	print "<tr><td align=\"left\">", &translate('List of user to add'), "</td><th>&nbsp;</th></tr>";
@@ -3634,7 +3637,7 @@ sub sc_show_trustclient
 	my $i = 0;
 	for ($i = 0; $i <= $#{$CONFIG{trustclient}}; $i++) {
 		my $old = $CONFIG{trustclient}[$i];
-		$old =~ s/\\/\\\\/g;
+		$old =~ s/\\/\\\\/go;
 		print "<tr><td><input type=\"text\" size=\"60\" name=\"trustclient$i\" value=\"$CONFIG{trustclient}[$i]\"/></td><th><a href=\"\" onclick=\"document.forms[0].oldvalue.value='", &encode_url($old), "'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Remove'), "\">$IMG_REMOVE</a></th></tr>";
 	}
 	print "<tr><td align=\"left\">", &translate('List of clients to add'), "</td><th>&nbsp;</th></tr>";
@@ -3659,7 +3662,7 @@ sub sc_show_abort
 	my $i = 0;
 	for ($i = 0; $i <= $#{$CONFIG{abort}}; $i++) {
 		my $old = $CONFIG{abort}[$i];
-		$old =~ s/\\/\\\\/g;
+		$old =~ s/\\/\\\\/go;
 		print "<tr><td><input type=\"text\" size=\"60\" name=\"abort$i\" value=\"$CONFIG{abort}[$i]\"/></td><th><a href=\"\" onclick=\"document.forms[0].oldvalue.value='", &encode_url($old), "'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Remove'), "\">$IMG_REMOVE</a></th></tr>";
 		$found++;
 	}
@@ -3668,7 +3671,7 @@ sub sc_show_abort
 	print "<tr><td colspan=\"2\">", &translate('Disable scan following regex in Content-Type'), "</th></tr>\n";
 	for ($i = 0; $i <= $#{$CONFIG{abortcontent}}; $i++) {
 		my $old = $CONFIG{abortcontent}[$i];
-		$old =~ s/\\/\\\\/g;
+		$old =~ s/\\/\\\\/go;
 		print "<tr><td><input type=\"text\" size=\"60\" name=\"abortcontent$i\" value=\"$CONFIG{abortcontent}[$i]\"/></td><th><a href=\"\" onclick=\"document.forms[0].oldvalue.value='", &encode_url($old), "'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Remove'), "\">$IMG_REMOVE</a></th></tr>";
 		$found++;
 	}
@@ -3706,14 +3709,14 @@ sub sc_apply_change
 		delete $CONFIG{'abort'};
 		delete $CONFIG{'abortcontent'};
 		foreach my $p ($CGI->param()) {
-			next if ($p !~ /^abort/);
+			next if ($p !~ /^abort/o);
 			my $val = $CGI->param($p) || '';
 			next if (!$val);
 			my $tmp = $val;
 			$tmp =~ s/([^\\])\\/$1\\\\/g;
 			next if ($OLD && ($tmp eq $OLD));
-			push(@{$CONFIG{'abort'}}, $val) if ($p =~ /^abort\d+$/);
-			push(@{$CONFIG{'abortcontent'}}, $val) if ($p =~ /^abortcontent\d+$/);
+			push(@{$CONFIG{'abort'}}, $val) if ($p =~ /^abort\d+$/o);
+			push(@{$CONFIG{'abortcontent'}}, $val) if ($p =~ /^abortcontent\d+$/o);
 			map { s/([^\\])\//$1\\\//g } @{$CONFIG{'abort'}};
 			map { s/([^\\])\//$1\\\//g } @{$CONFIG{'abortcontent'}};
 		}
@@ -3723,11 +3726,11 @@ sub sc_apply_change
 	if ($VIEW eq 'whitelists') {
 		delete $CONFIG{'whitelist'};
 		foreach my $p ($CGI->param()) {
-			next if ($p !~ /^whitelist/);
+			next if ($p !~ /^whitelist/o);
 			my $tmp = $CGI->param($p);
 			$tmp =~ s/([^\\])\\/$1\\\\/g;
 			next if ($OLD && ($OLD eq $tmp));
-			push(@{$CONFIG{'whitelist'}}, $CGI->param($p)) if ($p =~ /^whitelist\d+$/);
+			push(@{$CONFIG{'whitelist'}}, $CGI->param($p)) if ($p =~ /^whitelist\d+$/o);
 			map { s/([^\\])\//$1\\\//g } @{$CONFIG{'whitelist'}};
 		}
 	}
@@ -3748,11 +3751,11 @@ sub sc_apply_change
 	if ($VIEW eq 'trustclients') {
 		delete $CONFIG{'trustclient'};
 		foreach my $p ($CGI->param()) {
-			next if ($p !~ /^trustclient/);
+			next if ($p !~ /^trustclient/o);
 			my $tmp = $CGI->param($p);
 			$tmp =~ s/([^\\])\\/$1\\\\/g;
 			next if ($OLD && ($OLD eq $tmp));
-			push(@{$CONFIG{'trustclient'}}, $CGI->param($p)) if ($p =~ /^trustclient\d+$/);
+			push(@{$CONFIG{'trustclient'}}, $CGI->param($p)) if ($p =~ /^trustclient\d+$/o);
 		}
 	}
 
@@ -3834,10 +3837,10 @@ sub read_sgm_config
 	} else {
 		while (my $l = <IN>) {
 			chomp($l);
-			$l =~ s/\r//gs;
-			$l =~ s/[\s\t]*\#.*//;
+			$l =~ s/\r//gso;
+			$l =~ s/[\s\t]*\#.*//o;
 			next if (!$l);
-			my ($key, $val) = split(/[\s\t]+/, $l, 2);
+			my ($key, $val) = split(/[\s\t]+/o, $l, 2);
 			$key = uc($key);
 			${$key} = $val if ($val);
 		}
@@ -3928,7 +3931,7 @@ sub acl_in_use
 	my $found = 0;
 
 	foreach my $d (keys %{$CONFIG{dest}}) {
-		if (grep(/^$blname\/(domains|expressions|urls)$/, $CONFIG{dest}{$d}{'domainlist'},
+		if (grep(/^$blname\/(domains|expressions|urls)$/o, $CONFIG{dest}{$d}{'domainlist'},
 				$CONFIG{dest}{$d}{else}{'domainlist'},
 				$CONFIG{dest}{$d}{'expressionlist'},
 				$CONFIG{dest}{$d}{else}{'expressionlist'},
