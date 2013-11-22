@@ -95,7 +95,7 @@ my %abbrday = (
 
 use CGI;
 
-my %CONFIG = ();
+my $CONFIG = {};
 
 my $SG_VER       = '';
 my $ERROR        = '';
@@ -146,7 +146,7 @@ if ($ACTION eq 'squidclamav') {
 	}
 
 	# Read configuration from file squidclamav.conf
-	%CONFIG = &sc_get_configuration() if (-e $SC_CONF_FILE);
+	&sc_get_configuration() if (-e $SC_CONF_FILE);
 
 	if ($VIEW eq 'showlog') {
 		&show_filecontent($PATH, 1);
@@ -197,11 +197,12 @@ if ($ACTION eq 'squidclamav') {
 	if ($APPLY) {
 		&sc_apply_change();
 		&sc_save_config();
+		%{$CONFIG} = ();
 	}
 
 
 	# Read configuration from file squidclamav.conf
-	%CONFIG = &sc_get_configuration();
+	&sc_get_configuration();
 	if ($VIEW eq 'globals') {
 		&sc_show_globals();
 	} elsif ($VIEW eq 'whitelists') {
@@ -242,7 +243,7 @@ if (! -e $CONF_FILE) {
 }
 
 # Read configuration from file squidGuard.conf
-%CONFIG = &get_configuration();
+&get_configuration();
 
 if ($ACTION eq 'viewlist') {
 	&show_listcontent($PATH);
@@ -278,6 +279,8 @@ if ($ACTION eq 'squid') {
 
 if ($ACTION eq 'autocreate') {
 	&autocreate_filters();
+	%{$CONFIG} = ();
+	&get_configuration();
 }
 
 if ($BL && ($ACTION eq 'search') ) {
@@ -294,9 +297,9 @@ if ($BL && ($ACTION eq 'search') ) {
 }
 
 if ($BL && ($ACTION eq 'bldelete') ) {
-	if (-d "$CONFIG{dbhome}/$BL") {
+	if (-d "$CONFIG->{dbhome}/$BL") {
 		$BL =~ s/[^a-z0-9\_\-]+//ig;
-		`$RM -rf "$CONFIG{dbhome}/$BL"` if ($CONFIG{dbhome} && $BL);
+		`$RM -rf "$CONFIG->{dbhome}/$BL"` if ($CONFIG->{dbhome} && $BL);
 	}
 	$ACTION = 'blacklists';
 	$BL = '';
@@ -322,11 +325,14 @@ if ($APPLY && ($ACTION eq 'bledit') ) {
 		umask($BLUMASK);
 		&save_blacklist();
 	}
+	%{$CONFIG} = ();
+	&get_configuration();
 } elsif ($APPLY) {
 	&apply_change();
 	&save_config();
 	# Reread configuration from file
-	%CONFIG = &get_configuration();
+	%{$CONFIG} = ();
+	&get_configuration();
 }
 
 
@@ -418,7 +424,6 @@ sub normalize_configfile
 
 sub get_configuration
 {
-	my %infos = ();
 
 	# First normalize file for better parsing
 	return if (!&normalize_configfile());
@@ -497,7 +502,7 @@ sub get_configuration
 		}
 		if ($enter_acl && ($l =~ /^([^\s\t]+)[\s\t]+(outside|within)[\s\t]+([^\s\t]+)[\s\t]+\{/o) ) {
 			$cur_acl = $1;
-			$infos{acl}{$cur_acl}{'extended'}{$2} = $3;
+			$CONFIG->{acl}{$cur_acl}{'extended'}{$2} = $3
 		} elsif ($enter_acl && ($l =~ /^([^\s\t]+)[\s\t]+\{/o) ) {
 			$cur_acl = $1;
 		}
@@ -511,15 +516,15 @@ sub get_configuration
 
 		# parse global definition
 		if (grep(/^\Q$k\E$/, @GLOBALVAR)) {
-			$infos{$k} = $v;
+			$CONFIG->{$k} = $v;
 			next;
 		}
 		# Parse categories defintions
 		if ($cur_dest) {
 			if (!$dest_else) {
-				$infos{dest}{$cur_dest}{$k} = $v;
+				$CONFIG->{dest}{$cur_dest}{$k} = $v;
 			} else {
-				$infos{dest}{$cur_dest}{else}{$k} = $v;
+				$CONFIG->{dest}{$cur_dest}{else}{$k} = $v;
 			}
 			next;
 		}
@@ -527,17 +532,17 @@ sub get_configuration
 		if ($cur_rew) {
 			if ($k eq 'log') {
 				if (!$rew_else) {
-					$infos{rew}{$cur_rew}{$k} = $v;
+					$CONFIG->{rew}{$cur_rew}{$k} = $v;
 				} else {
-					$infos{rew}{$cur_rew}{else}{$k} = $v;
+					$CONFIG->{rew}{$cur_rew}{else}{$k} = $v;
 				}
 			} elsif ($k =~ /(within|outside)/o) {
-				$infos{rew}{$cur_rew}{$k} = $v;
+				$CONFIG->{rew}{$cur_rew}{$k} = $v;
 			} else {
 				if (!$rew_else) {
-					push(@{$infos{rew}{$cur_rew}{rewrite}}, $k);
+					push(@{$CONFIG->{rew}{$cur_rew}{rewrite}}, $k);
 				} else {
-					push(@{$infos{rew}{$cur_rew}{else}{rewrite}}, $k);
+					push(@{$CONFIG->{rew}{$cur_rew}{else}{rewrite}}, $k);
 				}
 			}
 			next;
@@ -545,16 +550,16 @@ sub get_configuration
 		# Parse source definitions
 		if ($cur_src && grep(/^$k$/, @SRC_KEYWORD)) {
 			if (!$src_else) {
-				push(@{$infos{src}{$cur_src}{$k}}, $v);
+				push(@{$CONFIG->{src}{$cur_src}{$k}}, $v);
 			} else {
-				push(@{$infos{src}{$cur_src}{else}{$k}}, $v);
+				push(@{$CONFIG->{src}{$cur_src}{else}{$k}}, $v);
 			}
 			next;
 		} elsif ($cur_src) {
 			if (!$src_else) {
-				$infos{src}{$cur_src}{$k} = $v;
+				$CONFIG->{src}{$cur_src}{$k} = $v;
 			} else {
-				$infos{src}{$cur_src}{else}{$k} = $v;
+				$CONFIG->{src}{$cur_src}{else}{$k} = $v;
 			}
 			next;
 		}
@@ -581,35 +586,35 @@ sub get_configuration
 			} elsif ($k eq 'date') {
 				$days = join(' ', @datas);
 			}
-			push(@{$infos{time}{$cur_time}{days}}, "$days|$hours");
+			push(@{$CONFIG->{time}{$cur_time}{days}}, "$days|$hours");
 		}
 		# Parse ACL definitions
 		if ($cur_acl) {
 			if (!$acl_else) {
 				if ($l =~ /^pass[\s\t]+(.*)/o) {
-					push(@{$infos{acl}{$cur_acl}{'pass'}}, split(/[\s\t]+/o, $1));
+					push(@{$CONFIG->{acl}{$cur_acl}{'pass'}}, split(/[\s\t]+/o, $1));
 				}
 				if ($l =~ /^redirect[\s\t]+(.*)/o) {
-					$infos{acl}{$cur_acl}{'redirect'} = $1;
+					$CONFIG->{acl}{$cur_acl}{'redirect'} = $1;
 				}
 				if ($l =~ /^(rew|rewrite)[\s\t]+(.*)/o) {
-					push(@{$infos{acl}{$cur_acl}{'rewrite'}}, $2);
+					push(@{$CONFIG->{acl}{$cur_acl}{'rewrite'}}, $2);
 				}
 				if ($l =~ /^log[\s\t]+(.*)/o) {
-					$infos{acl}{$cur_acl}{'log'} = $1;
+					$CONFIG->{acl}{$cur_acl}{'log'} = $1;
 				}
 			} else {
 				if ($l =~ /^pass[\s\t]+(.*)/o) {
-					push(@{$infos{acl}{$cur_acl}{else}{'pass'}}, split(/[\s\t]+/, $1));
+					push(@{$CONFIG->{acl}{$cur_acl}{else}{'pass'}}, split(/[\s\t]+/, $1));
 				}
 				if ($l =~ /^redirect[\s\t]+(.*)/o) {
-					$infos{acl}{$cur_acl}{else}{'redirect'} = $1;
+					$CONFIG->{acl}{$cur_acl}{else}{'redirect'} = $1;
 				}
 				if ($l =~ /^rewrite[\s\t]+(.*)/o) {
-					push(@{$infos{acl}{$cur_acl}{else}{'rewrite'}}, $1);
+					push(@{$CONFIG->{acl}{$cur_acl}{else}{'rewrite'}}, $1);
 				}
 				if ($l =~ /^log[\s\t]+(.*)/o) {
-					$infos{acl}{$cur_acl}{else}{'log'} = $1;
+					$CONFIG->{acl}{$cur_acl}{else}{'log'} = $1;
 				}
 			}
 		}
@@ -617,10 +622,8 @@ sub get_configuration
 	close(IN);
 
 	# Set default values
-	$infos{logdir} = $LOGDIR if (!exists $infos{logdir});
-	$infos{dbhome} = $DBHOME if (!exists $infos{dbhome});
-
-	return %infos;
+	$CONFIG->{logdir} = $LOGDIR if (!exists $CONFIG->{logdir});
+	$CONFIG->{dbhome} = $DBHOME if (!exists $CONFIG->{dbhome});
 
 }
 
@@ -683,11 +686,11 @@ sub get_blacklists
 	my $ldir = shift;
 
 	$ldir = '/' . $ldir if ($ldir);
-	if (not opendir(DIR, "$CONFIG{dbhome}$ldir")) {
-		$ERROR = "Can't open blacklist directory $CONFIG{dbhome}$ldir: $!\n";
+	if (not opendir(DIR, "$CONFIG->{dbhome}$ldir")) {
+		$ERROR = "Can't open blacklist directory $CONFIG->{dbhome}$ldir: $!\n";
 		return;
 	}
-	my @dirs = grep { !/^\..*$/ && -d "$CONFIG{dbhome}$ldir/$_" && !-l "$CONFIG{dbhome}$ldir/$_" } readdir(DIR);
+	my @dirs = grep { !/^\..*$/ && -d "$CONFIG->{dbhome}$ldir/$_" && !-l "$CONFIG->{dbhome}$ldir/$_" } readdir(DIR);
 	closedir(DIR);
 	# search for subdirectories
 	foreach my $d (@dirs) {
@@ -702,19 +705,16 @@ sub get_blacklists
 sub get_blacklists_description
 {
 
-	my %infos = ();
-
 	if (open(IN, "$LANGDIR/$LANG/$BLDESC")) {
 		while (<IN>) {
 			chomp;
 			my ($k, $a, $v) = split(/\t+/o);
-			$infos{$k}{alias} = $a if ($v);
-			$infos{$k}{description} = $v || $a;
+			$CONFIG->{$k}{alias} = $a if ($v);
+			$CONFIG->{$k}{description} = $v || $a;
 		}
 		close(IN);
 	}
 
-	return %infos;
 }
 
 sub show_blacklists
@@ -753,22 +753,22 @@ sub show_globals
 	print "<table align=\"center\" width=\"100%\"><tr><td>\n";
 	print "<table align=\"center\">\n";
 	print "<tr><td align=\"left\" colspan=\"2\"><b>", &translate('Mandatory parameters'), "</b></td></tr>\n";
-	print "<tr><th align=\"left\">", &translate('Log directory'), "</th><th align=\"left\"><input type=\"text\" size=\"40\" name=\"logdir\" value=\"$CONFIG{logdir}\"/></th></tr>\n";
-	print "<tr><th align=\"left\">", &translate('Databases home'), "</th><th align=\"left\"><input type=\"text\" size=\"40\" name=\"dbhome\" value=\"$CONFIG{dbhome}\"/></th></tr>\n";
+	print "<tr><th align=\"left\">", &translate('Log directory'), "</th><th align=\"left\"><input type=\"text\" size=\"40\" name=\"logdir\" value=\"$CONFIG->{logdir}\"/></th></tr>\n";
+	print "<tr><th align=\"left\">", &translate('Databases home'), "</th><th align=\"left\"><input type=\"text\" size=\"40\" name=\"dbhome\" value=\"$CONFIG->{dbhome}\"/></th></tr>\n";
 	print "<tr><th colspan=\"2\"><hr></th></tr>\n";
 	if ($SG_VER >= 1.4) {
 		print "<tr><td align=\"left\" colspan=\"2\"><b>", &translate('Retrieving users from MySQL'), "</b></td></tr>\n";
-		print "<tr><th align=\"left\">", &translate('MySQL Database'), "</th><th align=\"left\"><input type=\"text\" size=\"40\" name=\"mysqldb\" value=\"$CONFIG{mysqldb}\"/></th></tr>\n";
-		print "<tr><th align=\"left\">", &translate('MySQL Username'), "</th><th align=\"left\"><input type=\"text\" size=\"40\" name=\"mysqlusername\" value=\"$CONFIG{mysqlusername}\"/></th></tr>\n";
-		print "<tr><th align=\"left\">", &translate('MySQL Password'), "</th><th align=\"left\"><input type=\"text\" size=\"40\" name=\"mysqlpassword\" value=\"$CONFIG{mysqlpassword}\"/></th></tr>\n";
+		print "<tr><th align=\"left\">", &translate('MySQL Database'), "</th><th align=\"left\"><input type=\"text\" size=\"40\" name=\"mysqldb\" value=\"$CONFIG->{mysqldb}\"/></th></tr>\n";
+		print "<tr><th align=\"left\">", &translate('MySQL Username'), "</th><th align=\"left\"><input type=\"text\" size=\"40\" name=\"mysqlusername\" value=\"$CONFIG->{mysqlusername}\"/></th></tr>\n";
+		print "<tr><th align=\"left\">", &translate('MySQL Password'), "</th><th align=\"left\"><input type=\"text\" size=\"40\" name=\"mysqlpassword\" value=\"$CONFIG->{mysqlpassword}\"/></th></tr>\n";
 		print "<tr><th colspan=\"2\"><hr></th></tr>\n";
 	}
 	if ($SG_VER >= 1.5) {
 		print "<tr><td align=\"left\" colspan=\"2\"><b>", &translate('Retrieving users from LDAP'), "</b></td></tr>\n";
-		print "<tr><th align=\"left\">", &translate('LDAP Bind dn'), "</th><th align=\"left\"><input type=\"text\" size=\"40\" name=\"ldapbinddn\" value=\"$CONFIG{ldapbinddn}\"/></th></tr>\n";
-		print "<tr><th align=\"left\">", &translate('LDAP Password'), "</th><th align=\"left\"><input type=\"text\" size=\"40\" name=\"ldapbindpass\" value=\"$CONFIG{ldapbindpass}\"/></th></tr>\n";
-		print "<tr><th align=\"left\">", &translate('LDAP Protocol (2 or 3)'), "</th><th align=\"left\"><input type=\"text\" size=\"40\" name=\"ldapprotover\" value=\"$CONFIG{ldapprotover}\"/></th></tr>\n";
-		print "<tr><th align=\"left\">", &translate('LDAP Cache time'), "</th><th align=\"left\"><input type=\"text\" size=\"40\" name=\"ldapcachetime\" value=\"$CONFIG{ldapcachetime}\"/></th></tr>\n";
+		print "<tr><th align=\"left\">", &translate('LDAP Bind dn'), "</th><th align=\"left\"><input type=\"text\" size=\"40\" name=\"ldapbinddn\" value=\"$CONFIG->{ldapbinddn}\"/></th></tr>\n";
+		print "<tr><th align=\"left\">", &translate('LDAP Password'), "</th><th align=\"left\"><input type=\"text\" size=\"40\" name=\"ldapbindpass\" value=\"$CONFIG->{ldapbindpass}\"/></th></tr>\n";
+		print "<tr><th align=\"left\">", &translate('LDAP Protocol (2 or 3)'), "</th><th align=\"left\"><input type=\"text\" size=\"40\" name=\"ldapprotover\" value=\"$CONFIG->{ldapprotover}\"/></th></tr>\n";
+		print "<tr><th align=\"left\">", &translate('LDAP Cache time'), "</th><th align=\"left\"><input type=\"text\" size=\"40\" name=\"ldapcachetime\" value=\"$CONFIG->{ldapcachetime}\"/></th></tr>\n";
 		print "<tr><th colspan=\"2\"><hr></th></tr>\n";
 	}
 	print "<tr><th colspan=\"2\" align=\"right\"><input type=\"button\" name=\"save\" value=\"", &translate('Apply change'), "\" onclick=\"document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\"></th></tr>\n";
@@ -823,25 +823,25 @@ sub save_blacklist
 	$domains =~ s/\r//gs;
 	if ($domains) {
 		if ($action eq 'add') {
-			&add_item("$CONFIG{dbhome}/$bl/domains", split(/[\s\n]+/s, $domains) );
+			&add_item("$CONFIG->{dbhome}/$bl/domains", split(/[\s\n]+/s, $domains) );
 		} elsif ($action eq 'remove') {
-			&remove_item("$CONFIG{dbhome}/$bl/domains", split(/[\s\n]+/s, $domains) );
+			&remove_item("$CONFIG->{dbhome}/$bl/domains", split(/[\s\n]+/s, $domains) );
 		}
 	}
 	$urls =~ s/\r//gs;
 	if ($urls) {
 		if ($action eq 'add') {
-			&add_item("$CONFIG{dbhome}/$bl/urls", split(/[\s\n]+/s, $urls) );
+			&add_item("$CONFIG->{dbhome}/$bl/urls", split(/[\s\n]+/s, $urls) );
 		} elsif ($action eq 'remove') {
-			&remove_item("$CONFIG{dbhome}/$bl/urls", split(/[\s\n]+/s, $urls) );
+			&remove_item("$CONFIG->{dbhome}/$bl/urls", split(/[\s\n]+/s, $urls) );
 		}
 	}
 	$expressions =~ s/\r//gs;
 	if ($expressions) {
 		if ($action eq 'add') {
-			&add_item("$CONFIG{dbhome}/$bl/expressions", split(/[\s\n]+/s, $expressions) );
+			&add_item("$CONFIG->{dbhome}/$bl/expressions", split(/[\s\n]+/s, $expressions) );
 		} elsif ($action eq 'remove') {
-			&remove_item("$CONFIG{dbhome}/$bl/expressions", split(/[\s\n]+/s, $expressions) );
+			&remove_item("$CONFIG->{dbhome}/$bl/expressions", split(/[\s\n]+/s, $expressions) );
 		}
 	}
 }
@@ -898,7 +898,7 @@ sub add_item
 			&error("Can't open $file.tmpdiff for writing: $!<br>");
 		}
 	} else {
-		$file =~ s#$CONFIG{dbhome}/##;
+		$file =~ s#$CONFIG->{dbhome}/##;
 		&rebuild_database($file);
 	}
 }
@@ -963,7 +963,7 @@ sub remove_item
 				&error("Can't open $file.tmpdiff for writing: $!");
 			}
 		} else {
-			$file =~ s#$CONFIG{dbhome}/##;
+			$file =~ s#$CONFIG->{dbhome}/##;
 			&rebuild_database($file);
 		}
 	} else {
@@ -1019,22 +1019,22 @@ sub show_times
 	print "<table align=\"center\" width=\"80%\">\n";
 	print "<tr><th align=\"left\">", &translate('Rule name'), "</th><th align=\"left\">", &translate('Start time'), "</th><th align=\"left\">", &translate('End time'), "</th><th align=\"left\">", &translate('Days'), "</th><th colspan=\"2\">", &translate('Action'), "</th></tr>\n";
 	print "<tr><td style=\"border: none;\" colspan=\"6\"><hr></td></tr>\n";
-	foreach my $k (sort keys %{$CONFIG{time}}) {
+	foreach my $k (sort keys %{$CONFIG->{time}}) {
 		# Do not activate Delete if this rule is in used
 		my $delete = 1;
-		foreach my $z (keys %{$CONFIG{src}}) {
-			foreach my $e (keys %{$CONFIG{src}{$z}}) {
-				if ($CONFIG{src}{$z}{$e} eq $k) {
+		foreach my $z (keys %{$CONFIG->{src}}) {
+			foreach my $e (keys %{$CONFIG->{src}{$z}}) {
+				if ($CONFIG->{src}{$z}{$e} eq $k) {
 					$delete = 0;
 					last;
 				}
 			}
 			last if (!$delete);
 		}
-		foreach my $z (keys %{$CONFIG{acl}}) {
+		foreach my $z (keys %{$CONFIG->{acl}}) {
 			last if (!$delete);
-			foreach my $e (keys %{$CONFIG{acl}{$z}{extended}}) {
-				if ($CONFIG{acl}{$z}{extended}{$e} eq $k) {
+			foreach my $e (keys %{$CONFIG->{acl}{$z}{extended}}) {
+				if ($CONFIG->{acl}{$z}{extended}{$e} eq $k) {
 					$delete = 0;
 					last;
 				}
@@ -1049,7 +1049,7 @@ sub show_times
 			print "<th title=\"", &translate('Still in use'), "\">$IMG_NOREMOVE</th>";
 		}
 		print "</tr>\n";
-		foreach my $val (@{$CONFIG{time}{$k}{days}}) {
+		foreach my $val (@{$CONFIG->{time}{$k}{days}}) {
 			my ($days, $hours) = split(/\|/o, $val);
 			my ($start,$end) = split(/\-/o, $hours);
 			my $show_days = '';
@@ -1176,10 +1176,10 @@ sub show_rewrites
 	print "<table align=\"center\" width=\"80%\">\n";
 	print "<tr><th align=\"left\">", &translate('Rule name'), "</th><th align=\"left\">", &translate('Pattern matching'), "</th><th align=\"left\">", &translate('Substitution'), "</th><th>", &translate('Rewrite options'), "</th><th colspan=\"2\">", &translate('Action'), "</th></tr>\n";
 	print "<tr><td style=\"border: none;\" colspan=\"6\"><hr></td></tr>\n";
-	foreach my $k (sort keys %{$CONFIG{rew}}) {
+	foreach my $k (sort keys %{$CONFIG->{rew}}) {
 		my $delete = 1;
-		foreach my $z (keys %{$CONFIG{acl}}) {
-			foreach my $e (@{$CONFIG{acl}{$z}{rewrite}}) {
+		foreach my $z (keys %{$CONFIG->{acl}}) {
+			foreach my $e (@{$CONFIG->{acl}{$z}{rewrite}}) {
 				if ($e eq $k) {
 					$delete = 0;
 					last;
@@ -1194,7 +1194,7 @@ sub show_rewrites
 			print "<th title=\"", &translate('Still in use'), "\">$IMG_NOREMOVE</th>\n";
 		}
 		print "</tr>\n";
-		foreach my $val (@{$CONFIG{rew}{$k}{rewrite}}) {
+		foreach my $val (@{$CONFIG->{rew}{$k}{rewrite}}) {
 			my ($null, $pattern, $substitute, $opt) = split(/\@/o, $val);
 			my $options = '';
 			$options = &translate('Insensitive') if ($opt =~ /i/o);
@@ -1208,10 +1208,10 @@ sub show_rewrites
 		}
 		&show_log_schedule('rew', 'rewrite', $k, 3);
 
-		if ($CONFIG{rew}{$k}{outside} || $CONFIG{rew}{$k}{within}) {
+		if ($CONFIG->{rew}{$k}{outside} || $CONFIG->{rew}{$k}{within}) {
 			print "<tr><th>", &translate('if schedule not match'), "</th><th colspan=\"3\">&nbsp;</th><th><a href=\"\" onclick=\"document.forms[0].rewrite.value='$k-else'; document.forms[0].action.value='rewritesedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Add an element'), "\">$IMG_ADD</a></th>";
 			print "<th><a href=\"\" onclick=\"document.forms[0].rewrite.value='$k-else'; document.forms[0].action.value='rewritesdelete'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Remove all'), "\">$IMG_REMOVE</a></th></tr>\n";
-			foreach my $val (@{$CONFIG{rew}{$k}{else}{rewrite}}) {
+			foreach my $val (@{$CONFIG->{rew}{$k}{else}{rewrite}}) {
 				my ($null, $pattern, $substitute, $opt) = split(/\@/o, $val);
 				my $options = '';
 				$options = &translate('Insensitive') if ($opt =~ /i/o);
@@ -1223,7 +1223,7 @@ sub show_rewrites
 				print "<th><a href=\"\" onclick=\"document.forms[0].rewrite.value='$k-else'; document.forms[0].oldvalue.value='", &encode_url($val), "'; document.forms[0].action.value='rewritesdelete'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Delete'), "\">$IMG_DELETE</a></th>";
  				print "</tr>\n";
 			}
-			my $v = $CONFIG{rew}{$k}{else}{log} || '';
+			my $v = $CONFIG->{rew}{$k}{else}{log} || '';
 			my $anon = '';
 			if ($v =~ s/anonymous[\s\t]+(.*)/$1/) {
 				$anon = "(" . &translate('anonymized') . ")";
@@ -1234,8 +1234,8 @@ sub show_rewrites
 				print "<tr><th>&nbsp;</th><td colspan=\"3\"><b>", &translate('No log file'), "</b>";
 			}
 			print "$v $anon";
-			print "</td><th><a href=\"\" onclick=\"document.forms[0].rewrite.value='$k-else'; document.forms[0].oldvalue.value='", &encode_url("log $CONFIG{rew}{$k}{else}{log}"), "'; document.forms[0].action.value='rewritesedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Edit'), "\">$IMG_EDIT</a></th>";
-			print "<th><a href=\"\" onclick=\"document.forms[0].rewrite.value='$k-else'; document.forms[0].oldvalue.value='", &encode_url("log $CONFIG{rew}{$k}{else}{log}"), "'; document.forms[0].action.value='rewritesdelete'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Delete'), "\">$IMG_DELETE</a></th>";
+			print "</td><th><a href=\"\" onclick=\"document.forms[0].rewrite.value='$k-else'; document.forms[0].oldvalue.value='", &encode_url("log $CONFIG->{rew}{$k}{else}{log}"), "'; document.forms[0].action.value='rewritesedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Edit'), "\">$IMG_EDIT</a></th>";
+			print "<th><a href=\"\" onclick=\"document.forms[0].rewrite.value='$k-else'; document.forms[0].oldvalue.value='", &encode_url("log $CONFIG->{rew}{$k}{else}{log}"), "'; document.forms[0].action.value='rewritesdelete'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Delete'), "\">$IMG_DELETE</a></th>";
 			print "</tr>\n";
 		}
 		print "<tr><td style=\"border: none;\" colspan=\"6\"><hr></td></tr>\n";
@@ -1286,7 +1286,7 @@ sub edit_rewrites
 		print "<input type=\"hidden\" name=\"srctype\" value=\"time\" />\n";
 		print "<select name=\"srcval\">\n";
 		print "<option value=\"\">", &translate('All the time'), "</option>\n";
-		foreach my $k (sort keys %{$CONFIG{time}}) {
+		foreach my $k (sort keys %{$CONFIG->{time}}) {
 			foreach my $t ('within', 'outside') {
 				my $sel = '';
 				$sel = 'selected="1" ' if ($val eq "$t $k");
@@ -1340,9 +1340,9 @@ sub show_sources
 	print "<table align=\"center\" width=\"80%\">\n";
 	print "<tr><th align=\"left\">", &translate('Rule name'), "</th><th>&nbsp;</th><th colspan=\"2\">", &translate('Action'), "</th></tr>\n";
 	print "<tr><td style=\"border: none;\" colspan=\"4\"><hr></td></tr>\n";
-	foreach my $k (sort keys %{$CONFIG{src}}) {
+	foreach my $k (sort keys %{$CONFIG->{src}}) {
 		my $delete = 1;
-		foreach my $z (keys %{$CONFIG{acl}}) {
+		foreach my $z (keys %{$CONFIG->{acl}}) {
 			if ($z eq $k) {
 				$delete = 0;
 				last;
@@ -1355,9 +1355,9 @@ sub show_sources
 			print "<th title=\"", &translate('Still in use'), "\">$IMG_NOREMOVE</th>";
 		}
 		print "\n";
-		foreach my $key (sort keys %{$CONFIG{src}{$k}}) {
+		foreach my $key (sort keys %{$CONFIG->{src}{$k}}) {
 			next if (!grep(/^$key$/, @SRC_KEYWORD));
-			foreach (@{$CONFIG{src}{$k}{$key}}) {
+			foreach (@{$CONFIG->{src}{$k}{$key}}) {
 				print "<tr><th>&nbsp;</th><td><b>", &translate($SRC_ALIAS{$key}), "</b>: ", &show_editor($key, $_), "</td><th><a href=\"\" onclick=\"document.forms[0].source.value='$k'; document.forms[0].oldvalue.value='", &encode_url("$key $_"), "'; document.forms[0].action.value='sourcesedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Edit'), "\">$IMG_EDIT</a></th>";
 				print "<th><a href=\"\" onclick=\"document.forms[0].source.value='$k'; document.forms[0].oldvalue.value='", &encode_url("$key $_"), "'; document.forms[0].action.value='sourcesdelete'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Delete'), "\">$IMG_DELETE</a></th>";
 				print "</tr>\n";
@@ -1365,18 +1365,18 @@ sub show_sources
 		}
 		&show_log_schedule('src', 'source', $k, 0);
 
-		if ($CONFIG{src}{$k}{outside} || $CONFIG{src}{$k}{within}) {
+		if ($CONFIG->{src}{$k}{outside} || $CONFIG->{src}{$k}{within}) {
 			print "<tr><th>", &translate('if schedule not match'), "</th><th>&nbsp;</th><th><a href=\"\" onclick=\"document.forms[0].source.value='$k-else'; document.forms[0].action.value='sourcesedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Add an element'), "\">$IMG_ADD</a></th>";
 			print "<th><a href=\"\" onclick=\"document.forms[0].source.value='$k-else'; document.forms[0].action.value='sourcesdelete'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Remove all'), "\">$IMG_REMOVE</a></th></tr>\n";
-			foreach my $key (sort keys %{$CONFIG{src}{$k}{else}}) {
+			foreach my $key (sort keys %{$CONFIG->{src}{$k}{else}}) {
 				next if (!grep(/^$key$/, @SRC_KEYWORD));
-				foreach (@{$CONFIG{src}{$k}{else}{$key}}) {
+				foreach (@{$CONFIG->{src}{$k}{else}{$key}}) {
 					print "<tr><th>&nbsp;</th><td><b>", &translate($SRC_ALIAS{$key}), "</b>: ", &show_editor($key, $_), "</td><th><a href=\"\" onclick=\"document.forms[0].source.value='$k-else'; document.forms[0].oldvalue.value='", &encode_url("$key $_"), "'; document.forms[0].action.value='sourcesedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Edit'), "\">$IMG_EDIT</a></th>";
 					print "<th><a href=\"\" onclick=\"document.forms[0].source.value='$k'; document.forms[0].oldvalue.value='", &encode_url("$key $_"), "'; document.forms[0].action.value='sourcesdelete'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Delete'), "\">$IMG_DELETE</a></th>";
 					print "</tr>\n";
 				}
 			}
-			my $v = $CONFIG{src}{$k}{else}{log} || '';
+			my $v = $CONFIG->{src}{$k}{else}{log} || '';
 			my $anon = '';
 			if ($v =~ s/anonymous[\s\t]+(.*)/$1/) {
 				$anon = "(" . &translate('anonymized') . ")";
@@ -1387,8 +1387,8 @@ sub show_sources
 				print "<tr><th>&nbsp;</th><td><b>", &translate('No log file'), "</b>";
 			}
 			print "$v $anon";
-			print "</td><th><a href=\"\" onclick=\"document.forms[0].source.value='$k-else'; document.forms[0].oldvalue.value='", &encode_url("log $CONFIG{src}{$k}{else}{log}"), "'; document.forms[0].action.value='sourcesedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Edit'), "\">$IMG_EDIT</a></th>";
-			print "<th><a href=\"\" onclick=\"document.forms[0].source.value='$k-else'; document.forms[0].oldvalue.value='", &encode_url("log $CONFIG{src}{$k}{else}{log}"), "'; document.forms[0].action.value='sourcesdelete'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Delete'), "\">$IMG_DELETE</a></th>";
+			print "</td><th><a href=\"\" onclick=\"document.forms[0].source.value='$k-else'; document.forms[0].oldvalue.value='", &encode_url("log $CONFIG->{src}{$k}{else}{log}"), "'; document.forms[0].action.value='sourcesedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Edit'), "\">$IMG_EDIT</a></th>";
+			print "<th><a href=\"\" onclick=\"document.forms[0].source.value='$k-else'; document.forms[0].oldvalue.value='", &encode_url("log $CONFIG->{src}{$k}{else}{log}"), "'; document.forms[0].action.value='sourcesdelete'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Delete'), "\">$IMG_DELETE</a></th>";
 			print "</tr>\n";
 
 		}
@@ -1432,7 +1432,7 @@ sub edit_sources
 		print "<input type=\"hidden\" name=\"srctype\" value=\"time\" />\n";
 		print "<select name=\"srcval\">\n";
 		print "<option value=\"\">", &translate('All the time'), "</option>\n";
-		foreach my $k (sort keys %{$CONFIG{time}}) {
+		foreach my $k (sort keys %{$CONFIG->{time}}) {
 			foreach my $t ('within', 'outside') {
 				my $sel = '';
 				$sel = 'selected="1" ' if ($val eq "$t $k");
@@ -1446,7 +1446,7 @@ sub edit_sources
 		my $value = '';
 		foreach my $key (@SRC_KEYWORD) {
 			if (!$else) {
-				foreach (@{$CONFIG{src}{$name}{$key}}) {
+				foreach (@{$CONFIG->{src}{$name}{$key}}) {
 					if ("$key $_" eq $val) {
 						$type = $key;
 						$value = $_;
@@ -1454,7 +1454,7 @@ sub edit_sources
 					}
 				}
 			} else {
-				foreach (@{$CONFIG{src}{$name}{else}{$key}}) {
+				foreach (@{$CONFIG->{src}{$name}{else}{$key}}) {
 					if ("$key $_" eq $val) {
 						$type = $key;
 						$value = $_;
@@ -1490,16 +1490,16 @@ sub show_categories
 
 	print "<h2>", &translate('Filters Configuration'), "</h2>\n";
 	print "<input type=\"hidden\" name=\"category\" value=\"\" />\n";
-	if (!scalar keys %{$CONFIG{dest}}) {
+	if (!scalar keys %{$CONFIG->{dest}}) {
 		print "<p><input type=\"button\" name=\"autocreate\" value=\"", &translate('Autocreate'), "\" title=\"", &translate('Autocreate filters from blacklist database'), "\" onclick=\"document.forms[0].action.value='autocreate'; document.forms[0].submit(); return false;\"></p>\n";
 	}
 	print "<table align=\"center\" width=\"90%\">\n";
 	print "<tr><th align=\"left\" nowrap=\"1\">", &translate('Rule name'), "</th><th align=\"left\" nowrap=\"1\">", &translate('Schedules'), "</th><th align=\"left\">", &translate('Domains'), "</th><th align=\"left\">", &translate('Urls'), "</th><th align=\"left\">", &translate('Expressions'), "</th><th align=\"left\">", &translate('Redirection'), "</th><th align=\"left\">", &translate('Log file'), "</th><th colspan=\"2\">", &translate('Action'), "</th></tr>\n";
 	print "<tr><th colspan=\"9\"><hr></th></tr>\n";
-	foreach my $k (sort keys %{$CONFIG{dest}}) {
+	foreach my $k (sort keys %{$CONFIG->{dest}}) {
 		my $delete = 1;
-		foreach my $z (keys %{$CONFIG{acl}}) {
-			foreach my $e (@{$CONFIG{acl}{$z}{pass}}) {
+		foreach my $z (keys %{$CONFIG->{acl}}) {
+			foreach my $e (@{$CONFIG->{acl}{$z}{pass}}) {
 				if ( ($e eq $k) || ($e eq "!$k") ) {
 					$delete = 0;
 					last;
@@ -1508,14 +1508,14 @@ sub show_categories
 			last if (!$delete);
 		}
 		my $schedule = '&nbsp;';
-		if (exists $CONFIG{dest}{$k}{within}) {
-			$schedule = &translate('within') . ' ' . $CONFIG{dest}{$k}{within};
-		} elsif (exists $CONFIG{dest}{$k}{outside}) {
-			$schedule = &translate('outside') . ' ' . $CONFIG{dest}{$k}{outside};
+		if (exists $CONFIG->{dest}{$k}{within}) {
+			$schedule = &translate('within') . ' ' . $CONFIG->{dest}{$k}{within};
+		} elsif (exists $CONFIG->{dest}{$k}{outside}) {
+			$schedule = &translate('outside') . ' ' . $CONFIG->{dest}{$k}{outside};
 		}
 		print "<tr><th align=\"left\" nowrap=\"1\">$k</th><td align=\"left\" nowrap=\"1\">$schedule</td>\n";
 		foreach my $type ('domain', 'url', 'expression') {
-			my $list = $CONFIG{dest}{$k}{$type . 'list'} || '';
+			my $list = $CONFIG->{dest}{$k}{$type . 'list'} || '';
 			if ($list) {
 				$list =~ s/\/.*//o;
 				$list = $blinfo{$list}{alias} || $list;
@@ -1525,9 +1525,9 @@ sub show_categories
 			}
 		}
 		my $img = '&nbsp;';
-		$img = $IMG_REDIRECT if ($CONFIG{dest}{$k}{redirect});
-		print "<td nowrap=\"1\" title=\"$CONFIG{dest}{$k}{redirect}\" style=\"text-align: center;\">$img</td><td nowrap=\"1\">";
-		my $v = $CONFIG{dest}{$k}{log} || '';
+		$img = $IMG_REDIRECT if ($CONFIG->{dest}{$k}{redirect});
+		print "<td nowrap=\"1\" title=\"$CONFIG->{dest}{$k}{redirect}\" style=\"text-align: center;\">$img</td><td nowrap=\"1\">";
+		my $v = $CONFIG->{dest}{$k}{log} || '';
 		my $anon = '';
 		if ($v =~ s/anonymous[\s\t]+(.*)/$1/) {
 			$anon = "(" . &translate('anonymized') . ")";
@@ -1545,16 +1545,16 @@ sub show_categories
 		}
 		print "</tr>\n";
 
-		if ($CONFIG{dest}{$k}{outside} || $CONFIG{dest}{$k}{within}) {
+		if ($CONFIG->{dest}{$k}{outside} || $CONFIG->{dest}{$k}{within}) {
 			print "<tr><th nowrap=\"1\" colspan=\"2\" align=\"center\">", &translate('if schedule not match'), "</th><th colspan=\"5\">&nbsp;</th>";
-			if (scalar keys %{$CONFIG{dest}{$k}{else}} == 0 ) {
+			if (scalar keys %{$CONFIG->{dest}{$k}{else}} == 0 ) {
 				print "<th><a href=\"\" onclick=\"document.forms[0].category.value='$k-else'; document.forms[0].action.value='categoriesedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Add an element'), "\">$IMG_ADD</a></th>";
 			}
 			print "<th>&nbsp;</th></tr>\n";
-			if (scalar keys %{$CONFIG{dest}{$k}{else}} > 0) {
+			if (scalar keys %{$CONFIG->{dest}{$k}{else}} > 0) {
 				print "<tr><th align=\"left\" colspan=\"2\" nowrap=\"1\">&nbsp;</th>\n";
 				foreach my $type ('domain', 'url', 'expression') {
-					my $list = $CONFIG{dest}{$k}{else}{$type . 'list'} || '';
+					my $list = $CONFIG->{dest}{$k}{else}{$type . 'list'} || '';
 					if ($list) {
 						$list =~ s/\/.*//o;
 						$list = $blinfo{$list}{alias} || $list;
@@ -1563,8 +1563,8 @@ sub show_categories
 						print "<td>&nbsp;</td>";
 					}
 				}
-				print "<td nowrap=\"1\" title=\"$CONFIG{dest}{$k}{else}{redirect}\">", substr($CONFIG{dest}{$k}{else}{redirect}, 0, 60), "</td><td nowrap=\"1\">";
-				my $v = $CONFIG{dest}{$k}{else}{log} || '';
+				print "<td nowrap=\"1\" title=\"$CONFIG->{dest}{$k}{else}{redirect}\">", substr($CONFIG->{dest}{$k}{else}{redirect}, 0, 60), "</td><td nowrap=\"1\">";
+				my $v = $CONFIG->{dest}{$k}{else}{log} || '';
 				my $anon = '';
 				if ($v =~ s/anonymous[\s\t]+(.*)/$1/) {
 					$anon = "(" . &translate('anonymized') . ")";
@@ -1594,7 +1594,7 @@ sub edit_categories
 	if ($BL && ($default) ) {
 		$BL =~ s/[^a-z0-9\_\-]+//ig;
 		$BL = lc($BL);
-		mkdir("$CONFIG{dbhome}/$BL");
+		mkdir("$CONFIG->{dbhome}/$BL");
 		$ACTION = 'bledit';
 		$BL =~ s/\/.*//;
 	}
@@ -1613,20 +1613,20 @@ sub edit_categories
 	my $redirect = '';
 	my $log = '';
 	if (!$else) {
-		if (exists $CONFIG{dest}{$name}) {
-			$domain = $CONFIG{dest}{$name}{'domainlist'} || '';
-			$url = $CONFIG{dest}{$name}{'urllist'} || '';
-			$expression = $CONFIG{dest}{$name}{'expressionlist'} || '';
-			$redirect = $CONFIG{dest}{$name}{'redirect'} || '';
-			$log = $CONFIG{dest}{$name}{'log'} || '';
+		if (exists $CONFIG->{dest}{$name}) {
+			$domain = $CONFIG->{dest}{$name}{'domainlist'} || '';
+			$url = $CONFIG->{dest}{$name}{'urllist'} || '';
+			$expression = $CONFIG->{dest}{$name}{'expressionlist'} || '';
+			$redirect = $CONFIG->{dest}{$name}{'redirect'} || '';
+			$log = $CONFIG->{dest}{$name}{'log'} || '';
 		}
 	} else {
-		if (exists $CONFIG{dest}{$name}{else}) {
-			$domain = $CONFIG{dest}{$name}{else}{'domainlist'} || '';
-			$url = $CONFIG{dest}{$name}{else}{'urllist'} || '';
-			$expression = $CONFIG{dest}{$name}{else}{'expressionlist'} || '';
-			$redirect = $CONFIG{dest}{$name}{else}{'redirect'} || '';
-			$log = $CONFIG{dest}{$name}{else}{'log'} || '';
+		if (exists $CONFIG->{dest}{$name}{else}) {
+			$domain = $CONFIG->{dest}{$name}{else}{'domainlist'} || '';
+			$url = $CONFIG->{dest}{$name}{else}{'urllist'} || '';
+			$expression = $CONFIG->{dest}{$name}{else}{'expressionlist'} || '';
+			$redirect = $CONFIG->{dest}{$name}{else}{'redirect'} || '';
+			$log = $CONFIG->{dest}{$name}{else}{'log'} || '';
 		}
 	}
 	print "<table align=\"center\" width=\"100%\"><tr><td>\n";
@@ -1642,10 +1642,10 @@ sub edit_categories
 		print "<th nowrap=\"1\" align=\"left\">";
 		print "<select name=\"time\">\n";
 		print "<option value=\"\">", &translate('All the time'), "</option>\n";
-		foreach my $k (sort keys %{$CONFIG{time}}) {
+		foreach my $k (sort keys %{$CONFIG->{time}}) {
 			foreach my $t ('within', 'outside') {
 				my $sel = '';
-				$sel = 'selected="1" ' if ($CONFIG{dest}{$name}{$t} eq $k);
+				$sel = 'selected="1" ' if ($CONFIG->{dest}{$name}{$t} eq $k);
 				print "<option value=\"$t $k\" $sel>", &translate($t), " $k</option>\n";
 			}
 		}
@@ -1718,7 +1718,7 @@ sub show_acl
 	print "<table width=\"100%\">\n";
 	print "<tr><th>", &translate('Sources'), "</th><th>", &translate('Schedules'), "</th><th>", &translate('Destination'), "</th><th>", &translate('FQDN only'), "</th><th>", &translate('Url rewriting'), "</th><th>", &translate('Redirection'), "</th><th colspan=\"2\">", &translate('Actions'), "</th></tr>\n";
 	print "<tr><th align=\"left\" colspan=\"8\"><hr></th></tr>\n";
-	foreach my $k (sort keys %{$CONFIG{acl}}) {
+	foreach my $k (sort keys %{$CONFIG->{acl}}) {
 		next if ($k eq 'default');
 		my $allowed = '';
 		my $blocked = '';
@@ -1729,7 +1729,7 @@ sub show_acl
 		my $whitelist = '';
 		my @dnsbl = ();
 		# Show allowed first
-		foreach my $s (@{$CONFIG{acl}{$k}{pass}}) {
+		foreach my $s (@{$CONFIG->{acl}{$k}{pass}}) {
 			if ($s eq '!in-addr') {
 				$fqdn = $IMG_NOIP;
 				next;
@@ -1751,13 +1751,13 @@ sub show_acl
 			}
 
 		}
-		$blocked = &translate('All Internet') . ", " if (!$blocked && grep(/^none$/, @{$CONFIG{acl}{$k}{pass}}));
-		$allowed = &translate('All Internet') . ", " if (!$allowed && grep(/^(all|any)$/, @{$CONFIG{acl}{$k}{pass}}));
+		$blocked = &translate('All Internet') . ", " if (!$blocked && grep(/^none$/, @{$CONFIG->{acl}{$k}{pass}}));
+		$allowed = &translate('All Internet') . ", " if (!$allowed && grep(/^(all|any)$/, @{$CONFIG->{acl}{$k}{pass}}));
 		if ($blocked =~ s/, $//) {
 			$blocked = '<b>' . &translate('Blocked') . ' :</b> ' . $blocked;
 		}
 		if ($allowed =~ s/, $//) {
-			if (grep(/^none$/, @{$CONFIG{acl}{$k}{pass}})) {
+			if (grep(/^none$/, @{$CONFIG->{acl}{$k}{pass}})) {
 				$allowed = '<b>' . &translate('Allow only') . ' :</b> ' . $allowed;
 			} else {
 				$allowed = '<b>' . &translate('Allow') . ' :</b> ' . $allowed;
@@ -1777,28 +1777,28 @@ sub show_acl
 			$whitelist = "<br><b>" . &translate('DNS Whitelist') . ":</b> $whitelist";
 		}
 			
-		if (exists $CONFIG{acl}{$k}{extended}{within}) {
-			$schedule = &translate('within') . " $CONFIG{acl}{$k}{extended}{within}";
-		} elsif (exists $CONFIG{acl}{$k}{extended}{outside}) {
-			$schedule = &translate('outside') . " $CONFIG{acl}{$k}{extended}{outside}";
+		if (exists $CONFIG->{acl}{$k}{extended}{within}) {
+			$schedule = &translate('within') . " $CONFIG->{acl}{$k}{extended}{within}";
+		} elsif (exists $CONFIG->{acl}{$k}{extended}{outside}) {
+			$schedule = &translate('outside') . " $CONFIG->{acl}{$k}{extended}{outside}";
 		}
 		my $rewrite = '';
-		$rewrite = join(' ', @{$CONFIG{acl}{$k}{rewrite}}) if (exists $CONFIG{acl}{$k}{rewrite});
+		$rewrite = join(' ', @{$CONFIG->{acl}{$k}{rewrite}}) if (exists $CONFIG->{acl}{$k}{rewrite});
 		my $img = '&nbsp;';
-		$img = $IMG_REDIRECT if ($CONFIG{acl}{$k}{redirect});
+		$img = $IMG_REDIRECT if ($CONFIG->{acl}{$k}{redirect});
 		$schedule = '&nbsp;' if ($schedule eq "");
 		$fqdn = '&nbsp;' if ($fqdn eq "");
 		$rewrite = '&nbsp;' if ($rewrite eq "");
-		print "<tr><th align=\"left\">$k</th><td>$schedule</td><td>$allowed<br>$blocked$whitelist$blacklist</td><td style=\"text-align: center;\">$fqdn</td><td>$rewrite</td><td title=\"$CONFIG{acl}{$k}{redirect}\" style=\"text-align: center;\">$img</td><th><a href=\"\" onclick=\"document.forms[0].acl.value='$k'; document.forms[0].action.value='aclsedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Edit'), "\">$IMG_EDIT</a></th><th><a href=\"\" onclick=\"document.forms[0].acl.value='$k'; document.forms[0].action.value='aclsdelete'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Delete'), "\">$IMG_DELETE</a></th></tr>\n";
+		print "<tr><th align=\"left\">$k</th><td>$schedule</td><td>$allowed<br>$blocked$whitelist$blacklist</td><td style=\"text-align: center;\">$fqdn</td><td>$rewrite</td><td title=\"$CONFIG->{acl}{$k}{redirect}\" style=\"text-align: center;\">$img</td><th><a href=\"\" onclick=\"document.forms[0].acl.value='$k'; document.forms[0].action.value='aclsedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Edit'), "\">$IMG_EDIT</a></th><th><a href=\"\" onclick=\"document.forms[0].acl.value='$k'; document.forms[0].action.value='aclsdelete'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Delete'), "\">$IMG_DELETE</a></th></tr>\n";
 		my $sources = '';
-		if (exists $CONFIG{acl}{$k}{else}) {
+		if (exists $CONFIG->{acl}{$k}{else}) {
 			$fqdn = '';
 			$allowed = '';
 			$blocked = '';
 			$whitelist = '';
 			$blacklist = '';
 			@dnsbl = ();
-			foreach my $s (@{$CONFIG{acl}{$k}{else}{pass}}) {
+			foreach my $s (@{$CONFIG->{acl}{$k}{else}{pass}}) {
 				if ($s eq '!in-addr') {
 					$fqdn = $IMG_NOIP;
 					next;
@@ -1820,13 +1820,13 @@ sub show_acl
 				}
 
 			}
-			$blocked = &translate('All Internet') . ", " if (!$blocked && grep(/^none$/, @{$CONFIG{acl}{$k}{else}{pass}}));
-			$allowed = &translate('All Internet') . ", " if (!$allowed && grep(/^(all|any)$/, @{$CONFIG{acl}{$k}{else}{pass}}));
+			$blocked = &translate('All Internet') . ", " if (!$blocked && grep(/^none$/, @{$CONFIG->{acl}{$k}{else}{pass}}));
+			$allowed = &translate('All Internet') . ", " if (!$allowed && grep(/^(all|any)$/, @{$CONFIG->{acl}{$k}{else}{pass}}));
 			if ($blocked =~ s/, $//) {
 				$blocked = '<b>' . &translate('Blocked') . ' :</b> ' . $blocked;
 			}
 			if ($allowed =~ s/, $//) {
-				if (grep(/^none$/, @{$CONFIG{acl}{$k}{else}{pass}})) {
+				if (grep(/^none$/, @{$CONFIG->{acl}{$k}{else}{pass}})) {
 					$allowed = '<b>' . &translate('Allow only') . ' :</b> ' . $allowed;
 				} else {
 					$allowed = '<b>' . &translate('Allow') . ' :</b> ' . $allowed;
@@ -1846,12 +1846,12 @@ sub show_acl
 				$whitelist = "<br><b>" . &translate('DNS Whitelist') . ":</b> $whitelist";
 			}
 			$rewrite = '';
-			$rewrite = join(' ', @{$CONFIG{acl}{$k}{else}{rewrite}}) if (exists $CONFIG{acl}{$k}{else}{rewrite});
+			$rewrite = join(' ', @{$CONFIG->{acl}{$k}{else}{rewrite}}) if (exists $CONFIG->{acl}{$k}{else}{rewrite});
 			$img = '&nbsp;';
-			$img = $IMG_REDIRECT if ($CONFIG{acl}{$k}{else}{redirect});
+			$img = $IMG_REDIRECT if ($CONFIG->{acl}{$k}{else}{redirect});
 			$fqdn = '&nbsp;' if ($fqdn eq "");
 			$rewrite = '&nbsp;' if ($rewrite eq "");
-			print "<tr><th align=\"right\">", &translate('else'), "</th><td>&nbsp;</td><td>$allowed<br>$blocked$whitelist$blacklist</td><td style=\"text-align: center;\">$fqdn</td><td>$rewrite</td><td title=\"$CONFIG{acl}{$k}{else}{redirect}\" style=\"text-align: center;\">$img</td><th colspan=\"2\">&nbsp;</th></tr>\n";
+			print "<tr><th align=\"right\">", &translate('else'), "</th><td>&nbsp;</td><td>$allowed<br>$blocked$whitelist$blacklist</td><td style=\"text-align: center;\">$fqdn</td><td>$rewrite</td><td title=\"$CONFIG->{acl}{$k}{else}{redirect}\" style=\"text-align: center;\">$img</td><th colspan=\"2\">&nbsp;</th></tr>\n";
 		}
 		print "<tr><th align=\"left\" colspan=\"8\"><hr></th></tr>\n";
 	}
@@ -1866,7 +1866,7 @@ sub show_acl
 	my $blacklist = '';
 	my @dnsbl = ();
 	# Show allowed first
-	foreach my $s (@{$CONFIG{acl}{default}{pass}}) {
+	foreach my $s (@{$CONFIG->{acl}{default}{pass}}) {
 		if ($s eq '!in-addr') {
 			$fqdn = $IMG_NOIP;
 			next;
@@ -1888,13 +1888,13 @@ sub show_acl
 		}
 
 	}
-	$blocked = &translate('All Internet') . ", " if (!$blocked && grep(/^none$/, @{$CONFIG{acl}{default}{pass}}));
-	$allowed = &translate('All Internet') . ", " if (!$allowed && grep(/^(all|any)$/, @{$CONFIG{acl}{default}{pass}}));
+	$blocked = &translate('All Internet') . ", " if (!$blocked && grep(/^none$/, @{$CONFIG->{acl}{default}{pass}}));
+	$allowed = &translate('All Internet') . ", " if (!$allowed && grep(/^(all|any)$/, @{$CONFIG->{acl}{default}{pass}}));
 	if ($blocked =~ s/, $//) {
 		$blocked = '<b>' . &translate('Blocked') . ' :</b> ' . $blocked;
 	}
 	if ($allowed =~ s/, $//) {
-		if (grep(/^none$/, @{$CONFIG{acl}{default}{pass}})) {
+		if (grep(/^none$/, @{$CONFIG->{acl}{default}{pass}})) {
 			$allowed = '<b>' . &translate('Allow only') . ' :</b> ' . $allowed;
 		} else {
 			$allowed = '<b>' . &translate('Allow') . ' :</b> ' . $allowed;
@@ -1913,28 +1913,28 @@ sub show_acl
 	if ($whitelist =~ s/, $//) {
 		$whitelist = "<br><b>" . &translate('DNS Whitelist') . ":</b> $whitelist";
 	}
-	if (exists $CONFIG{acl}{default}{extended}{within}) {
-		$schedule = &translate('within') . " $CONFIG{acl}{default}{extended}{within}";
-	} elsif (exists $CONFIG{acl}{default}{extended}{outside}) {
-		$schedule = &translate('outside') . " $CONFIG{acl}{default}{extended}{outside}";
+	if (exists $CONFIG->{acl}{default}{extended}{within}) {
+		$schedule = &translate('within') . " $CONFIG->{acl}{default}{extended}{within}";
+	} elsif (exists $CONFIG->{acl}{default}{extended}{outside}) {
+		$schedule = &translate('outside') . " $CONFIG->{acl}{default}{extended}{outside}";
 	}
 	my $rewrite = '';
-	$rewrite = join(' ', @{$CONFIG{acl}{default}{rewrite}}) if (exists $CONFIG{acl}{default}{rewrite});
+	$rewrite = join(' ', @{$CONFIG->{acl}{default}{rewrite}}) if (exists $CONFIG->{acl}{default}{rewrite});
 	my $img = '&nbsp;';
-	$img = $IMG_REDIRECT if ($CONFIG{acl}{default}{redirect});
+	$img = $IMG_REDIRECT if ($CONFIG->{acl}{default}{redirect});
 	$schedule = '&nbsp;' if ($schedule eq "");
 	$fqdn = '&nbsp;' if ($fqdn eq "");
 	$rewrite = '&nbsp;' if ($rewrite eq "");
-	print "<tr><th align=\"left\">", &translate('Default ACL'), "</th><td>$schedule</td><td>$allowed<br>$blocked$whitelist$blacklist</td><td style=\"text-align: center;\">$fqdn</td><td>$rewrite</td><td title=\"$CONFIG{acl}{default}{redirect}\" style=\"text-align: center;\">$img</td><th><a href=\"\" onclick=\"document.forms[0].acl.value='default'; document.forms[0].action.value='aclsedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Edit'), "\">$IMG_EDIT</a></th><th>&nbsp;</th></tr>\n";
+	print "<tr><th align=\"left\">", &translate('Default ACL'), "</th><td>$schedule</td><td>$allowed<br>$blocked$whitelist$blacklist</td><td style=\"text-align: center;\">$fqdn</td><td>$rewrite</td><td title=\"$CONFIG->{acl}{default}{redirect}\" style=\"text-align: center;\">$img</td><th><a href=\"\" onclick=\"document.forms[0].acl.value='default'; document.forms[0].action.value='aclsedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Edit'), "\">$IMG_EDIT</a></th><th>&nbsp;</th></tr>\n";
 	my $sources = '';
-	if (exists $CONFIG{acl}{default}{else}) {
+	if (exists $CONFIG->{acl}{default}{else}) {
 		$fqdn = '';
 		$allowed = '';
 		$blocked = '';
 		$whitelist = '';
 		$blacklist = '';
 		@dnsbl = ();
-		foreach my $s (@{$CONFIG{acl}{default}{else}{pass}}) {
+		foreach my $s (@{$CONFIG->{acl}{default}{else}{pass}}) {
 			if ($s eq '!in-addr') {
 				$fqdn = $IMG_NOIP;
 				next;
@@ -1956,13 +1956,13 @@ sub show_acl
 			}
 
 		}
-		$blocked = &translate('All Internet') . ", " if (!$blocked && grep(/^none$/, @{$CONFIG{acl}{default}{else}{pass}}));
-		$allowed = &translate('All Internet') . ", " if (!$allowed && grep(/^(all|any)$/, @{$CONFIG{acl}{default}{else}{pass}}));
+		$blocked = &translate('All Internet') . ", " if (!$blocked && grep(/^none$/, @{$CONFIG->{acl}{default}{else}{pass}}));
+		$allowed = &translate('All Internet') . ", " if (!$allowed && grep(/^(all|any)$/, @{$CONFIG->{acl}{default}{else}{pass}}));
 		if ($blocked =~ s/, $//) {
 			$blocked = '<b>' . &translate('Blocked') . ' :</b> ' . $blocked;
 		}
 		if ($allowed =~ s/, $//) {
-			if (grep(/^none$/, @{$CONFIG{acl}{default}{else}{pass}})) {
+			if (grep(/^none$/, @{$CONFIG->{acl}{default}{else}{pass}})) {
 				$allowed = '<b>' . &translate('Allow only') . ' :</b> ' . $allowed;
 			} else {
 				$allowed = '<b>' . &translate('Allow') . ' :</b> ' . $allowed;
@@ -1982,12 +1982,12 @@ sub show_acl
 			$whitelist = "<br><b>" . &translate('DNS Whitelist') . ":</b> $whitelist";
 		}
 		$rewrite = '';
-		$rewrite = join(' ', @{$CONFIG{acl}{default}{else}{rewrite}}) if (exists $CONFIG{acl}{default}{else}{rewrite});
+		$rewrite = join(' ', @{$CONFIG->{acl}{default}{else}{rewrite}}) if (exists $CONFIG->{acl}{default}{else}{rewrite});
 		$img = '&nbsp;';
-		$img = $IMG_REDIRECT if ($CONFIG{acl}{default}{else}{redirect});
+		$img = $IMG_REDIRECT if ($CONFIG->{acl}{default}{else}{redirect});
 		$fqdn = '&nbsp;' if ($fqdn eq "");
 		$rewrite = '&nbsp;' if ($rewrite eq "");
-		print "<tr><th align=\"right\">", &translate('else'), "</th><td>&nbsp;</td><td>$allowed<br>$blocked$whitelist$blacklist</td><td style=\"text-align: center;\">$fqdn</td><td>$rewrite</td><td title=\"$CONFIG{acl}{default}{else}{redirect}\" style=\"text-align: center;\">$img</td><td colspan=\"2\">&nbsp;</td></tr>\n";
+		print "<tr><th align=\"right\">", &translate('else'), "</th><td>&nbsp;</td><td>$allowed<br>$blocked$whitelist$blacklist</td><td style=\"text-align: center;\">$fqdn</td><td>$rewrite</td><td title=\"$CONFIG->{acl}{default}{else}{redirect}\" style=\"text-align: center;\">$img</td><td colspan=\"2\">&nbsp;</td></tr>\n";
 	}
 	print "<tr><th align=\"left\" colspan=\"8\"><hr></th></tr>\n";
 
@@ -2002,13 +2002,13 @@ sub edit_acls
 
 	# Get all DNS List
 	my @BLDNS = split(/[,;\s\t]+/, $DNSBL);
-	foreach my $a (%{$CONFIG{acl}}) {
-		foreach my $d (@{$CONFIG{acl}{$a}{pass}}) {
+	foreach my $a (%{$CONFIG->{acl}}) {
+		foreach my $d (@{$CONFIG->{acl}{$a}{pass}}) {
 			if ($d =~ /^[^:]+:(.*)/o) {
 				push(@BLDNS, $1) if (!grep(/^$1$/, @BLDNS));
 			}
 		}
-		foreach my $d (@{$CONFIG{acl}{$a}{else}{pass}}) {
+		foreach my $d (@{$CONFIG->{acl}{$a}{else}{pass}}) {
 			if ($d =~ /^[^:]+:(.*)/o) {
 				push(@BLDNS, $1) if (!grep(/^$1$/, @BLDNS));
 			}
@@ -2017,7 +2017,7 @@ sub edit_acls
 
 	print "<h2>", &translate('Policy Edition'), "</h2>\n";
 
-	if ( !scalar keys %{$CONFIG{src}} && ($name ne 'default') ) {
+	if ( !scalar keys %{$CONFIG->{src}} && ($name ne 'default') ) {
 		&error(&translate('You must define some sources before'));
 		return;
 	}
@@ -2031,8 +2031,8 @@ sub edit_acls
 		print "<tr><th colspan=\"2\" align=\"left\">", &translate('Source name'), " ";
 		print "<select name=\"acl\">\n";
 		print "<option value=\"\">", &translate('Select a source'), "</option>\n";
-		foreach my $k (sort keys %{$CONFIG{src}}) {
-			if (!exists $CONFIG{acl}{$k}) {
+		foreach my $k (sort keys %{$CONFIG->{src}}) {
+			if (!exists $CONFIG->{acl}{$k}) {
 				print "<option value=\"$k\">$k</option>\n";
 			}
 		}
@@ -2046,10 +2046,10 @@ sub edit_acls
 	print "<th nowrap=\"1\" align=\"left\">";
 	print "<select name=\"time\" onchange=\"conditional_status(this.selectedIndex);\">\n";
 	print "<option value=\"\">", &translate('All the time'), "</option>\n";
-	foreach my $k (sort keys %{$CONFIG{time}}) {
+	foreach my $k (sort keys %{$CONFIG->{time}}) {
 		foreach my $t ('within', 'outside') {
 			my $sel = '';
-			$sel = 'selected="1" ' if (exists $CONFIG{acl}{$name}{extended}{$t} && ($CONFIG{acl}{$name}{extended}{$t} eq $k) );
+			$sel = 'selected="1" ' if (exists $CONFIG->{acl}{$name}{extended}{$t} && ($CONFIG->{acl}{$name}{extended}{$t} eq $k) );
 			print "<option value=\"$t $k\" $sel>", &translate($t), " $k</option>\n";
 		}
 	}
@@ -2058,26 +2058,26 @@ sub edit_acls
 	print "<tr><th colspan=\"2\"><hr></th></tr>\n";
 	print "<tr><th nowrap=\"1\" align=\"left\">&nbsp;</th>";
 	my $sel = '';
-	$sel = 'checked="1" ' if (grep(/^\!in-addr$/, @{$CONFIG{acl}{$name}{pass}}));
+	$sel = 'checked="1" ' if (grep(/^\!in-addr$/, @{$CONFIG->{acl}{$name}{pass}}));
 	print "<td><input type=\"checkbox\" name=\"dest\" value=\"!in-addr\" $sel>\n";
 	print " ", &translate('Deny ip addresses in Urls'), "</td></tr>\n";
 
 	$sel = '';
-	$sel = 'checked="1" ' if (grep(/^none$/, @{$CONFIG{acl}{$name}{pass}}));
+	$sel = 'checked="1" ' if (grep(/^none$/, @{$CONFIG->{acl}{$name}{pass}}));
 	print "<tr><th nowrap=\"1\" style=\"text-align: right;\">", &translate('Default access'), "</th><td>",
 	"<input type=\"radio\" name=\"dest\" value=\"none\" $sel>", &translate('Only the selected list'), " (none)";
 	$sel = '';
-	$sel = 'checked="1" ' if (!grep(/^none$/, @{$CONFIG{acl}{$name}{pass}}));
+	$sel = 'checked="1" ' if (!grep(/^none$/, @{$CONFIG->{acl}{$name}{pass}}));
 	print "<input type=\"radio\" name=\"dest\" value=\"all\" $sel>", &translate('All Internet'), "  (all | any)</td><th></tr>\n";
 
 	print "<tr><th nowrap=\"1\" style=\"text-align: right;\">", &translate('Allow access to'), "</th><th>\n";
 	my $i = 0;
 	print "<table align=\"left\"><tr>\n";
-	foreach my $k (sort keys %{$CONFIG{dest}}) {
+	foreach my $k (sort keys %{$CONFIG->{dest}}) {
 		next if ( ($k eq 'any') || ($k eq 'all') || ($k eq 'none') );
 		$sel = '';
-		$sel = 'checked="1" ' if (grep(/^$k$/, @{$CONFIG{acl}{$name}{pass}}));
-		print "</tr><tr>" if ($i && (($i % 6) == 0) && ($i < scalar keys %{$CONFIG{dest}}));
+		$sel = 'checked="1" ' if (grep(/^$k$/, @{$CONFIG->{acl}{$name}{pass}}));
+		print "</tr><tr>" if ($i && (($i % 6) == 0) && ($i < scalar keys %{$CONFIG->{dest}}));
 		print "<td nowrap=\"1\"><input type=\"checkbox\" name=\"dest\" value=\"$k\" $sel>$k</td>\n";
 		$i++;
 	}
@@ -2087,7 +2087,7 @@ sub edit_acls
 		print "<tr><th nowrap=\"1\" align=\"right\">", &translate('DNS Whitelist'), "</th><td>\n";
 		foreach my $d (@BLDNS) {
 			$sel = '';
-			$sel = 'checked="1" ' if (grep(/^dnsbl:$d$/, @{$CONFIG{acl}{$name}{pass}}));
+			$sel = 'checked="1" ' if (grep(/^dnsbl:$d$/, @{$CONFIG->{acl}{$name}{pass}}));
 			print "<input type=\"checkbox\" name=\"dest\" value=\"dnsbl:$d\" $sel>$d\n";
 		}
 		print "</td></tr>\n";
@@ -2095,11 +2095,11 @@ sub edit_acls
 	print "<tr><th nowrap=\"1\" align=\"right\">", &translate('Deny access to'), "</th><th>\n";
 	print "<table><tr>\n";
 	$i = 0;
-	foreach my $k (sort keys %{$CONFIG{dest}}) {
+	foreach my $k (sort keys %{$CONFIG->{dest}}) {
 		next if ( ($k eq 'any') || ($k eq 'none') || ($k eq 'all'));
 		$sel = '';
-		$sel = 'checked="1" ' if (grep(/^\!$k$/, @{$CONFIG{acl}{$name}{pass}}));
-		print "</tr><tr>" if ($i && (($i % 6) == 0) && ($i < scalar keys %{$CONFIG{dest}}));
+		$sel = 'checked="1" ' if (grep(/^\!$k$/, @{$CONFIG->{acl}{$name}{pass}}));
+		print "</tr><tr>" if ($i && (($i % 6) == 0) && ($i < scalar keys %{$CONFIG->{dest}}));
 		print "<td nowrap=\"1\"><input type=\"checkbox\" name=\"dest\" value=\"\!$k\" $sel>$k</td>\n";
 		$i++;
 	}
@@ -2109,24 +2109,24 @@ sub edit_acls
 		print "<tr><th nowrap=\"1\" align=\"right\">", &translate('DNS Blacklist'), "</th><td>\n";
 		foreach my $d (@BLDNS) {
 			$sel = '';
-			$sel = 'checked="1" ' if (grep(/^\!dnsbl:$d$/, @{$CONFIG{acl}{$name}{pass}}));
+			$sel = 'checked="1" ' if (grep(/^\!dnsbl:$d$/, @{$CONFIG->{acl}{$name}{pass}}));
 			print "<input type=\"checkbox\" name=\"dest\" value=\"!dnsbl:$d\" $sel>$d\n";
 		}
 		print "</td></tr>\n";
 	}
 
 	print "<tr><th nowrap=\"1\" align=\"right\">", &translate('Rewrite rules'), "</th><td>\n";
-	foreach my $r (sort keys %{$CONFIG{rew}}) {
+	foreach my $r (sort keys %{$CONFIG->{rew}}) {
 		my $sel = '';
-		$sel = 'checked="1" ' if grep(/^[\!]*$r$/, @{$CONFIG{acl}{$name}{rewrite}});
+		$sel = 'checked="1" ' if grep(/^[\!]*$r$/, @{$CONFIG->{acl}{$name}{rewrite}});
 		print "<input type=\"checkbox\" name=\"rew\" value=\"$r\" $sel>$r\n";
 	}
 	print "</td></tr>\n";
 
-	print "<tr><th align=\"right\">", &translate('Redirect url'), "</th><td><input type=\"text\" size=\"50\" name=\"redirect\" value=\"", $CGI->escapeHTML($CONFIG{acl}{$name}{redirect}), "\" />";
+	print "<tr><th align=\"right\">", &translate('Redirect url'), "</th><td><input type=\"text\" size=\"50\" name=\"redirect\" value=\"", $CGI->escapeHTML($CONFIG->{acl}{$name}{redirect}), "\" />";
 	print "&nbsp;<input type=\"button\" name=\"redirectlist\" value=\"", &translate('From list'), "\" onclick=\"window.open('$ENV{SCRIPT_NAME}?action=redirectlist&acl=$ACL&opener=redirect&lang=$LANG','redlistwin','scrollbars=yes,status=no,toolbar=no,width=600,height=400,resizable=yes'); return false;\">";
 	print "</td></tr>\n";
-	print "<tr><th align=\"right\">", &translate('Log file'), "</th><td><input type=\"text\" size=\"50\" name=\"log\" value=\"$CONFIG{acl}{$name}{log}\" /></td></tr>\n";
+	print "<tr><th align=\"right\">", &translate('Log file'), "</th><td><input type=\"text\" size=\"50\" name=\"log\" value=\"$CONFIG->{acl}{$name}{log}\" /></td></tr>\n";
 
 	print "<tr><th colspan=\"2\"><hr /></th></tr>\n";
 
@@ -2136,25 +2136,25 @@ sub edit_acls
 	print "<tr><th colspan=\"2\"><hr></th></tr>\n";
 	print "<tr><th nowrap=\"1\" align=\"left\">&nbsp;</th>";;
 	$sel = '';
-	$sel = 'checked="1" ' if (grep(/^\!in-addr$/, @{$CONFIG{acl}{$name}{else}{pass}}));
+	$sel = 'checked="1" ' if (grep(/^\!in-addr$/, @{$CONFIG->{acl}{$name}{else}{pass}}));
 	print "<td><input type=\"checkbox\" name=\"edest\" value=\"!in-addr\" $sel>";
 	print " ", &translate('Deny ip addresses in Urls'), "</td></tr>\n";
 
 	$sel = '';
-	$sel = 'checked="1" ' if (grep(/^none$/, @{$CONFIG{acl}{$name}{else}{pass}}));
+	$sel = 'checked="1" ' if (grep(/^none$/, @{$CONFIG->{acl}{$name}{else}{pass}}));
 	print "<tr><th nowrap=\"1\" style=\"text-align: right;\">", &translate('Default access'), "</th><td><input type=\"radio\" name=\"edest\" value=\"none\" $sel>", &translate('Only the selected list'), " (none)";
 	$sel = '';
-	$sel = 'checked="1" ' if (grep(/^all$/, @{$CONFIG{acl}{$name}{else}{pass}}));
+	$sel = 'checked="1" ' if (grep(/^all$/, @{$CONFIG->{acl}{$name}{else}{pass}}));
 	print "<input type=\"radio\" name=\"edest\" value=\"all\" $sel>", &translate('All Internet'), " (all | any)</td><th></tr>\n";
 
 	print "<tr><th nowrap=\"1\" style=\"text-align: right;\">", &translate('Allow access to'), "</th><th>\n";
 	$i = 0;
 	print "<table align=\"left\"><tr>\n";
-	foreach my $k (sort keys %{$CONFIG{dest}}) {
+	foreach my $k (sort keys %{$CONFIG->{dest}}) {
 		next if ( ($k eq 'any') || ($k eq 'all') || ($k eq 'none') );
 		$sel = '';
-		$sel = 'checked="1" ' if (grep(/^$k$/, @{$CONFIG{acl}{$name}{else}{pass}}));
-		print "</tr><tr>" if ($i && (($i % 6) == 0) && ($i < scalar keys %{$CONFIG{dest}}));
+		$sel = 'checked="1" ' if (grep(/^$k$/, @{$CONFIG->{acl}{$name}{else}{pass}}));
+		print "</tr><tr>" if ($i && (($i % 6) == 0) && ($i < scalar keys %{$CONFIG->{dest}}));
 		print "<td nowrap=\"1\"><input type=\"checkbox\" name=\"edest\" value=\"$k\" $sel>$k</td>\n";
 		$i++;
 	}
@@ -2164,7 +2164,7 @@ sub edit_acls
 		print "<tr><th nowrap=\"1\" align=\"right\">", &translate('DNS Whitelist'), "</th><td>\n";
 		foreach my $d (@BLDNS) {
 			$sel = '';
-			$sel = 'checked="1" ' if (grep(/^dnsbl:$d$/, @{$CONFIG{acl}{$name}{else}{pass}}));
+			$sel = 'checked="1" ' if (grep(/^dnsbl:$d$/, @{$CONFIG->{acl}{$name}{else}{pass}}));
 			print "<input type=\"checkbox\" name=\"edest\" value=\"dnsbl:$d\" $sel>$d\n";
 		}
 		print "</td></tr>\n";
@@ -2172,11 +2172,11 @@ sub edit_acls
 	print "<tr><th nowrap=\"1\" align=\"right\">", &translate('Deny access to'), "</th><th>\n";
 	print "<table><tr>\n";
 	$i = 0;
-	foreach my $k (sort keys %{$CONFIG{dest}}) {
+	foreach my $k (sort keys %{$CONFIG->{dest}}) {
 		next if ( ($k eq 'any') || ($k eq 'none') || ($k eq 'all'));
 		$sel = '';
-		$sel = 'checked="1" ' if (grep(/^\!$k$/, @{$CONFIG{acl}{$name}{else}{pass}}));
-		print "</tr><tr>" if ($i && (($i % 6) == 0) && ($i < scalar keys %{$CONFIG{dest}}));
+		$sel = 'checked="1" ' if (grep(/^\!$k$/, @{$CONFIG->{acl}{$name}{else}{pass}}));
+		print "</tr><tr>" if ($i && (($i % 6) == 0) && ($i < scalar keys %{$CONFIG->{dest}}));
 		print "<td nowrap=\"1\"><input type=\"checkbox\" name=\"edest\" value=\"\!$k\" $sel>$k</td>\n";
 		$i++;
 	}
@@ -2186,24 +2186,24 @@ sub edit_acls
 		print "<tr><th nowrap=\"1\" align=\"right\">", &translate('DNS Blacklist'), "</th><td>\n";
 		foreach my $d (@BLDNS) {
 			$sel = '';
-			$sel = 'checked="1" ' if (grep(/^\!dnsbl:$d$/, @{$CONFIG{acl}{else}{$name}{pass}}));
+			$sel = 'checked="1" ' if (grep(/^\!dnsbl:$d$/, @{$CONFIG->{acl}{else}{$name}{pass}}));
 			print "<input type=\"checkbox\" name=\"edest\" value=\"!dnsbl:$d\" $sel>$d\n";
 		}
 		print "</td></tr>\n";
 	}
 
 	print "<tr><th nowrap=\"1\" align=\"right\">", &translate('Rewrite rules'), "</th><td>\n";
-	foreach my $k (sort keys %{$CONFIG{rew}}) {
+	foreach my $k (sort keys %{$CONFIG->{rew}}) {
 		my $sel = '';
-		$sel = 'checked="1" ' if (grep(/^[\!]*$k$/, @{$CONFIG{acl}{$name}{else}{rewrite}}));
+		$sel = 'checked="1" ' if (grep(/^[\!]*$k$/, @{$CONFIG->{acl}{$name}{else}{rewrite}}));
 		print "<input type=\"checkbox\" name=\"erew\" value=\"$k\" $sel>$k\n";
 	}
 	print "</td></tr>\n";
 
-	print "<tr><th align=\"right\">", &translate('Redirect url'), "</th><td><input type=\"text\" size=\"50\" name=\"eredirect\" value=\"", $CGI->escapeHTML($CONFIG{acl}{$name}{else}{redirect}), "\" />";
+	print "<tr><th align=\"right\">", &translate('Redirect url'), "</th><td><input type=\"text\" size=\"50\" name=\"eredirect\" value=\"", $CGI->escapeHTML($CONFIG->{acl}{$name}{else}{redirect}), "\" />";
 	print "&nbsp;<input type=\"button\" name=\"eredirectlist\" value=\"", &translate('From list'), "\" onclick=\"window.open('$ENV{SCRIPT_NAME}?action=redirectlist&acl=$ACL&opener=eredirect&lang=$LANG','eredlistwin','scrollbars=yes,status=no,toolbar=no,width=600,height=400,resizable=yes'); return false;\">";
 	print "</td></tr>\n";
-	print "<tr><th align=\"right\">", &translate('Log file'), "</th><td><input type=\"text\" size=\"50\" name=\"elog\" value=\"$CONFIG{acl}{$name}{else}{log}\" /></td></tr>\n";
+	print "<tr><th align=\"right\">", &translate('Log file'), "</th><td><input type=\"text\" size=\"50\" name=\"elog\" value=\"$CONFIG->{acl}{$name}{else}{log}\" /></td></tr>\n";
 	print "<tr><th colspan=\"2\"><hr /></th></tr>\n";
 
 	print "<tr><th colspan=\"2\" align=\"right\"><input type=\"button\" name=\"save\" value=\"", &translate('Apply change'), "\" onclick=\"if (validate_policy() == true) { document.forms[0].apply.value='1'; document.forms[0].submit(); } return false;\"></th></tr>\n";
@@ -2248,15 +2248,15 @@ sub dump_config
 	my $config = '';
 	$config .= "# Global variables\n";
 	foreach my $g (@GLOBALVAR) {
-		$config .= "$g\t$CONFIG{$g}\n" if ($CONFIG{$g});
+		$config .= "$g\t$CONFIG->{$g}\n" if ($CONFIG->{$g});
 	}
 
 	$config .= "\n# Time rules\n";
 	$config .= "# abbrev for weekdays:\n";
 	$config .= "# s = sun, m = mon, t =tue, w = wed, h = thu, f = fri, a = sat\n";
-	foreach my $t (sort keys %{$CONFIG{time}}) {
+	foreach my $t (sort keys %{$CONFIG->{time}}) {
 		$config .= "time $t {\n";
-		foreach my $v (@{$CONFIG{time}{$t}{days}}) {
+		foreach my $v (@{$CONFIG->{time}{$t}{days}}) {
 			$v =~ s/\|/ /o;
 			if ($v =~ /^[0-9\*]+\.[0-9\*]+\.[0-9\*]+/o) {
 				$config .= "\tdate $v\n";
@@ -2268,93 +2268,93 @@ sub dump_config
 	}
 
 	$config .= "\n# Source addresses\n";
-	foreach my $t (sort keys %{$CONFIG{src}}) {
-#		if ($CONFIG{src}{$t}{'outside'}) {
-#			$config .= "src $t outside $CONFIG{src}{$t}{'outside'} {\n";
-#		} elsif ($CONFIG{src}{$t}{'within'}) {
-#			$config .= "src $t within $CONFIG{src}{$t}{'within'} {\n";
+	foreach my $t (sort keys %{$CONFIG->{src}}) {
+#		if ($CONFIG->{src}{$t}{'outside'}) {
+#			$config .= "src $t outside $CONFIG->{src}{$t}{'outside'} {\n";
+#		} elsif ($CONFIG->{src}{$t}{'within'}) {
+#			$config .= "src $t within $CONFIG->{src}{$t}{'within'} {\n";
 #		} else {
 			$config .= "src $t {\n";
 #		}
 		foreach my $k (@SRC_KEYWORD) {
-			foreach my $v (@{$CONFIG{src}{$t}{$k}}) {
+			foreach my $v (@{$CONFIG->{src}{$t}{$k}}) {
 				$config .= "\t$k\t$v\n";
 			}
 		}
-		if ($CONFIG{src}{$t}{within}) {
-			$config .= "\twithin\t$CONFIG{src}{$t}{within}\n";
+		if ($CONFIG->{src}{$t}{within}) {
+			$config .= "\twithin\t$CONFIG->{src}{$t}{within}\n";
 		}
-		if ($CONFIG{src}{$t}{outside}) {
-			$config .= "\toutside\t$CONFIG{src}{$t}{outside}\n";
+		if ($CONFIG->{src}{$t}{outside}) {
+			$config .= "\toutside\t$CONFIG->{src}{$t}{outside}\n";
 		}
-		if ($CONFIG{src}{$t}{log}) {
-			$config .= "\tlog\t$CONFIG{src}{$t}{log}\n";
+		if ($CONFIG->{src}{$t}{log}) {
+			$config .= "\tlog\t$CONFIG->{src}{$t}{log}\n";
 		}
-		if (exists $CONFIG{src}{$t}{else} && (scalar keys %{$CONFIG{src}{$t}{else}} > 0) ) {
+		if (exists $CONFIG->{src}{$t}{else} && (scalar keys %{$CONFIG->{src}{$t}{else}} > 0) ) {
 			$config .= "} else {\n";
 			foreach my $k (@SRC_KEYWORD) {
-				foreach my $v (@{$CONFIG{src}{$t}{else}{$k}}) {
+				foreach my $v (@{$CONFIG->{src}{$t}{else}{$k}}) {
 					$config .= "\t$k\t$v\n";
 				}
 			}
-			if ($CONFIG{src}{$t}{else}{log}) {
-				$config .= "\tlog\t$CONFIG{src}{$t}{else}{log}\n";
+			if ($CONFIG->{src}{$t}{else}{log}) {
+				$config .= "\tlog\t$CONFIG->{src}{$t}{else}{log}\n";
 			}
 		}
 		$config .= "}\n";
 	}
 
 	$config .= "\n# Destination classes\n";
-	foreach my $t (sort keys %{$CONFIG{dest}}) {
-#		if ($CONFIG{dest}{$t}{'outside'}) {
-#			$config .= "dest $t outside $CONFIG{dest}{$t}{'outside'} {\n";
-#		} elsif ($CONFIG{dest}{$t}{'within'}) {
-#			$config .= "dest $t within $CONFIG{dest}{$t}{'within'} {\n";
+	foreach my $t (sort keys %{$CONFIG->{dest}}) {
+#		if ($CONFIG->{dest}{$t}{'outside'}) {
+#			$config .= "dest $t outside $CONFIG->{dest}{$t}{'outside'} {\n";
+#		} elsif ($CONFIG->{dest}{$t}{'within'}) {
+#			$config .= "dest $t within $CONFIG->{dest}{$t}{'within'} {\n";
 #		} else {
 			$config .= "dest $t {\n";
-#			delete $CONFIG{dest}{$t}{'else'};
+#			delete $CONFIG->{dest}{$t}{'else'};
 #		}
-		foreach my $k (sort keys %{$CONFIG{dest}{$t}}) {
+		foreach my $k (sort keys %{$CONFIG->{dest}{$t}}) {
 			next if (grep(/^$k$/, 'else'));
-			$config .= "\t$k\t$CONFIG{dest}{$t}{$k}\n";
+			$config .= "\t$k\t$CONFIG->{dest}{$t}{$k}\n";
 		}
-		if (exists $CONFIG{dest}{$t}{else} && (scalar keys %{$CONFIG{dest}{$t}{else}} > 0) ) {
+		if (exists $CONFIG->{dest}{$t}{else} && (scalar keys %{$CONFIG->{dest}{$t}{else}} > 0) ) {
 			$config .= "} else {\n";
-			foreach my $k (sort keys %{$CONFIG{dest}{$t}{else}}) {
-				$config .= "\t$k\t$CONFIG{dest}{$t}{else}{$k}\n";
+			foreach my $k (sort keys %{$CONFIG->{dest}{$t}{else}}) {
+				$config .= "\t$k\t$CONFIG->{dest}{$t}{else}{$k}\n";
 			}
 		}
 		$config .= "}\n";
 	}
 
 	$config .= "\n# Rewrite rules\n";
-	foreach my $t (sort keys %{$CONFIG{rew}}) {
-#		if ($CONFIG{rew}{$t}{'outside'}) {
-#			$config .= "rew $t outside $CONFIG{rew}{$t}{'outside'} {\n";
-#		} elsif ($CONFIG{rew}{$t}{'within'}) {
-#			$config .= "rew $t within $CONFIG{rew}{$t}{'within'} {\n";
+	foreach my $t (sort keys %{$CONFIG->{rew}}) {
+#		if ($CONFIG->{rew}{$t}{'outside'}) {
+#			$config .= "rew $t outside $CONFIG->{rew}{$t}{'outside'} {\n";
+#		} elsif ($CONFIG->{rew}{$t}{'within'}) {
+#			$config .= "rew $t within $CONFIG->{rew}{$t}{'within'} {\n";
 #		} else {
 			$config .= "rew $t {\n";
 #		}
-		foreach my $v (@{$CONFIG{rew}{$t}{rewrite}}) {
+		foreach my $v (@{$CONFIG->{rew}{$t}{rewrite}}) {
 			$config .= "\t$v\n";
 		}
-		if ($CONFIG{rew}{$t}{within}) {
-			$config .= "\twithin $CONFIG{rew}{$t}{within}\n";
+		if ($CONFIG->{rew}{$t}{within}) {
+			$config .= "\twithin $CONFIG->{rew}{$t}{within}\n";
 		}
-		if ($CONFIG{rew}{$t}{outside}) {
-			$config .= "\toutside $CONFIG{rew}{$t}{outside}\n";
+		if ($CONFIG->{rew}{$t}{outside}) {
+			$config .= "\toutside $CONFIG->{rew}{$t}{outside}\n";
 		}
-		if ($CONFIG{rew}{$t}{log}) {
-			$config .= "\tlog $CONFIG{rew}{$t}{log}\n";
+		if ($CONFIG->{rew}{$t}{log}) {
+			$config .= "\tlog $CONFIG->{rew}{$t}{log}\n";
 		}
-		if (exists $CONFIG{rew}{$t}{else} && (scalar keys %{$CONFIG{rew}{$t}{else}} > 0) ) {
+		if (exists $CONFIG->{rew}{$t}{else} && (scalar keys %{$CONFIG->{rew}{$t}{else}} > 0) ) {
 			$config .= "} else {\n";
-			foreach my $v (@{$CONFIG{rew}{$t}{else}{rewrite}}) {
+			foreach my $v (@{$CONFIG->{rew}{$t}{else}{rewrite}}) {
 				$config .= "\t$v\n";
 			}
-			if ($CONFIG{rew}{$t}{else}{log}) {
-				$config .= "\tlog\t$CONFIG{rew}{$t}{else}{log}\n";
+			if ($CONFIG->{rew}{$t}{else}{log}) {
+				$config .= "\tlog\t$CONFIG->{rew}{$t}{else}{log}\n";
 			}
 		}
 		$config .= "}\n";
@@ -2362,26 +2362,26 @@ sub dump_config
 
 	$config .= "\n# Policies\n";
 	$config .= "acl {\n";
-	foreach my $t (sort keys %{$CONFIG{acl}}) {
+	foreach my $t (sort keys %{$CONFIG->{acl}}) {
 		next if ($t eq 'default');
 		my $extended = '';
-		if (exists $CONFIG{acl}{$t}{extended}{within}) {
-			$config .= "\t$t within $CONFIG{acl}{$t}{extended}{within} {\n";
-		} elsif (exists $CONFIG{acl}{$t}{extended}{outside}) {
-			$config .= "\t$t outside $CONFIG{acl}{$t}{extended}{outside} {\n";
+		if (exists $CONFIG->{acl}{$t}{extended}{within}) {
+			$config .= "\t$t within $CONFIG->{acl}{$t}{extended}{within} {\n";
+		} elsif (exists $CONFIG->{acl}{$t}{extended}{outside}) {
+			$config .= "\t$t outside $CONFIG->{acl}{$t}{extended}{outside} {\n";
 		} else {
 			$config .= "\t$t {\n";
 		}
-		foreach my $v (sort keys %{$CONFIG{acl}{$t}}) {
+		foreach my $v (sort keys %{$CONFIG->{acl}{$t}}) {
 			next if ( ($v eq 'extended') || ($v eq 'else') );
 			if ($v eq 'rewrite') {
-				$config .= "\t\t$v\t" . join(' ', @{$CONFIG{acl}{$t}{$v}}) . "\n";
+				$config .= "\t\t$v\t" . join(' ', @{$CONFIG->{acl}{$t}{$v}}) . "\n";
 			} elsif ($v ne 'pass') {
-				$config .= "\t\t$v\t$CONFIG{acl}{$t}{$v}\n";
+				$config .= "\t\t$v\t$CONFIG->{acl}{$t}{$v}\n";
 			} else {
 				$config .= "\t\t$v\t";
 				my $last = '';
-				foreach (@{$CONFIG{acl}{$t}{$v}}) {
+				foreach (@{$CONFIG->{acl}{$t}{$v}}) {
 					if (($_ eq 'none') || ($_ eq 'all')) {
 						$last = $_;
 						next;
@@ -2391,17 +2391,17 @@ sub dump_config
 				$config .= "$last\n";
 			}
 		}
-		if (exists $CONFIG{acl}{$t}{else} && (scalar keys %{$CONFIG{acl}{$t}{else}} > 0) ) {
+		if (exists $CONFIG->{acl}{$t}{else} && (scalar keys %{$CONFIG->{acl}{$t}{else}} > 0) ) {
 			$config .= "\t} else {\n";
-			foreach my $v (sort keys %{$CONFIG{acl}{$t}{else}}) {
+			foreach my $v (sort keys %{$CONFIG->{acl}{$t}{else}}) {
 				if ($v eq 'rewrite') {
-					$config .= "\t\t$v\t" . join(' ', @{$CONFIG{acl}{$t}{else}{$v}}) . "\n";
+					$config .= "\t\t$v\t" . join(' ', @{$CONFIG->{acl}{$t}{else}{$v}}) . "\n";
 				} elsif ($v ne 'pass') {
-					$config .= "\t\t$v\t$CONFIG{acl}{$t}{else}{$v}\n";
+					$config .= "\t\t$v\t$CONFIG->{acl}{$t}{else}{$v}\n";
 				} else {
 					$config .= "\t\t$v\t";
 					my $last = '';
-					foreach (@{$CONFIG{acl}{$t}{else}{$v}}) {
+					foreach (@{$CONFIG->{acl}{$t}{else}{$v}}) {
 						if (($_ eq 'none') || ($_ eq 'all')) {
 							$last = $_;
 							next;
@@ -2415,39 +2415,39 @@ sub dump_config
 		$config .= "\t}\n";
 	}
 	my $extended = '';
-	if (exists $CONFIG{acl}{default}{extended}{within}) {
-		$config .= "\tdefault within $CONFIG{acl}{default}{extended}{within} {\n";
-	} elsif (exists $CONFIG{acl}{default}{extended}{outside}) {
-		$config .= "\tdefault outside $CONFIG{acl}{default}{extended}{outside} {\n";
+	if (exists $CONFIG->{acl}{default}{extended}{within}) {
+		$config .= "\tdefault within $CONFIG->{acl}{default}{extended}{within} {\n";
+	} elsif (exists $CONFIG->{acl}{default}{extended}{outside}) {
+		$config .= "\tdefault outside $CONFIG->{acl}{default}{extended}{outside} {\n";
 	} else {
 		$config .= "\tdefault {\n";
 	}
-	foreach my $v (sort keys %{$CONFIG{acl}{default}}) {
+	foreach my $v (sort keys %{$CONFIG->{acl}{default}}) {
 		next if ( ($v eq 'extended') || ($v eq 'else') );
 		if ($v eq 'rewrite') {
-			$config .= "\t\t$v\t" . join(' ', @{$CONFIG{acl}{default}{$v}}) . "\n";
+			$config .= "\t\t$v\t" . join(' ', @{$CONFIG->{acl}{default}{$v}}) . "\n";
 		} elsif ($v ne 'pass') {
-			$config .= "\t\t$v\t$CONFIG{acl}{default}{$v}\n";
+			$config .= "\t\t$v\t$CONFIG->{acl}{default}{$v}\n";
 		} else {
-			$config .= "\t\t$v\t" . join(' ', @{$CONFIG{acl}{default}{$v}}) . "\n";
+			$config .= "\t\t$v\t" . join(' ', @{$CONFIG->{acl}{default}{$v}}) . "\n";
 		}
 	}
-	if (exists $CONFIG{acl}{default}{else} && (scalar keys %{$CONFIG{acl}{default}{else}} > 0)) {
+	if (exists $CONFIG->{acl}{default}{else} && (scalar keys %{$CONFIG->{acl}{default}{else}} > 0)) {
 		$config .= "\t} else {\n";
-		foreach my $v (sort keys %{$CONFIG{acl}{default}{else}}) {
+		foreach my $v (sort keys %{$CONFIG->{acl}{default}{else}}) {
 			if ($v eq 'rewrite') {
-				$config .= "\t\t$v\t" . join(' ', @{$CONFIG{acl}{default}{else}{$v}}) . "\n";
+				$config .= "\t\t$v\t" . join(' ', @{$CONFIG->{acl}{default}{else}{$v}}) . "\n";
 			} elsif ($v ne 'pass') {
-				$config .= "\t\t$v\t$CONFIG{acl}{default}{else}{$v}\n";
+				$config .= "\t\t$v\t$CONFIG->{acl}{default}{else}{$v}\n";
 			} else {
-				$config .= "\t\t$v\t" . join(' ', @{$CONFIG{acl}{default}{else}{$v}}) . "\n";
+				$config .= "\t\t$v\t" . join(' ', @{$CONFIG->{acl}{default}{else}{$v}}) . "\n";
 			}
 		}
 	}
 	$config .= "\t}\n";
 	$config .= "}\n";
 
-	return $config;
+	return \$config;
 }
 
 sub save_config
@@ -2459,7 +2459,8 @@ sub save_config
 		$ERROR = "Can't save configuration to file $CONF_FILE: $!\n";
 		return 0;
 	}
-	print OUT "$content\n";
+	#print OUT "$content\n";
+	print OUT "${$content}\n";
 	close(OUT);
 
 	return 1;
@@ -2481,14 +2482,14 @@ sub show_listcontent
 	print "<input type=\"hidden\" name=\"apply\" value=\"\" />\n";
 	print "<input type=\"hidden\" name=\"filelist\" value=\"$bl\" />\n";
 
-	if (!$bl || !-e "$CONFIG{dbhome}/$bl") {
+	if (!$bl || !-e "$CONFIG->{dbhome}/$bl") {
 		&error("No file set");
 		print "<input type=\"button\" name=\"save\" value=\"", &translate('Close'), "\" onclick=\"window.close(); return false;\">\n";
 	} else {
 		print "<h2>", &translate('List'), " : $bl</h2>\n";
 
-		if (not open(IN, "$CONFIG{dbhome}/$bl")) {
-			&error("Can't read file $CONFIG{dbhome}/$bl: $!");
+		if (not open(IN, "$CONFIG->{dbhome}/$bl")) {
+			&error("Can't read file $CONFIG->{dbhome}/$bl: $!");
 		} else {
 			print "<table><tr><th align=\"left\">\n";
 			print "<textarea name=\"content\" cols=\"45\" rows=\"42\" wrap=\"off\">\n";
@@ -2528,7 +2529,7 @@ sub save_listcontent
 	my @datas = split(/\n+/, $content);
 	$content = '';
 	map { s/^[\s]+//; s/[\s]+$//; } @datas;
-	if (not open(OUT, ">$CONFIG{dbhome}/$bl.tmp")) {
+	if (not open(OUT, ">$CONFIG->{dbhome}/$bl.tmp")) {
 		&error("Can't read file $bl.tmp: $!");
 	} else {
 		foreach my $l (@datas) {
@@ -2536,33 +2537,33 @@ sub save_listcontent
 		}
 		close(OUT);
 	}
-	if (-e "$CONFIG{dbhome}/$bl") {
+	if (-e "$CONFIG->{dbhome}/$bl") {
 		# Create a diff file
 		if ($DIFF) {
-			`$DIFF -U 0 $CONFIG{dbhome}/$bl $CONFIG{dbhome}/$bl.tmp  | $GREP -v "^\@\@" | $GREP -v "^--- " | $GREP -v "^+++ " > $CONFIG{dbhome}/$bl.tmpdiff`;
-			print `$SQUIDGUARD -u $CONFIG{dbhome}/$bl.tmpdiff`;
+			`$DIFF -U 0 $CONFIG->{dbhome}/$bl $CONFIG->{dbhome}/$bl.tmp  | $GREP -v "^\@\@" | $GREP -v "^--- " | $GREP -v "^+++ " > $CONFIG->{dbhome}/$bl.tmpdiff`;
+			print `$SQUIDGUARD -u $CONFIG->{dbhome}/$bl.tmpdiff`;
 			# Save diff into the historical file.
 			if ($KEEP_DIFF) {
-				if (open(IN, "$CONFIG{dbhome}/$bl.tmpdiff")) {
+				if (open(IN, "$CONFIG->{dbhome}/$bl.tmpdiff")) {
 					my @text = <IN>;
 					close(IN);
-					if (open(OUT, ">>$CONFIG{dbhome}/$bl.diff.hist")) {
+					if (open(OUT, ">>$CONFIG->{dbhome}/$bl.diff.hist")) {
 						print OUT @text;
 						close(OUT);
 					} else {
-						&error("Can't write to file $CONFIG{dbhome}/$bl.diff.hist: $!");
+						&error("Can't write to file $CONFIG->{dbhome}/$bl.diff.hist: $!");
 					}
 				} else {
-					&error("Can't read file $CONFIG{dbhome}/$bl.tmpdiff: $!");
+					&error("Can't read file $CONFIG->{dbhome}/$bl.tmpdiff: $!");
 				}
 			}
-			unlink("$CONFIG{dbhome}/$bl.tmpdiff");
+			unlink("$CONFIG->{dbhome}/$bl.tmpdiff");
 		}
-		unlink("$CONFIG{dbhome}/$bl");
+		unlink("$CONFIG->{dbhome}/$bl");
 	} else {
 		$DIFF = '';
 	}
-	rename("$CONFIG{dbhome}/$bl.tmp", "$CONFIG{dbhome}/$bl");
+	rename("$CONFIG->{dbhome}/$bl.tmp", "$CONFIG->{dbhome}/$bl");
 	if (!$DIFF) {
 		&rebuild_database($bl);
 	}
@@ -2582,7 +2583,7 @@ sub apply_change
 	# Update Global variables
 	if (defined $CGI->param('dbhome')) {
 		foreach my $g (@GLOBALVAR) {
-			$CONFIG{$g} = $CGI->param($g) || '';
+			$CONFIG->{$g} = $CGI->param($g) || '';
 			if ($g eq 'dbhome' && !-d $CGI->param($g)) {
 				$ERROR = "Databases home directory " . $CGI->param($g) . " doesn't exists";
 			} elsif ($g eq 'logdir' && !-d $CGI->param($g)) {
@@ -2610,16 +2611,16 @@ sub apply_change
 
 		my $oldval = $OLD;
 		if ($oldval) {
-			for (my $i = 0; $i <= $#{$CONFIG{time}{$name}{days}}; $i++) {
-				if ($CONFIG{time}{$name}{days}[$i] eq "$oldval") {
-					$CONFIG{time}{$name}{days}[$i] = ($week || $date);
-					$CONFIG{time}{$name}{days}[$i] .= "|$starth:$startm-$endh:$endm" if ($starth ne '');
+			for (my $i = 0; $i <= $#{$CONFIG->{time}{$name}{days}}; $i++) {
+				if ($CONFIG->{time}{$name}{days}[$i] eq "$oldval") {
+					$CONFIG->{time}{$name}{days}[$i] = ($week || $date);
+					$CONFIG->{time}{$name}{days}[$i] .= "|$starth:$startm-$endh:$endm" if ($starth ne '');
 					last;
 				}
 			}
 		} else {
-			push(@{$CONFIG{time}{$name}{days}}, ($week || $date));
-			${$CONFIG{time}{$name}{days}}[-1] .= "|$starth:$startm-$endh:$endm" if ($starth ne '');
+			push(@{$CONFIG->{time}{$name}{days}}, ($week || $date));
+			${$CONFIG->{time}{$name}{days}}[-1] .= "|$starth:$startm-$endh:$endm" if ($starth ne '');
 		}
 		$ACTION = 'times';
 
@@ -2629,14 +2630,14 @@ sub apply_change
 		my $oldval = $OLD;
 		if ($oldval) {
 			my @days = ();
-			for (my $i = 0; $i <= $#{$CONFIG{time}{$name}{days}}; $i++) {
-				if ($CONFIG{time}{$name}{days}[$i] ne "$oldval") {
-					push(@days, $CONFIG{time}{$name}{days}[$i]);
+			for (my $i = 0; $i <= $#{$CONFIG->{time}{$name}{days}}; $i++) {
+				if ($CONFIG->{time}{$name}{days}[$i] ne "$oldval") {
+					push(@days, $CONFIG->{time}{$name}{days}[$i]);
 				}
 			}
-			@{$CONFIG{time}{$name}{days}} = @days;
+			@{$CONFIG->{time}{$name}{days}} = @days;
 		} else {
-			delete $CONFIG{time}{$name}{days};
+			delete $CONFIG->{time}{$name}{days};
 		}
 		$ACTION = 'times';
 	}
@@ -2660,76 +2661,76 @@ sub apply_change
 			if ($type eq 'log') {
 				$srcval = 'anonymous ' . $srcval if ($anonymous eq 'on');
 				if ($else) {
-					$CONFIG{rew}{$name}{else}{$type} = $srcval;
+					$CONFIG->{rew}{$name}{else}{$type} = $srcval;
 				} else {
-					$CONFIG{rew}{$name}{$type} = $srcval;
+					$CONFIG->{rew}{$name}{$type} = $srcval;
 				}
 			} elsif ($type eq 'time') {
-				delete $CONFIG{rew}{$name}{within};
-				delete $CONFIG{rew}{$name}{outside};
+				delete $CONFIG->{rew}{$name}{within};
+				delete $CONFIG->{rew}{$name}{outside};
 				($type, $srcval) = split(/[\s\t]+/, $srcval, 2);
-				$CONFIG{rew}{$name}{$type} = $srcval;
+				$CONFIG->{rew}{$name}{$type} = $srcval;
 			} else {
 				if ($oldval) {
 					if ($else) {
-						for (my $i = 0; $i <= $#{$CONFIG{rew}{$name}{else}{rewrite}}; $i++) {
-							if ($CONFIG{rew}{$name}{else}{rewrite}[$i] eq $oldval) {
-								$CONFIG{rew}{$name}{else}{rewrite}[$i] = 's@' . $patt . '@' . $subst . '@' . join('', sort @opt);
+						for (my $i = 0; $i <= $#{$CONFIG->{rew}{$name}{else}{rewrite}}; $i++) {
+							if ($CONFIG->{rew}{$name}{else}{rewrite}[$i] eq $oldval) {
+								$CONFIG->{rew}{$name}{else}{rewrite}[$i] = 's@' . $patt . '@' . $subst . '@' . join('', sort @opt);
 								last;
 							}
 						}
 					} else {
-						for (my $i = 0; $i <= $#{$CONFIG{rew}{$name}{rewrite}}; $i++) {
-							if ($CONFIG{rew}{$name}{rewrite}[$i] eq $oldval) {
-								$CONFIG{rew}{$name}{rewrite}[$i] = 's@' . $patt . '@' . $subst . '@' . join('', sort @opt);
+						for (my $i = 0; $i <= $#{$CONFIG->{rew}{$name}{rewrite}}; $i++) {
+							if ($CONFIG->{rew}{$name}{rewrite}[$i] eq $oldval) {
+								$CONFIG->{rew}{$name}{rewrite}[$i] = 's@' . $patt . '@' . $subst . '@' . join('', sort @opt);
 								last;
 							}
 						}
 					}
 				} else {
 					if ($else) {
-						push(@{$CONFIG{rew}{$name}{else}{rewrite}}, 's@' . $patt . '@' . $subst . '@' . join('', sort @opt)) if ($patt && $subst);
+						push(@{$CONFIG->{rew}{$name}{else}{rewrite}}, 's@' . $patt . '@' . $subst . '@' . join('', sort @opt)) if ($patt && $subst);
 					} else {
-						push(@{$CONFIG{rew}{$name}{rewrite}}, 's@' . $patt . '@' . $subst . '@'. join('', sort @opt)) if ($patt && $subst);
+						push(@{$CONFIG->{rew}{$name}{rewrite}}, 's@' . $patt . '@' . $subst . '@'. join('', sort @opt)) if ($patt && $subst);
 					}
 				}
 			}
 		} elsif ($oldval) {
 			my @rewrites = ();
 			if ($else) {
-				for (my $i = 0; $i <= $#{$CONFIG{rew}{$name}{else}{rewrite}}; $i++) {
-					if ($CONFIG{rew}{$name}{else}{rewrite}[$i] ne $oldval) {
+				for (my $i = 0; $i <= $#{$CONFIG->{rew}{$name}{else}{rewrite}}; $i++) {
+					if ($CONFIG->{rew}{$name}{else}{rewrite}[$i] ne $oldval) {
 						
-						push(@rewrites, $CONFIG{rew}{$name}{else}{rewrite}[$i]);
+						push(@rewrites, $CONFIG->{rew}{$name}{else}{rewrite}[$i]);
 					}
 				}
-				delete $CONFIG{rew}{$name}{else}{rewrite};
-				@{$CONFIG{rew}{$name}{else}{rewrite}} = @rewrites;
+				delete $CONFIG->{rew}{$name}{else}{rewrite};
+				@{$CONFIG->{rew}{$name}{else}{rewrite}} = @rewrites;
 				if ($oldval =~ /^(log|within|outside)/) {
-					delete $CONFIG{rew}{$name}{else}{$1};
+					delete $CONFIG->{rew}{$name}{else}{$1};
 				}
 			} else {
-				for (my $i = 0; $i <= $#{$CONFIG{rew}{$name}{rewrite}}; $i++) {
-					if ($CONFIG{rew}{$name}{rewrite}[$i] ne $oldval) {
+				for (my $i = 0; $i <= $#{$CONFIG->{rew}{$name}{rewrite}}; $i++) {
+					if ($CONFIG->{rew}{$name}{rewrite}[$i] ne $oldval) {
 						
-						push(@rewrites, $CONFIG{rew}{$name}{rewrite}[$i]);
+						push(@rewrites, $CONFIG->{rew}{$name}{rewrite}[$i]);
 					}
 				}
-				delete $CONFIG{rew}{$name}{rewrite};
-				@{$CONFIG{rew}{$name}{rewrite}} = @rewrites;
+				delete $CONFIG->{rew}{$name}{rewrite};
+				@{$CONFIG->{rew}{$name}{rewrite}} = @rewrites;
 				if ($oldval =~ /^(log|within|outside)/) {
-					delete $CONFIG{rew}{$name}{$1};
+					delete $CONFIG->{rew}{$name}{$1};
 				}
 			}
 		} else {
 			if ($else) {
-				delete $CONFIG{rew}{$name}{else};
+				delete $CONFIG->{rew}{$name}{else};
 			} else {
-				delete $CONFIG{rew}{$name};
+				delete $CONFIG->{rew}{$name};
 			}
 		}
-		if (!exists $CONFIG{rew}{$name}{within} && !exists $CONFIG{rew}{$name}{outside}) {
-			delete $CONFIG{rew}{$name}{else};
+		if (!exists $CONFIG->{rew}{$name}{within} && !exists $CONFIG->{rew}{$name}{outside}) {
+			delete $CONFIG->{rew}{$name}{else};
 		}
 		$ACTION = 'rewrites';
 	}
@@ -2749,41 +2750,41 @@ sub apply_change
 			if (grep(/^$key$/, @SRC_KEYWORD)) {
 				$val = quotemeta($val);
 				if ($else) {
-					@{$CONFIG{src}{$name}{else}{$key}} = grep(!/^$val$/, @{$CONFIG{src}{$name}{else}{$key}});
+					@{$CONFIG->{src}{$name}{else}{$key}} = grep(!/^$val$/, @{$CONFIG->{src}{$name}{else}{$key}});
 				} else {
-					@{$CONFIG{src}{$name}{$key}} = grep(!/^$val$/, @{$CONFIG{src}{$name}{$key}});
+					@{$CONFIG->{src}{$name}{$key}} = grep(!/^$val$/, @{$CONFIG->{src}{$name}{$key}});
 				}
 			} else {
 				if ($else) {
-					delete $CONFIG{src}{$name}{else}{$key};
+					delete $CONFIG->{src}{$name}{else}{$key};
 				} else {
-					delete $CONFIG{src}{$name}{$key};
+					delete $CONFIG->{src}{$name}{$key};
 				}
 			}
 		}
 		if ($srcval) {
 			if (grep(/^$type$/, @SRC_KEYWORD)) {
 				if ($else) {
-					push(@{$CONFIG{src}{$name}{else}{$type}}, "$srcval");
+					push(@{$CONFIG->{src}{$name}{else}{$type}}, "$srcval");
 				} else {
-					push(@{$CONFIG{src}{$name}{$type}}, "$srcval");
+					push(@{$CONFIG->{src}{$name}{$type}}, "$srcval");
 				}
 			} elsif ($type eq 'log') {
 				$srcval = 'anonymous ' . $srcval if ($anonymous eq 'on');
 				if ($else) {
-					$CONFIG{src}{$name}{else}{$type} = $srcval;
+					$CONFIG->{src}{$name}{else}{$type} = $srcval;
 				} else {
-					$CONFIG{src}{$name}{$type} = $srcval;
+					$CONFIG->{src}{$name}{$type} = $srcval;
 				}
 			} elsif ($type eq 'time') {
-				delete $CONFIG{src}{$name}{within};
-				delete $CONFIG{src}{$name}{outside};
+				delete $CONFIG->{src}{$name}{within};
+				delete $CONFIG->{src}{$name}{outside};
 				($type, $srcval) = split(/[\s\t]+/, $srcval, 2);
-				$CONFIG{src}{$name}{$type} = $srcval;
+				$CONFIG->{src}{$name}{$type} = $srcval;
 			}
 		}
-		if (!exists $CONFIG{src}{$name}{within} && !exists $CONFIG{src}{$name}{outside}) {
-			delete $CONFIG{src}{$name}{else};
+		if (!exists $CONFIG->{src}{$name}{within} && !exists $CONFIG->{src}{$name}{outside}) {
+			delete $CONFIG->{src}{$name}{else};
 		}
 		$ACTION = 'sources';
 
@@ -2799,26 +2800,26 @@ sub apply_change
 			if (grep(/^$key$/, @SRC_KEYWORD)) {
 				$val = quotemeta($val);
 				if ($else) {
-					@{$CONFIG{src}{$name}{else}{$key}} = grep(!/^$val$/, @{$CONFIG{src}{$name}{else}{$key}});
+					@{$CONFIG->{src}{$name}{else}{$key}} = grep(!/^$val$/, @{$CONFIG->{src}{$name}{else}{$key}});
 				} else {
-					@{$CONFIG{src}{$name}{$key}} = grep(!/^$val$/, @{$CONFIG{src}{$name}{$key}});
+					@{$CONFIG->{src}{$name}{$key}} = grep(!/^$val$/, @{$CONFIG->{src}{$name}{$key}});
 				}
 			} else {
 				if ($else) {
-					delete $CONFIG{src}{$name}{else}{$key};
+					delete $CONFIG->{src}{$name}{else}{$key};
 				} else {
-					delete $CONFIG{src}{$name}{$key};
+					delete $CONFIG->{src}{$name}{$key};
 				}
 			}
 		} else {
 			if ($else) {
-				delete $CONFIG{src}{$name}{else};
+				delete $CONFIG->{src}{$name}{else};
 			} else {
-				delete $CONFIG{src}{$name};
+				delete $CONFIG->{src}{$name};
 			}
 		}
-		if (!exists $CONFIG{src}{$name}{within} && !exists $CONFIG{src}{$name}{outside}) {
-			delete $CONFIG{src}{$name}{else};
+		if (!exists $CONFIG->{src}{$name}{within} && !exists $CONFIG->{src}{$name}{outside}) {
+			delete $CONFIG->{src}{$name}{else};
 		}
 		$ACTION = 'sources';
 	}
@@ -2838,72 +2839,72 @@ sub apply_change
 			my $redirect = $CGI->param('redirect') || '';
 			my $log = $CGI->param('log') || '';
 			my $anon = $CGI->param('anonymous') || '';
-			delete $CONFIG{dest}{$name}{within};
-			delete $CONFIG{dest}{$name}{outside};
+			delete $CONFIG->{dest}{$name}{within};
+			delete $CONFIG->{dest}{$name}{outside};
 			if ($time) {
 				$time =~ /^(within|outside) (.*)/;
-				$CONFIG{dest}{$name}{$1} = $2;
+				$CONFIG->{dest}{$name}{$1} = $2;
 			}
 			if (!$else) {
 				if ($domain) {
-					$CONFIG{dest}{$name}{domainlist} = $domain;
+					$CONFIG->{dest}{$name}{domainlist} = $domain;
 				} else {
-					delete $CONFIG{dest}{$name}{domainlist};
+					delete $CONFIG->{dest}{$name}{domainlist};
 				}
 				if ($url) {
-					$CONFIG{dest}{$name}{urllist} = $url;
+					$CONFIG->{dest}{$name}{urllist} = $url;
 				} else {
-					delete $CONFIG{dest}{$name}{urllist};
+					delete $CONFIG->{dest}{$name}{urllist};
 				}
 				if ($expression) {
-					$CONFIG{dest}{$name}{expressionlist} = $expression;
+					$CONFIG->{dest}{$name}{expressionlist} = $expression;
 				} else {
-					delete $CONFIG{dest}{$name}{expressionlist};
+					delete $CONFIG->{dest}{$name}{expressionlist};
 				}
 				if ($redirect) {
-					$CONFIG{dest}{$name}{redirect} = $redirect;
+					$CONFIG->{dest}{$name}{redirect} = $redirect;
 				} else {
-					delete $CONFIG{dest}{$name}{redirect};
+					delete $CONFIG->{dest}{$name}{redirect};
 				}
 				if ($log) {
 					$anon = 'anonymous ' if ($anon);;
-					$CONFIG{dest}{$name}{log} = $anon . $log;
+					$CONFIG->{dest}{$name}{log} = $anon . $log;
 				} else {
-					delete $CONFIG{dest}{$name}{log};
+					delete $CONFIG->{dest}{$name}{log};
 				}
 			} else {
 				if ($domain) {
-					$CONFIG{dest}{$name}{else}{domainlist} = $domain;
+					$CONFIG->{dest}{$name}{else}{domainlist} = $domain;
 				} else {
-					delete $CONFIG{dest}{$name}{else}{domainlist};
+					delete $CONFIG->{dest}{$name}{else}{domainlist};
 				}
 				if ($url) {
-					$CONFIG{dest}{$name}{else}{urllist} = $url;
+					$CONFIG->{dest}{$name}{else}{urllist} = $url;
 				} else {
-					delete $CONFIG{dest}{$name}{else}{urllist};
+					delete $CONFIG->{dest}{$name}{else}{urllist};
 				}
 				if ($expression) {
-					$CONFIG{dest}{$name}{else}{expressionlist} = $expression;
+					$CONFIG->{dest}{$name}{else}{expressionlist} = $expression;
 				} else {
-					delete $CONFIG{dest}{$name}{else}{expressionlist};
+					delete $CONFIG->{dest}{$name}{else}{expressionlist};
 				}
 				if ($redirect) {
-					$CONFIG{dest}{$name}{else}{redirect} = $redirect;
+					$CONFIG->{dest}{$name}{else}{redirect} = $redirect;
 				} else {
-					delete $CONFIG{dest}{$name}{else}{redirect};
+					delete $CONFIG->{dest}{$name}{else}{redirect};
 				}
 				if ($log) {
 					$anon = 'anonymous ' if ($anon);;
-					$CONFIG{dest}{$name}{else}{log} = $anon . $log;
+					$CONFIG->{dest}{$name}{else}{log} = $anon . $log;
 				} else {
-					delete $CONFIG{dest}{$name}{else}{log};
+					delete $CONFIG->{dest}{$name}{else}{log};
 				}
 			}
 		} else {
 			if (!$else) {
-				delete $CONFIG{dest}{$name};
+				delete $CONFIG->{dest}{$name};
 			} else {
-				delete $CONFIG{dest}{$name}{else};
+				delete $CONFIG->{dest}{$name}{else};
 			}
 		}
 		if ($CGI->param('default')) {
@@ -2919,51 +2920,51 @@ sub apply_change
 		my $name = $CGI->param('acl') || '';
 		$name =~ s/[^a-z0-9\-\_]//ig;
 		if ($ACTION ne 'aclsdelete') {
-			delete $CONFIG{acl}{$name}{pass};
-			delete $CONFIG{acl}{$name}{else}{pass};
+			delete $CONFIG->{acl}{$name}{pass};
+			delete $CONFIG->{acl}{$name}{else}{pass};
 			my @dests = $CGI->param('dest');
 			my $all = 1;
 			$all = 0 if (!grep(/^all$/, @dests));
 			my $none = 0;
 			$none = 1 if (grep(/^none$/, @dests));
-			push(@{$CONFIG{acl}{$name}{'pass'}}, grep(!/^(all|none)$/, @dests)) if ($#dests >= 0);
-			push(@{$CONFIG{acl}{$name}{'pass'}}, 'all') if ($all);
-			push(@{$CONFIG{acl}{$name}{'pass'}}, 'none') if ($none && !$all);
+			push(@{$CONFIG->{acl}{$name}{'pass'}}, grep(!/^(all|none)$/, @dests)) if ($#dests >= 0);
+			push(@{$CONFIG->{acl}{$name}{'pass'}}, 'all') if ($all);
+			push(@{$CONFIG->{acl}{$name}{'pass'}}, 'none') if ($none && !$all);
 			my @edests = $CGI->param('edest');
 			$all = 1;
 			$none = 0;
 			$all = 0 if (!grep(/^all$/, @edests));
 			$none = 1 if (grep(/^none$/, @edests));
-			push(@{$CONFIG{acl}{$name}{else}{'pass'}}, grep(!/^(all|none)$/, @edests)) if ($#edests >= 0);
-			push(@{$CONFIG{acl}{$name}{else}{'pass'}}, 'all') if ($all);
-			push(@{$CONFIG{acl}{$name}{else}{'pass'}}, 'none') if ($none && !$all);
-			delete $CONFIG{acl}{$name}{'rewrite'};
-			delete $CONFIG{acl}{$name}{else}{'rewrite'};
+			push(@{$CONFIG->{acl}{$name}{else}{'pass'}}, grep(!/^(all|none)$/, @edests)) if ($#edests >= 0);
+			push(@{$CONFIG->{acl}{$name}{else}{'pass'}}, 'all') if ($all);
+			push(@{$CONFIG->{acl}{$name}{else}{'pass'}}, 'none') if ($none && !$all);
+			delete $CONFIG->{acl}{$name}{'rewrite'};
+			delete $CONFIG->{acl}{$name}{else}{'rewrite'};
 			my @rews = $CGI->param('rew');
-			push(@{$CONFIG{acl}{$name}{'rewrite'}}, @rews) if ($#rews >= 0);
+			push(@{$CONFIG->{acl}{$name}{'rewrite'}}, @rews) if ($#rews >= 0);
 			@rews = $CGI->param('erew');
-			push(@{$CONFIG{acl}{$name}{else}{'rewrite'}}, @rews) if ($#rews >= 0);
+			push(@{$CONFIG->{acl}{$name}{else}{'rewrite'}}, @rews) if ($#rews >= 0);
 			my $redirect = $CGI->param('redirect') || '';
-			delete $CONFIG{acl}{$name}{redirect};
-			$CONFIG{acl}{$name}{redirect} = $redirect if ($redirect);
+			delete $CONFIG->{acl}{$name}{redirect};
+			$CONFIG->{acl}{$name}{redirect} = $redirect if ($redirect);
 			$redirect = $CGI->param('eredirect') || '';
-			delete $CONFIG{acl}{$name}{else}{redirect};
-			$CONFIG{acl}{$name}{else}{redirect} = $redirect if ($redirect);
+			delete $CONFIG->{acl}{$name}{else}{redirect};
+			$CONFIG->{acl}{$name}{else}{redirect} = $redirect if ($redirect);
 			my $log = $CGI->param('log') || '';
-			delete $CONFIG{acl}{$name}{log};
-			$CONFIG{acl}{$name}{log} = $log if ($log);
+			delete $CONFIG->{acl}{$name}{log};
+			$CONFIG->{acl}{$name}{log} = $log if ($log);
 			$log = $CGI->param('elog') || '';
-			delete $CONFIG{acl}{$name}{else}{log};
-			$CONFIG{acl}{$name}{else}{log} = $log if ($log);
+			delete $CONFIG->{acl}{$name}{else}{log};
+			$CONFIG->{acl}{$name}{else}{log} = $log if ($log);
 
-			delete $CONFIG{acl}{$name}{extended};
+			delete $CONFIG->{acl}{$name}{extended};
 			my $time = $CGI->param('time') || '';
 			if ($time) {
 				$time =~ /^([^\s]+)\s([^\s]+)$/;
-				$CONFIG{acl}{$name}{extended}{$1} = $2;
+				$CONFIG->{acl}{$name}{extended}{$1} = $2;
 			}
 		} else {
-			delete $CONFIG{acl}{$name};
+			delete $CONFIG->{acl}{$name};
 		}
 		$ACTION = 'acl';
 	}
@@ -2985,31 +2986,31 @@ sub show_redirectlist
 
 	if ($CAT ne '') {
 		if ($OPENER eq 'eredirect') {
-			$curval = $CONFIG{'dest'}{$CAT}{'else'}{'redirect'} || '';
+			$curval = $CONFIG->{'dest'}{$CAT}{'else'}{'redirect'} || '';
 		} else {
-			$curval = $CONFIG{'dest'}{$CAT}{'redirect'} || '';
+			$curval = $CONFIG->{'dest'}{$CAT}{'redirect'} || '';
 		}
 	} elsif ($SRC ne '') {
 		if ($OPENER eq 'eredirect') {
-			$curval = $CONFIG{'src'}{$SRC}{'else'}{'redirect'} || '';
+			$curval = $CONFIG->{'src'}{$SRC}{'else'}{'redirect'} || '';
 		} else {
-			$curval = $CONFIG{'src'}{$SRC}{'redirect'} || '';
+			$curval = $CONFIG->{'src'}{$SRC}{'redirect'} || '';
 		}
 	} else {
 		if ($OPENER eq 'eredirect') {
-			$curval = $CONFIG{'acl'}{$ACL}{'else'}{'redirect'} || '';
+			$curval = $CONFIG->{'acl'}{$ACL}{'else'}{'redirect'} || '';
 		} else {
-			$curval = $CONFIG{'acl'}{$ACL}{'redirect'} || '';
+			$curval = $CONFIG->{'acl'}{$ACL}{'redirect'} || '';
 		}
 	}
 
 	foreach $o (@topobjects) {
-		foreach $k (keys %{$CONFIG{$o}}) {
-			if ($CONFIG{$o}{$k}{'redirect'}) {
-				push(@nonuniq, $CONFIG{$o}{$k}{'redirect'});
+		foreach $k (keys %{$CONFIG->{$o}}) {
+			if ($CONFIG->{$o}{$k}{'redirect'}) {
+				push(@nonuniq, $CONFIG->{$o}{$k}{'redirect'});
 			}
-			if ($CONFIG{$o}{$k}{else}{'redirect'}) {
-				push(@nonuniq, $CONFIG{$o}{$k}{'else'}{'redirect'});
+			if ($CONFIG->{$o}{$k}{else}{'redirect'}) {
+				push(@nonuniq, $CONFIG->{$o}{$k}{'else'}{'redirect'});
 			}
 		}
 	}
@@ -3130,7 +3131,7 @@ sub show_log_schedule
 
 	$colspan = "colspan=\"$colspan\"" if ($colspan);
 
-	my $v = $CONFIG{$type}{$key}{log} || '';
+	my $v = $CONFIG->{$type}{$key}{log} || '';
 	my $anon = '';
 	if ($v =~ s/anonymous[\s\t]+(.*)/$1/) {
 		$anon = "(" . &translate('anonymized') . ")";
@@ -3141,9 +3142,9 @@ sub show_log_schedule
 		print "<tr><th>&nbsp;</th><td $colspan><b>", &translate('No log file'), "</b>";
 	}
 	print "$v $anon";
-	print "</td><th><a href=\"\" onclick=\"document.forms[0].$elt.value='$key'; document.forms[0].oldvalue.value='", &encode_url("log $CONFIG{$type}{$key}{log}"), "'; document.forms[0].action.value='${elt}sedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Edit'), "\">$IMG_EDIT</a></th>";
+	print "</td><th><a href=\"\" onclick=\"document.forms[0].$elt.value='$key'; document.forms[0].oldvalue.value='", &encode_url("log $CONFIG->{$type}{$key}{log}"), "'; document.forms[0].action.value='${elt}sedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Edit'), "\">$IMG_EDIT</a></th>";
 	if ($v) {
-		print "<th><a href=\"\" onclick=\"document.forms[0].$elt.value='$key'; document.forms[0].oldvalue.value='", &encode_url("log $CONFIG{$type}{$key}{log}"), "'; document.forms[0].action.value='${elt}sdelete'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Delete'), "\">$IMG_DELETE</a></th>";
+		print "<th><a href=\"\" onclick=\"document.forms[0].$elt.value='$key'; document.forms[0].oldvalue.value='", &encode_url("log $CONFIG->{$type}{$key}{log}"), "'; document.forms[0].action.value='${elt}sdelete'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Delete'), "\">$IMG_DELETE</a></th>";
 	} else {
 		print "<th>&nbsp;</th>\n";
 	}
@@ -3151,18 +3152,18 @@ sub show_log_schedule
 
 	my $sched = '';
 	my $label = 'No schedule association';
-	if (exists $CONFIG{$type}{$key}{within}) {
+	if (exists $CONFIG->{$type}{$key}{within}) {
 		$sched = 'within';
 		$label = 'Within schedule';
-	} elsif (exists $CONFIG{$type}{$key}{outside}) {
+	} elsif (exists $CONFIG->{$type}{$key}{outside}) {
 		$sched = 'outside';
 		$label = 'Outside schedule';
 	}
-	print "<tr><th>&nbsp;</th><td $colspan><b>", &translate($label), "</b> $CONFIG{$type}{$key}{$sched}</td>";
+	print "<tr><th>&nbsp;</th><td $colspan><b>", &translate($label), "</b> $CONFIG->{$type}{$key}{$sched}</td>";
 	my $prefix = $sched || 'within';
-	print "</td><th><a href=\"\" onclick=\"document.forms[0].$elt.value='$key'; document.forms[0].oldvalue.value='", &encode_url("$prefix $CONFIG{$type}{$key}{$sched}"), "'; document.forms[0].action.value='${elt}sedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Edit'), "\">$IMG_EDIT</a></th>";
+	print "</td><th><a href=\"\" onclick=\"document.forms[0].$elt.value='$key'; document.forms[0].oldvalue.value='", &encode_url("$prefix $CONFIG->{$type}{$key}{$sched}"), "'; document.forms[0].action.value='${elt}sedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Edit'), "\">$IMG_EDIT</a></th>";
 	if ($sched) {
-		print "<th><a href=\"\" onclick=\"document.forms[0].$elt.value='$key'; document.forms[0].oldvalue.value='", &encode_url("$prefix $CONFIG{$type}{$key}{$sched}"), "'; document.forms[0].action.value='${elt}sdelete'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Delete'), "\">$IMG_DELETE</a></th>";
+		print "<th><a href=\"\" onclick=\"document.forms[0].$elt.value='$key'; document.forms[0].oldvalue.value='", &encode_url("$prefix $CONFIG->{$type}{$key}{$sched}"), "'; document.forms[0].action.value='${elt}sdelete'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Delete'), "\">$IMG_DELETE</a></th>";
 	} else {
 		print "<th>&nbsp;</th>\n";
 	}
@@ -3203,7 +3204,7 @@ sub show_filecontent
 	if (!$file) {
 		&error("No file set");
 	} else {
-		$file = "$CONFIG{dbhome}/$file" if ($file !~ /^\//);
+		$file = "$CONFIG->{dbhome}/$file" if ($file !~ /^\//);
 		print "<h2>", &translate('File'), " : $file</h2>\n";
 		if (!$tail) {
 			if (-e "$file" && not open(IN, "$file")) {
@@ -3250,7 +3251,7 @@ sub save_filecontent
 	my @datas = split(/\n+/, $content);
 	$content = '';
 	map { s/^[\s]+//; s/[\s]+$//; } @datas;
-	$file = "$CONFIG{dbhome}/$file" if ($file !~ /^\//);
+	$file = "$CONFIG->{dbhome}/$file" if ($file !~ /^\//);
 	if (not open(OUT, ">$file")) {
 		&error("Can't read file $file: $!");
 	} else {
@@ -3313,31 +3314,31 @@ sub create_default_config
 sub autocreate_filters
 {
 	# Read configuration from file squidGuard.conf
-	%CONFIG = &get_configuration();
+	&get_configuration();
 
-	if (not opendir(DIR, $CONFIG{dbhome})) {
-		$ERROR = "can't opendir $CONFIG{dbhome}: $!\n";
+	if (not opendir(DIR, $CONFIG->{dbhome})) {
+		$ERROR = "can't opendir $CONFIG->{dbhome}: $!\n";
 		return;
 	}
-	my @dirs = grep { !/^\./ && -d "$CONFIG{dbhome}/$_" && !-l "$CONFIG{dbhome}/$_"} readdir(DIR);
+	my @dirs = grep { !/^\./ && -d "$CONFIG->{dbhome}/$_" && !-l "$CONFIG->{dbhome}/$_"} readdir(DIR);
 	my $found = 0;
 	foreach my $name (@dirs) {
-		if (-e "$CONFIG{dbhome}/$name/domains") {
-			$CONFIG{dest}{$name}{domainlist} = "$name/domains";
+		if (-e "$CONFIG->{dbhome}/$name/domains") {
+			$CONFIG->{dest}{$name}{domainlist} = "$name/domains";
 			$found = 1;
 		}
-		if (-e "$CONFIG{dbhome}/$name/urls") {
-			$CONFIG{dest}{$name}{urllist} = "$name/urls";
+		if (-e "$CONFIG->{dbhome}/$name/urls") {
+			$CONFIG->{dest}{$name}{urllist} = "$name/urls";
 			$found = 1;
 		}
-		if (-e "$CONFIG{dbhome}/$name/expressions") {
-			$CONFIG{dest}{$name}{expressionlist} = "$name/expressions";
+		if (-e "$CONFIG->{dbhome}/$name/expressions") {
+			$CONFIG->{dest}{$name}{expressionlist} = "$name/expressions";
 			$found = 1;
 		}
 	}
 	closedir DIR;
 	if (!$found) {
-		$ERROR = "No blocklists found under: $CONFIG{dbhome}\n";
+		$ERROR = "No blocklists found under: $CONFIG->{dbhome}\n";
 	}
 	$ACTION = 'categories';
 	$CGI->param('action', 'categories');
@@ -3364,18 +3365,18 @@ sub squidguard_version
 sub show_logs
 {
 
-	if (not opendir(DIR, $CONFIG{logdir})) {
-		$ERROR = "can't opendir $CONFIG{logdir}: $!";
+	if (not opendir(DIR, $CONFIG->{logdir})) {
+		$ERROR = "can't opendir $CONFIG->{logdir}: $!";
 		return;
 	}
-	my @files = grep { !/^\./ && -f "$CONFIG{logdir}/$_" } readdir(DIR);
+	my @files = grep { !/^\./ && -f "$CONFIG->{logdir}/$_" } readdir(DIR);
 	print "<table >\n";
 	print "<tr><td colspan=\"2\">", &show_help('logs'), "</td></tr>\n";
 	if ($#files == -1) {
 		print "<tr><th>", &translate('No log file'), ".</th></tr>\n";
 	} else {
 		foreach my $name (@files) {
-			print "<tr><th size=\"20\" style=\"text-align: right;\">$IMG_LOG</th><th style=\"text-align: left;\"><a href=\"\" onclick=\"window.open('$ENV{SCRIPT_NAME}?action=viewfile&path=$CONFIG{logdir}/$name&tail=1','filewin','scrollbars=yes,status=no,toolbar=no,width=800,height=800,resizable=yes,screenX=1,screenY=1,top=1,left=1'); return false;\" target=\"_new\">$name</a></th></tr>\n";
+			print "<tr><th size=\"20\" style=\"text-align: right;\">$IMG_LOG</th><th style=\"text-align: left;\"><a href=\"\" onclick=\"window.open('$ENV{SCRIPT_NAME}?action=viewfile&path=$CONFIG->{logdir}/$name&tail=1','filewin','scrollbars=yes,status=no,toolbar=no,width=800,height=800,resizable=yes,screenX=1,screenY=1,top=1,left=1'); return false;\" target=\"_new\">$name</a></th></tr>\n";
 		}
 	}
 	print "</table>\n";
@@ -3407,7 +3408,7 @@ sub sc_smgr_header
 	print "<a href=\"\" onclick=\"document.forms[0].view.value='trustclients'; document.forms[0].submit(); return false;\">", &translate('Trusted Clients'), "</a> |\n";
 	print "<br><hr>\n";
 	print "<a href=\"\" onclick=\"document.forms[0].view.value='dump'; document.forms[0].submit(); return false;\">", &translate('View Configuration'), "</a> | \n";
-	print "<a href=\"\" onclick=\"window.open('$ENV{SCRIPT_NAME}?action=squidclamav&view=showlog&path=$CONFIG{logfile}&lang=$LANG','filewin','scrollbars=yes,status=no,toolbar=no,width=850,height=800,resizable=yes,screenX=1,screenY=1,top=1,left=1'); return false;\" target=\"_new\">", &translate('View log'), "</a> |\n" if ($CONFIG{logfile} && -e $CONFIG{logfile});
+	print "<a href=\"\" onclick=\"window.open('$ENV{SCRIPT_NAME}?action=squidclamav&view=showlog&path=$CONFIG->{logfile}&lang=$LANG','filewin','scrollbars=yes,status=no,toolbar=no,width=850,height=800,resizable=yes,screenX=1,screenY=1,top=1,left=1'); return false;\" target=\"_new\">", &translate('View log'), "</a> |\n" if ($CONFIG->{logfile} && -e $CONFIG->{logfile});
 	if ($SQUIDCLAMAV eq 'c-icap') {
 		print "<a href=\"\" onclick=\"document.forms[0].view.value='cicap'; document.forms[0].submit(); return false;\">", &translate('Reload c-icap'), "</a> |\n";
 	} elsif ($SQUID_WRAPPER) {
@@ -3470,30 +3471,30 @@ sub sc_show_globals
 	print "<table align=\"center\" width=\"80%\">\n";
 	if ($SQUIDCLAMAV ne 'c-icap') {
 		print "<tr><td align=\"left\" colspan=\"2\"><b>", &translate('Squid parameters'), "</b></td></tr>\n";
-		print "<tr><th align=\"left\">", &translate('Squid Ip address'), "</th><th align=\"left\"><input type=\"text\" size=\"40\" name=\"squid_ip\" value=\"$CONFIG{squid_ip}\"/></th></tr>\n";
-		print "<tr><th align=\"left\">", &translate('Squid port'), "</th><th align=\"left\"><input type=\"text\" size=\"40\" name=\"squid_port\" value=\"$CONFIG{squid_port}\"/></th></tr>\n";
+		print "<tr><th align=\"left\">", &translate('Squid Ip address'), "</th><th align=\"left\"><input type=\"text\" size=\"40\" name=\"squid_ip\" value=\"$CONFIG->{squid_ip}\"/></th></tr>\n";
+		print "<tr><th align=\"left\">", &translate('Squid port'), "</th><th align=\"left\"><input type=\"text\" size=\"40\" name=\"squid_port\" value=\"$CONFIG->{squid_port}\"/></th></tr>\n";
 		print "<tr><th colspan=\"2\"><hr></th></tr>\n";
 	}
 	print "<tr><td align=\"left\" colspan=\"2\"><b>", &translate('Clamav parameters'), "</b></td></tr>\n";
-	print "<tr><th align=\"left\">", &translate('Clamd Unix Socket'), "</th><th align=\"left\"><input type=\"text\" size=\"40\" name=\"clamd_local\" value=\"$CONFIG{clamd_local}\"/></th></tr>\n";
-	print "<tr><th align=\"left\">", &translate('Clamd Ip address'), "</th><th align=\"left\"><input type=\"text\" size=\"40\" name=\"clamd_ip\" value=\"$CONFIG{clamd_ip}\"/></th></tr>\n";
-	print "<tr><th align=\"left\">", &translate('Clamd port'), "</th><th align=\"left\"><input type=\"text\" size=\"40\" name=\"clamd_port\" value=\"$CONFIG{clamd_port}\"/></th></tr>\n";
+	print "<tr><th align=\"left\">", &translate('Clamd Unix Socket'), "</th><th align=\"left\"><input type=\"text\" size=\"40\" name=\"clamd_local\" value=\"$CONFIG->{clamd_local}\"/></th></tr>\n";
+	print "<tr><th align=\"left\">", &translate('Clamd Ip address'), "</th><th align=\"left\"><input type=\"text\" size=\"40\" name=\"clamd_ip\" value=\"$CONFIG->{clamd_ip}\"/></th></tr>\n";
+	print "<tr><th align=\"left\">", &translate('Clamd port'), "</th><th align=\"left\"><input type=\"text\" size=\"40\" name=\"clamd_port\" value=\"$CONFIG->{clamd_port}\"/></th></tr>\n";
 	print "<tr><th colspan=\"2\"><hr></th></tr>\n";
 	print "<tr><td align=\"left\" colspan=\"2\"><b>", &translate('SquidGuard parameters'), "</b></td></tr>\n";
-	print "<tr><th align=\"left\">", &translate('SquidGuard program'), "</th><th align=\"left\"><input type=\"text\" size=\"40\" name=\"squidguard\" value=\"$CONFIG{squidguard}\"/></th></tr>\n";
+	print "<tr><th align=\"left\">", &translate('SquidGuard program'), "</th><th align=\"left\"><input type=\"text\" size=\"40\" name=\"squidguard\" value=\"$CONFIG->{squidguard}\"/></th></tr>\n";
 	print "<tr><th colspan=\"2\"><hr></th></tr>\n";
 	print "<tr><td align=\"left\" colspan=\"2\"><b>", &translate('SquidClamav parameters'), "</b></td></tr>\n";
-	print "<tr><th align=\"left\">", &translate('Redirect'), "</th><th align=\"left\"><input type=\"text\" size=\"40\" name=\"redirect\" value=\"$CONFIG{redirect}\"/></th></tr>\n";
-	print "<tr><th align=\"left\">", &translate('Log redirection'), "</th><th align=\"left\"><input type=\"text\" size=\"40\" name=\"logredir\" value=\"$CONFIG{logredir}\"/></th></tr>\n";
-	print "<tr><th align=\"left\">", &translate('DNS lookup'), "</th><th align=\"left\"><input type=\"text\" size=\"40\" name=\"dnslookup\" value=\"$CONFIG{dnslookup}\"/></th></tr>\n";
-	print "<tr><th align=\"left\">", &translate('Maximum scan size'), "</th><th align=\"left\"><input type=\"text\" size=\"40\" name=\"maxsize\" value=\"$CONFIG{maxsize}\"/></th></tr>\n";
+	print "<tr><th align=\"left\">", &translate('Redirect'), "</th><th align=\"left\"><input type=\"text\" size=\"40\" name=\"redirect\" value=\"$CONFIG->{redirect}\"/></th></tr>\n";
+	print "<tr><th align=\"left\">", &translate('Log redirection'), "</th><th align=\"left\"><input type=\"text\" size=\"40\" name=\"logredir\" value=\"$CONFIG->{logredir}\"/></th></tr>\n";
+	print "<tr><th align=\"left\">", &translate('DNS lookup'), "</th><th align=\"left\"><input type=\"text\" size=\"40\" name=\"dnslookup\" value=\"$CONFIG->{dnslookup}\"/></th></tr>\n";
+	print "<tr><th align=\"left\">", &translate('Maximum scan size'), "</th><th align=\"left\"><input type=\"text\" size=\"40\" name=\"maxsize\" value=\"$CONFIG->{maxsize}\"/></th></tr>\n";
 	if ($SQUIDCLAMAV ne 'c-icap') {
-		print "<tr><th align=\"left\">", &translate('Log file'), "</th><th align=\"left\"><input type=\"text\" size=\"40\" name=\"logfile\" value=\"$CONFIG{logfile}\"/></th></tr>\n";
-		print "<tr><th align=\"left\">", &translate('Maximum redirect'), "</th><th align=\"left\"><input type=\"text\" size=\"40\" name=\"maxredir\" value=\"$CONFIG{maxredir}\"/></th></tr>\n";
+		print "<tr><th align=\"left\">", &translate('Log file'), "</th><th align=\"left\"><input type=\"text\" size=\"40\" name=\"logfile\" value=\"$CONFIG->{logfile}\"/></th></tr>\n";
+		print "<tr><th align=\"left\">", &translate('Maximum redirect'), "</th><th align=\"left\"><input type=\"text\" size=\"40\" name=\"maxredir\" value=\"$CONFIG->{maxredir}\"/></th></tr>\n";
 		print "<tr><th align=\"left\">", &translate('Log SquidClamav performence'), "</th><th align=\"left\">\n";
 		my $sel1 = '';
 		my $sel2 = '';
-		($CONFIG{stat}) ? $sel2 = 'selected="1"' : $sel1 = 'selected="1"';
+		($CONFIG->{stat}) ? $sel2 = 'selected="1"' : $sel1 = 'selected="1"';
 		print "<select name=\"stat\">\n";
 		print "<option value=\"0\" $sel1>Off</option>\n";
 		print "<option value=\"1\" $sel2>On</option>\n";
@@ -3504,7 +3505,7 @@ sub sc_show_globals
 		print "<select name=\"debug\">\n";
 		foreach my $k (sort keys %labels) {
 			my $sel = '';
-			$sel = 'selected="1"' if ($CONFIG{debug} == $k);
+			$sel = 'selected="1"' if ($CONFIG->{debug} == $k);
 			print "<option value=\"$k\" $sel>$labels{$k}</option>\n";
 		}
 		print "</select>\n";
@@ -3512,15 +3513,15 @@ sub sc_show_globals
 		print "<tr><th align=\"left\">", &translate('Trust Squid cache'), "</th><th align=\"left\">";
 		$sel1 = '';
 		$sel2 = '';
-		($CONFIG{trust_cache}) ? $sel2 = 'selected="1"' : $sel1 = 'selected="1"';
+		($CONFIG->{trust_cache}) ? $sel2 = 'selected="1"' : $sel1 = 'selected="1"';
 		print "<select name=\"trust_cache\">\n";
 		print "<option value=\"0\" $sel1>Off</option>\n";
 		print "<option value=\"1\" $sel2>On</option>\n";
 		print "</select>\n";
 		print "</th></tr>\n";
-		print "<tr><th align=\"left\">", &translate('Change User Agent'), "</th><th align=\"left\"><input type=\"text\" size=\"50\" name=\"useragent\" value=\"$CONFIG{useragent}\"/></th></tr>\n";
+		print "<tr><th align=\"left\">", &translate('Change User Agent'), "</th><th align=\"left\"><input type=\"text\" size=\"50\" name=\"useragent\" value=\"$CONFIG->{useragent}\"/></th></tr>\n";
 	}
-	print "<tr><th align=\"left\">", &translate('SquidClamav internal timeout'), "</th><th align=\"left\"><input type=\"text\" size=\"40\" name=\"timeout\" value=\"$CONFIG{timeout}\"/></th></tr>\n";
+	print "<tr><th align=\"left\">", &translate('SquidClamav internal timeout'), "</th><th align=\"left\"><input type=\"text\" size=\"40\" name=\"timeout\" value=\"$CONFIG->{timeout}\"/></th></tr>\n";
 	print "<tr><th colspan=\"2\"><hr></th></tr>\n";
 	print "<tr><th colspan=\"2\" align=\"right\"><input type=\"button\" name=\"save\" value=\"", &translate('Apply change'), "\" onclick=\"document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\"></th></tr>\n";
 	print "</table>\n";
@@ -3537,7 +3538,6 @@ sub squidclamav_version
 
 sub sc_get_configuration
 {
-	my %infos = ();
 
 	if (not open(IN, $SC_CONF_FILE)) {
 		$ERROR = "Can't open configuration file $SC_CONF_FILE: $!\n";
@@ -3551,32 +3551,32 @@ sub sc_get_configuration
 		next if (!$l);
 		my ($key, $val) = split(/[\s\t]+/o, $l, 2);
 		if ( ($key eq 'abort') || ($key eq 'abortcontent') ) {
-			push(@{$infos{$key}}, $val);
+			push(@{$CONFIG->{$key}}, $val);
 		} elsif ( ($key eq 'whitelist') ) {
-			push(@{$infos{$key}}, $val);
+			push(@{$CONFIG->{$key}}, $val);
 		} elsif ( ($key eq 'trustuser') || ($key eq 'trustclient') ) {
-			push(@{$infos{$key}}, $val);
+			push(@{$CONFIG->{$key}}, $val);
 		} else {
-			$infos{$key} = $val;
+			$CONFIG->{$key} = $val;
 		}
 	}
 	close(IN);
 
 	# Set default values
 	if ($SQUIDCLAMAV ne 'c-icap') {
-		$infos{squid_ip} = '127.0.0.1' if (!exists $infos{squid_ip});
-		$infos{squid_port} = 3128 if (!exists $infos{squid_port});
-		$infos{debug} = 0 if (!exists $infos{debug});
-		$infos{stat} = 0 if (!exists $infos{stat});
-		$infos{maxredir} = 30 if (!exists $infos{maxredir});
-		$infos{trust_cache} = 1 if (!exists $infos{trust_cache});
-		$infos{useragent} = 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)' if (!exists $infos{useragent});
+		$CONFIG->{squid_ip} = '127.0.0.1' if (!exists $CONFIG->{squid_ip});
+		$CONFIG->{squid_port} = 3128 if (!exists $CONFIG->{squid_port});
+		$CONFIG->{debug} = 0 if (!exists $CONFIG->{debug});
+		$CONFIG->{stat} = 0 if (!exists $CONFIG->{stat});
+		$CONFIG->{maxredir} = 30 if (!exists $CONFIG->{maxredir});
+		$CONFIG->{trust_cache} = 1 if (!exists $CONFIG->{trust_cache});
+		$CONFIG->{useragent} = 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)' if (!exists $CONFIG->{useragent});
 	}
-	$infos{logredir} = 1 if (!exists $infos{logredir});
-	$infos{dnslookup} = 1 if (!exists $infos{dnslookup});
-	$infos{timeout} = 1 if (!exists $infos{timeout});
-	$infos{maxsize} = 5000000 if (!exists $infos{maxsize});
-	return %infos;
+	$CONFIG->{logredir} = 1 if (!exists $CONFIG->{logredir});
+	$CONFIG->{dnslookup} = 1 if (!exists $CONFIG->{dnslookup});
+	$CONFIG->{timeout} = 1 if (!exists $CONFIG->{timeout});
+	$CONFIG->{maxsize} = 5000000 if (!exists $CONFIG->{maxsize});
+
 }
 
 sub sc_show_whitelist
@@ -3586,10 +3586,10 @@ sub sc_show_whitelist
 	print "<tr><th valign=\"top\">\n";
 	print "<table align=\"center\">\n";
 	my $i = 0;
-	for ($i = 0; $i <= $#{$CONFIG{whitelist}}; $i++) {
-		my $old = $CONFIG{whitelist}[$i];
+	for ($i = 0; $i <= $#{$CONFIG->{whitelist}}; $i++) {
+		my $old = $CONFIG->{whitelist}[$i];
 		$old =~ s/\\/\\\\/go;
-		print "<tr><td><input type=\"text\" size=\"60\" name=\"whitelist$i\" value=\"$CONFIG{whitelist}[$i]\"/></td><th><a href=\"\" onclick=\"document.forms[0].oldvalue.value='", &encode_url($old), "'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Remove'), "\">$IMG_REMOVE</a></th></tr>";
+		print "<tr><td><input type=\"text\" size=\"60\" name=\"whitelist$i\" value=\"$CONFIG->{whitelist}[$i]\"/></td><th><a href=\"\" onclick=\"document.forms[0].oldvalue.value='", &encode_url($old), "'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Remove'), "\">$IMG_REMOVE</a></th></tr>";
 	}
 	print "<tr><td align=\"left\">", &translate('List of domain or host to add'), "</td><th>&nbsp;</th></tr>";
 	print "<tr><th align=\"left\"><textarea name=\"whitelist$i\" cols=\"50\" rows=\"5\" wrap=\"off\"></textarea></th><th>&nbsp;</th></tr>";
@@ -3617,10 +3617,10 @@ sub sc_show_trustuser
         print "<tr><th valign=\"top\">\n";
         print "<table align=\"center\">\n";
 	my $i = 0;
-	for ($i = 0; $i <= $#{$CONFIG{trustuser}}; $i++) {
-		my $old = $CONFIG{trustuser}[$i];
+	for ($i = 0; $i <= $#{$CONFIG->{trustuser}}; $i++) {
+		my $old = $CONFIG->{trustuser}[$i];
 		$old =~ s/\\/\\\\/go;
-		print "<tr><td><input type=\"text\" size=\"60\" name=\"trustuser$i\" value=\"$CONFIG{trustuser}[$i]\"/></td><th><a href=\"\" onclick=\"document.forms[0].oldvalue.value='", &encode_url($old), "'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Remove'), "\">$IMG_REMOVE</a></th></tr>";
+		print "<tr><td><input type=\"text\" size=\"60\" name=\"trustuser$i\" value=\"$CONFIG->{trustuser}[$i]\"/></td><th><a href=\"\" onclick=\"document.forms[0].oldvalue.value='", &encode_url($old), "'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Remove'), "\">$IMG_REMOVE</a></th></tr>";
 	}
 	print "<tr><td align=\"left\">", &translate('List of user to add'), "</td><th>&nbsp;</th></tr>";
 	print "<tr><th align=\"left\"><textarea name=\"trustuser$i\" cols=\"50\" rows=\"5\" wrap=\"off\"></textarea></th><th>&nbsp;</th></tr>";
@@ -3641,10 +3641,10 @@ sub sc_show_trustclient
         print "<table align=\"center\">\n";
 
 	my $i = 0;
-	for ($i = 0; $i <= $#{$CONFIG{trustclient}}; $i++) {
-		my $old = $CONFIG{trustclient}[$i];
+	for ($i = 0; $i <= $#{$CONFIG->{trustclient}}; $i++) {
+		my $old = $CONFIG->{trustclient}[$i];
 		$old =~ s/\\/\\\\/go;
-		print "<tr><td><input type=\"text\" size=\"60\" name=\"trustclient$i\" value=\"$CONFIG{trustclient}[$i]\"/></td><th><a href=\"\" onclick=\"document.forms[0].oldvalue.value='", &encode_url($old), "'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Remove'), "\">$IMG_REMOVE</a></th></tr>";
+		print "<tr><td><input type=\"text\" size=\"60\" name=\"trustclient$i\" value=\"$CONFIG->{trustclient}[$i]\"/></td><th><a href=\"\" onclick=\"document.forms[0].oldvalue.value='", &encode_url($old), "'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Remove'), "\">$IMG_REMOVE</a></th></tr>";
 	}
 	print "<tr><td align=\"left\">", &translate('List of clients to add'), "</td><th>&nbsp;</th></tr>";
 	print "<tr><th align=\"left\"><textarea name=\"trustclient$i\" cols=\"50\" rows=\"5\" wrap=\"off\"></textarea></th><th>&nbsp;</th></tr>";
@@ -3666,19 +3666,19 @@ sub sc_show_abort
 	print "<tr><td colspan=\"2\">", &translate('Disable virus scan following regex in URL'), "</th></tr>\n";
 	my $found = 0;
 	my $i = 0;
-	for ($i = 0; $i <= $#{$CONFIG{abort}}; $i++) {
-		my $old = $CONFIG{abort}[$i];
+	for ($i = 0; $i <= $#{$CONFIG->{abort}}; $i++) {
+		my $old = $CONFIG->{abort}[$i];
 		$old =~ s/\\/\\\\/go;
-		print "<tr><td><input type=\"text\" size=\"60\" name=\"abort$i\" value=\"$CONFIG{abort}[$i]\"/></td><th><a href=\"\" onclick=\"document.forms[0].oldvalue.value='", &encode_url($old), "'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Remove'), "\">$IMG_REMOVE</a></th></tr>";
+		print "<tr><td><input type=\"text\" size=\"60\" name=\"abort$i\" value=\"$CONFIG->{abort}[$i]\"/></td><th><a href=\"\" onclick=\"document.forms[0].oldvalue.value='", &encode_url($old), "'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Remove'), "\">$IMG_REMOVE</a></th></tr>";
 		$found++;
 	}
 	print "<tr><th align=\"left\"><textarea name=\"abort$i\" cols=\"50\" rows=\"5\" wrap=\"off\"></textarea></th><th>&nbsp;</th></tr>";
 	print "<tr><th colspan=\"2\"><hr></th></tr>\n";
 	print "<tr><td colspan=\"2\">", &translate('Disable scan following regex in Content-Type'), "</th></tr>\n";
-	for ($i = 0; $i <= $#{$CONFIG{abortcontent}}; $i++) {
-		my $old = $CONFIG{abortcontent}[$i];
+	for ($i = 0; $i <= $#{$CONFIG->{abortcontent}}; $i++) {
+		my $old = $CONFIG->{abortcontent}[$i];
 		$old =~ s/\\/\\\\/go;
-		print "<tr><td><input type=\"text\" size=\"60\" name=\"abortcontent$i\" value=\"$CONFIG{abortcontent}[$i]\"/></td><th><a href=\"\" onclick=\"document.forms[0].oldvalue.value='", &encode_url($old), "'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Remove'), "\">$IMG_REMOVE</a></th></tr>";
+		print "<tr><td><input type=\"text\" size=\"60\" name=\"abortcontent$i\" value=\"$CONFIG->{abortcontent}[$i]\"/></td><th><a href=\"\" onclick=\"document.forms[0].oldvalue.value='", &encode_url($old), "'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Remove'), "\">$IMG_REMOVE</a></th></tr>";
 		$found++;
 	}
 	print "<tr><th align=\"left\"><textarea name=\"abortcontent$i\" cols=\"50\" rows=\"5\" wrap=\"off\"></textarea></th><th>&nbsp;</th></tr>";
@@ -3703,17 +3703,17 @@ sub sc_apply_change
 	if ($VIEW eq 'globals') {
 		foreach my $g (@SC_GLOBALVAR) {
 			if (defined $CGI->param($g)) {
-				$CONFIG{$g} = $CGI->param($g);
+				$CONFIG->{$g} = $CGI->param($g);
 			} else {
-				delete $CONFIG{$g};
+				delete $CONFIG->{$g};
 			}
 		}
 	}
 
 	# Virus Scan abort and abortcontent
 	if ($VIEW eq 'aborts') {
-		delete $CONFIG{'abort'};
-		delete $CONFIG{'abortcontent'};
+		delete $CONFIG->{'abort'};
+		delete $CONFIG->{'abortcontent'};
 		foreach my $p ($CGI->param()) {
 			next if ($p !~ /^abort/o);
 			my $val = $CGI->param($p) || '';
@@ -3721,47 +3721,47 @@ sub sc_apply_change
 			my $tmp = $val;
 			$tmp =~ s/([^\\])\\/$1\\\\/g;
 			next if ($OLD && ($tmp eq $OLD));
-			push(@{$CONFIG{'abort'}}, $val) if ($p =~ /^abort\d+$/o);
-			push(@{$CONFIG{'abortcontent'}}, $val) if ($p =~ /^abortcontent\d+$/o);
-			map { s/([^\\])\//$1\\\//g } @{$CONFIG{'abort'}};
-			map { s/([^\\])\//$1\\\//g } @{$CONFIG{'abortcontent'}};
+			push(@{$CONFIG->{'abort'}}, $val) if ($p =~ /^abort\d+$/o);
+			push(@{$CONFIG->{'abortcontent'}}, $val) if ($p =~ /^abortcontent\d+$/o);
+			map { s/([^\\])\//$1\\\//g } @{$CONFIG->{'abort'}};
+			map { s/([^\\])\//$1\\\//g } @{$CONFIG->{'abortcontent'}};
 		}
 	}
 
 	# Whitelist definitions
 	if ($VIEW eq 'whitelists') {
-		delete $CONFIG{'whitelist'};
+		delete $CONFIG->{'whitelist'};
 		foreach my $p ($CGI->param()) {
 			next if ($p !~ /^whitelist/o);
 			my $tmp = $CGI->param($p);
 			$tmp =~ s/([^\\])\\/$1\\\\/g;
 			next if ($OLD && ($OLD eq $tmp));
-			push(@{$CONFIG{'whitelist'}}, $CGI->param($p)) if ($p =~ /^whitelist\d+$/o);
-			map { s/([^\\])\//$1\\\//g } @{$CONFIG{'whitelist'}};
+			push(@{$CONFIG->{'whitelist'}}, $CGI->param($p)) if ($p =~ /^whitelist\d+$/o);
+			map { s/([^\\])\//$1\\\//g } @{$CONFIG->{'whitelist'}};
 		}
 	}
 
 	# Trustuser definitions
 	if ($VIEW eq 'trustusers') {
-		delete $CONFIG{'trustuser'};
+		delete $CONFIG->{'trustuser'};
 		foreach my $p ($CGI->param()) {
 			next if ($p !~ /^trustuser/);
 			my $tmp = $CGI->param($p);
 			$tmp =~ s/([^\\])\\/$1\\\\/g;
 			next if ($OLD && ($OLD eq $tmp));
-			push(@{$CONFIG{'trustuser'}}, $CGI->param($p)) if ($p =~ /^trustuser\d+$/);
+			push(@{$CONFIG->{'trustuser'}}, $CGI->param($p)) if ($p =~ /^trustuser\d+$/);
 		}
 	}
 
 	# Trustclient definitions
 	if ($VIEW eq 'trustclients') {
-		delete $CONFIG{'trustclient'};
+		delete $CONFIG->{'trustclient'};
 		foreach my $p ($CGI->param()) {
 			next if ($p !~ /^trustclient/o);
 			my $tmp = $CGI->param($p);
 			$tmp =~ s/([^\\])\\/$1\\\\/g;
 			next if ($OLD && ($OLD eq $tmp));
-			push(@{$CONFIG{'trustclient'}}, $CGI->param($p)) if ($p =~ /^trustclient\d+$/o);
+			push(@{$CONFIG->{'trustclient'}}, $CGI->param($p)) if ($p =~ /^trustclient\d+$/o);
 		}
 	}
 
@@ -3776,7 +3776,7 @@ sub sc_save_config
 		&error("Can't save configuration to file $SC_CONF_FILE: $!");
 		return 0;
 	}
-	print OUT "$content\n";
+	print OUT "${$content}\n";
 	close(OUT);
 
 	return 1;
@@ -3788,35 +3788,35 @@ sub sc_dump_config
 	my $config = '';
 	$config .= "# Global variables\n";
 	foreach my $g (@SC_GLOBALVAR) {
-		$config .= "$g $CONFIG{$g}\n" if (defined $CONFIG{$g} && ($CONFIG{$g} ne ''));
+		$config .= "$g $CONFIG->{$g}\n" if (defined $CONFIG->{$g} && ($CONFIG->{$g} ne ''));
 	}
 
 	$config .= "\n# Virus Scan abort based on URL and content type pattern matching\n";
-	foreach my $v (@{$CONFIG{'abort'}}) {
+	foreach my $v (@{$CONFIG->{'abort'}}) {
 		$config .= "abort $v\n" if ($v ne '');
 	}
-	foreach my $v (@{$CONFIG{'abortcontent'}}) {
+	foreach my $v (@{$CONFIG->{'abortcontent'}}) {
 		$config .= "abortcontent $v\n" if ($v ne '');
 	}
 
 	$config .= "\n# Virus Scan and SquidGuard abort based on whitelisted URL pattern matching\n";
-	foreach my $v (@{$CONFIG{'whitelist'}}) {
+	foreach my $v (@{$CONFIG->{'whitelist'}}) {
 		$config .= "whitelist $v\n" if ($v ne '');
 	}
 
 	$config .= "\n# Virus Scan and SquidGuard abort based on authenticated username\n";
-	foreach my $v (@{$CONFIG{'trustuser'}}) {
+	foreach my $v (@{$CONFIG->{'trustuser'}}) {
 		$config .= "trustuser $v\n" if ($v ne '');
 	}
 
 	$config .= "\n# Virus Scan and SquidGuard abort based on remote client ip address or hostname\n";
-	foreach my $v (@{$CONFIG{'trustclient'}}) {
+	foreach my $v (@{$CONFIG->{'trustclient'}}) {
 		$config .= "trustclient $v\n" if ($v ne '');
 	}
 
 	$config .= "\n";
 
-	return $config;
+	return \$config;
 }
 
 sub sc_show_config
@@ -3828,7 +3828,8 @@ sub sc_show_config
 	print "<tr><th><hr /></th></tr>\n";
 	print "<tr><th  align=\"left\"><pre>\n";
 
-	print &sc_dump_config();
+	my $config = &sc_dump_config();
+	print ${$config};
 
 	print "</pre></td></tr>\n";
 	print "</table>\n";
@@ -3875,9 +3876,9 @@ sub search_database
 	my $str = shift;
 	return if (!$str);
 
-	my @result = `$FIND $CONFIG{dbhome} -type f \\( -name 'domains' -o -name 'urls' \\) -exec $GREP -Hn '$str' '\{\}' \\;`;
+	my @result = `$FIND $CONFIG->{dbhome} -type f \\( -name 'domains' -o -name 'urls' \\) -exec $GREP -Hn '$str' '\{\}' \\;`;
 	if ($#result >= 0) {
-		map { s#$CONFIG{dbhome}\/## } @result;
+		map { s#$CONFIG->{dbhome}\/## } @result;
 		map { s#:(\d+):# :Line $1: # } @result;
 	} else {
 		push(@result, &translate('No data found'));
@@ -3936,13 +3937,13 @@ sub acl_in_use
 
 	my $found = 0;
 
-	foreach my $d (keys %{$CONFIG{dest}}) {
-		if (grep(/^$blname\/(domains|expressions|urls)$/o, $CONFIG{dest}{$d}{'domainlist'},
-				$CONFIG{dest}{$d}{else}{'domainlist'},
-				$CONFIG{dest}{$d}{'expressionlist'},
-				$CONFIG{dest}{$d}{else}{'expressionlist'},
-				$CONFIG{dest}{$d}{'urllist'},
-				$CONFIG{dest}{$d}{else}{'urllist'})
+	foreach my $d (keys %{$CONFIG->{dest}}) {
+		if (grep(/^$blname\/(domains|expressions|urls)$/o, $CONFIG->{dest}{$d}{'domainlist'},
+				$CONFIG->{dest}{$d}{else}{'domainlist'},
+				$CONFIG->{dest}{$d}{'expressionlist'},
+				$CONFIG->{dest}{$d}{else}{'expressionlist'},
+				$CONFIG->{dest}{$d}{'urllist'},
+				$CONFIG->{dest}{$d}{else}{'urllist'})
 		) {
 			$found = 1;
 			last;
