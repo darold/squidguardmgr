@@ -446,7 +446,7 @@ sub get_configuration
 		chomp($l);
 		$l =~ s/\#.*//o;
 		$l =~ s/^[\s\t]+//o;
-		$acl_else = 0, $src_else = 0, $dest_else = 0, $rew_else = 0 if ($l =~ /\}$/);
+		$acl_else = 0, $src_else = 0, $dest_else = 0, $rew_else = 0 if ($l =~ /\}$/o);
 		next if ( !$l || ($l eq '}') );
 		if ($l =~ /^acl[\s\t]+\{/o) {
 			$enter_acl = 1;
@@ -657,7 +657,7 @@ sub smgr_header
 	print "<a href=\"\" onclick=\"document.forms[0].oldvalue.value=''; document.forms[0].action.value='dump'; document.forms[0].submit(); return false;\">", &translate('View Configuration'), "</a> | \n";
 	print "<a href=\"\" onclick=\"document.forms[0].oldvalue.value=''; document.forms[0].action.value='logs'; document.forms[0].submit(); return false;\">", &translate('View logs'), "</a> |\n";
 	if ($SQUIDCLAMAV && (lc($SQUIDCLAMAV) ne 'off')) {
-		print "<a href=\"\" onclick=\"window.open('$ENV{SCRIPT_NAME}?action=squidclamav&view=&lang=$LANG','squidclamav','scrollbars=yes,status=no,toolbar=no,width=900,height=800,resizable=yes,screenX=1,screenY=1,top=1,left=1'); return false;\" target=\"_new\">", &translate('SquidClamav'), "</a> |\n";
+		print "<a href=\"\" onclick=\"window.open('", $CGI->escapeHTML("$ENV{SCRIPT_NAME}?action=squidclamav&view=&lang=$LANG"), "','squidclamav','scrollbars=yes,status=no,toolbar=no,width=900,height=800,resizable=yes,screenX=1,screenY=1,top=1,left=1'); return false;\" target=\"_new\">", &translate('SquidClamav'), "</a> |\n";
 	}
 	if ($SQUID_WRAPPER) {
 		print "<a href=\"\" onclick=\"document.forms[0].oldvalue.value=''; document.forms[0].action.value='squid'; document.forms[0].submit(); return false;\">", &translate('Restart Squid'), "</a> |\n";
@@ -734,7 +734,7 @@ sub show_blacklists
 		print "<a href=\"\" onclick=\"if (confirm('WARNING: ", &translate('This will remove the list from your system.'), &translate('Are you sure to continue?'), "')) { document.forms[0].action.value='bldelete'; document.forms[0].blacklist.value='$bl[$i]'; document.forms[0].submit(); } return false;\" title=\"", &translate('Remove'), "\">$IMG_SMALL_REMOVE</a>" if (!$in_use);
 		print "<font title=\"", &translate('still in use'), "\">$IMG_SMALL_NOREMOVE</font>" if ($in_use);
 		print "</td>\n";
-		if ($i =~ /9$/) {
+		if ($i =~ /9$/o) {
 			print "</tr>\n";
 		}
 	}
@@ -791,7 +791,7 @@ sub edit_blacklist
 	print "<table width=\"100%\"><tr><td>\n";
 	print "<table>\n";
 	foreach ('domains', 'urls', 'expressions') {
-		print "<tr><th align=\"right\">", &translate(ucfirst($_)), "<br><a href=\"\" onclick=\"window.open('$ENV{SCRIPT_NAME}?action=viewlist&path=$bl/$_&lang=$LANG','blwin','scrollbars=yes,status=no,toolbar=no,width=400,height=800,resizable=yes,screenX=1,screenY=1,top=1,left=1'); return false;\" target=\"_new\" title=\"", &translate('Edit'), "\">$IMG_EDIT</a>&nbsp;&nbsp;<a href=\"\" onclick=\"document.forms[0].action.value='rebuild'; document.forms[0].blacklist.value='$bl/$_'; document.forms[0].submit(); return false;\" title=\"", &translate('Rebuild database'), "\">$IMG_REBUILD</a></th><th align=\"left\"><textarea name=\"${bl}_$_\" cols=\"50\" rows=\"5\" wrap=\"off\"></textarea></th></tr>\n";
+		print "<tr><th align=\"right\">", &translate(ucfirst($_)), "<br><a href=\"\" onclick=\"window.open('", $CGI->escapeHTML("$ENV{SCRIPT_NAME}?action=viewlist&path=$bl/$_&lang=$LANG"), "','blwin','scrollbars=yes,status=no,toolbar=no,width=400,height=800,resizable=yes,screenX=1,screenY=1,top=1,left=1'); return false;\" target=\"_new\" title=\"", &translate('Edit'), "\">$IMG_EDIT</a>&nbsp;&nbsp;<a href=\"\" onclick=\"document.forms[0].action.value='rebuild'; document.forms[0].blacklist.value='$bl/$_'; document.forms[0].submit(); return false;\" title=\"", &translate('Rebuild database'), "\">$IMG_REBUILD</a></th><th align=\"left\"><textarea name=\"${bl}_$_\" cols=\"50\" rows=\"5\" wrap=\"off\"></textarea></th></tr>\n";
 	}
 	print "<tr><th colspan=\"2\" align=\"right\"><input type=\"button\" name=\"remove\" value=\"", &translate('Remove'), "\" onclick=\"document.forms[0].action.value='bledit'; document.forms[0].apply.value='remove'; document.forms[0].submit(); return false;\">&nbsp;&nbsp;<input type=\"button\" name=\"add\" value=\"", &translate('Add'), "\" onclick=\"document.forms[0].action.value='bledit'; document.forms[0].apply.value='add'; document.forms[0].submit(); return false;\"></th></tr>\n";
 	print "</table>\n";
@@ -1144,7 +1144,7 @@ sub edit_times
 	print "<tr><td colspan=\"2\" nowrap=\"1\">\n";
 	foreach my $d ('Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday') {
 		my $sel = '';
-		if ($days !~ /\-/) {
+		if ($days !~ /\-/o) {
 			$sel = 'checked="1" ' if ( ($days =~ /$dayabbr{$d}/) || ($days eq '*'));
 		}
 		print "<input type=\"checkbox\" name=\"week\" value=\"$dayabbr{$d}\" $sel/>", &translate($d), "\n";
@@ -1202,7 +1202,7 @@ sub show_rewrites
 			$options .= &translate('Temporary') if ($opt =~ /r/o);
 			$options .= ' / ' if ($opt && ($opt =~ /R/o));
 			$options .= &translate('Permanently') if ($opt =~ /R/o);
-			print "<tr><th>&nbsp;</th><td align=\"center\"><b>", &translate('Replace'), "</b> $pattern</td><td><b>", &translate('with'), "</b> $substitute</td><td>$options</td><th><a href=\"\" onclick=\"document.forms[0].rewrite.value='$k'; document.forms[0].oldvalue.value='", &encode_url($val), "'; document.forms[0].action.value='rewritesedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Edit'), "\">$IMG_EDIT</a></th>";
+			print "<tr><th>&nbsp;</th><td align=\"center\"><b>", &translate('Replace'), "</b> ", $CGI->escapeHTML("$pattern"), "</td><td><b>", &translate('with'), "</b> ", $CGI->escapeHTML("$substitute"), "</td><td>$options</td><th><a href=\"\" onclick=\"document.forms[0].rewrite.value='$k'; document.forms[0].oldvalue.value='", &encode_url($val), "'; document.forms[0].action.value='rewritesedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Edit'), "\">$IMG_EDIT</a></th>";
 			print "<th><a href=\"\" onclick=\"document.forms[0].rewrite.value='$k'; document.forms[0].oldvalue.value='", &encode_url($val), "'; document.forms[0].action.value='rewritesdelete'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Delete'), "\">$IMG_DELETE</a></th>";
 			print "</tr>\n";
 		}
@@ -1219,13 +1219,13 @@ sub show_rewrites
 				$options .= &translate('Temporary') if ($opt =~ /r/o);
 				$options .= ' / ' if ($opt && ($opt =~ /R/o));
 				$options .= &translate('Permanently') if ($opt =~ /R/o);
-				print "<tr><th>&nbsp;</th><td align=\"center\"><b>", &translate('Replace'), "</b> $pattern</td><td><b>", &translate('with'), "</b> $substitute</td><td>$options</td><th><a href=\"\" onclick=\"document.forms[0].rewrite.value='$k-else'; document.forms[0].oldvalue.value='", &encode_url($val), "'; document.forms[0].action.value='rewritesedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Edit'), "\">$IMG_EDIT</a></th>";
+				print "<tr><th>&nbsp;</th><td align=\"center\"><b>", &translate('Replace'), "</b> ", $CGI->escapeHTML("$pattern"), "</td><td><b>", &translate('with'), "</b> ", $CGI->escapeHTML("$substitute"), "</td><td>$options</td><th><a href=\"\" onclick=\"document.forms[0].rewrite.value='$k-else'; document.forms[0].oldvalue.value='", &encode_url($val), "'; document.forms[0].action.value='rewritesedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Edit'), "\">$IMG_EDIT</a></th>";
 				print "<th><a href=\"\" onclick=\"document.forms[0].rewrite.value='$k-else'; document.forms[0].oldvalue.value='", &encode_url($val), "'; document.forms[0].action.value='rewritesdelete'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Delete'), "\">$IMG_DELETE</a></th>";
  				print "</tr>\n";
 			}
 			my $v = $CONFIG->{rew}{$k}{else}{log} || '';
 			my $anon = '';
-			if ($v =~ s/anonymous[\s\t]+(.*)/$1/) {
+			if ($v =~ s/anonymous[\s\t]+(.*)/$1/o) {
 				$anon = "(" . &translate('anonymized') . ")";
 			}
 			if ($v) {
@@ -1307,9 +1307,9 @@ sub edit_rewrites
 			}
 		}
 		print "<tr><td nowrap=\"1\">", &translate('Replace'), " : \n";
-		print "<input type=\"text\" size=\"50\" name=\"pattern\" value=\"$pattern\" /></td>\n";
+		print "<input type=\"text\" size=\"50\" name=\"pattern\" value=\"", $CGI->escapeHTML("$pattern"), "\" /></td>\n";
 		print "<td nowrap=\"1\">", &translate('with'), " : \n";
-		print "<input type=\"text\" size=\"50\" name=\"substitute\" value=\"$substitute\" /></td></tr>\n";
+		print "<input type=\"text\" size=\"50\" name=\"substitute\" value=\"", $CGI->escapeHTML("$substitute"), "\" /></td></tr>\n";
 		print "<tr><th nowrap=\"1\" colspan=\"2\">", &translate('Case insensitive'), "\n";
 		my $checked = '';
 		$checked = 'checked="1"' if ($icase);
@@ -1378,7 +1378,7 @@ sub show_sources
 			}
 			my $v = $CONFIG->{src}{$k}{else}{log} || '';
 			my $anon = '';
-			if ($v =~ s/anonymous[\s\t]+(.*)/$1/) {
+			if ($v =~ s/anonymous[\s\t]+(.*)/$1/o) {
 				$anon = "(" . &translate('anonymized') . ")";
 			}
 			if ($v) {
@@ -1529,7 +1529,7 @@ sub show_categories
 		print "<td nowrap=\"1\" title=\"$CONFIG->{dest}{$k}{redirect}\" style=\"text-align: center;\">$img</td><td nowrap=\"1\">";
 		my $v = $CONFIG->{dest}{$k}{log} || '';
 		my $anon = '';
-		if ($v =~ s/anonymous[\s\t]+(.*)/$1/) {
+		if ($v =~ s/anonymous[\s\t]+(.*)/$1/o) {
 			$anon = "(" . &translate('anonymized') . ")";
 		}
 		if ($v) {
@@ -1566,7 +1566,7 @@ sub show_categories
 				print "<td nowrap=\"1\" title=\"$CONFIG->{dest}{$k}{else}{redirect}\">", substr($CONFIG->{dest}{$k}{else}{redirect}, 0, 60), "</td><td nowrap=\"1\">";
 				my $v = $CONFIG->{dest}{$k}{else}{log} || '';
 				my $anon = '';
-				if ($v =~ s/anonymous[\s\t]+(.*)/$1/) {
+				if ($v =~ s/anonymous[\s\t]+(.*)/$1/o) {
 					$anon = "(" . &translate('anonymized') . ")";
 				}
 				if ($v) {
@@ -1685,7 +1685,7 @@ sub edit_categories
 	print "<tr><td colspan=\"2\" align=\"left\">", &translate('When found in list above'), "</td></tr>\n";
 
 	print "<tr><th align=\"right\">", &translate('Redirect to Url'), "</th><th align=\"left\"><input type=\"text\" size=\"50\" name=\"redirect\" value=\"", $CGI->escapeHTML($redirect), "\" />";
-	print "&nbsp;<input type=\"button\" name=\"redirectlist\" value=\"", &translate('From list'), "\" onclick=\"window.open('$ENV{SCRIPT_NAME}?action=redirectlist&category=$CAT&opener=redirect&lang=$LANG','redlistwin','scrollbars=yes,status=no,toolbar=no,width=600,height=400,resizable=yes'); return false;\">";
+	print "&nbsp;<input type=\"button\" name=\"redirectlist\" value=\"", &translate('From list'), "\" onclick=\"window.open('", $CGI->escapeHTML("$ENV{SCRIPT_NAME}?action=redirectlist&category=$CAT&opener=redirect&lang=$LANG"), "','redlistwin','scrollbars=yes,status=no,toolbar=no,width=600,height=400,resizable=yes'); return false;\">";
 	print "</th></tr>\n";
 	my $anon = '';
 	if ($log =~ s/anonymous[\s\t]+//) {
@@ -1712,6 +1712,7 @@ sub show_acl
 	my $rex_dnsbl = qr/^dnsbl:/;
 	my $rex_notdnsbl = qr/^\!dnsbl:/;
 	my $rex_bang = qr/^\!/;
+	my $rex_cmsp = qr/, $/;
 
 	print "<h2>", &translate('ACLs Configuration'), "</h2>\n";
 	print "<input type=\"hidden\" name=\"acl\" value=\"\" />\n";
@@ -1751,13 +1752,13 @@ sub show_acl
 			}
 
 		}
-		$blocked = &translate('All Internet') . ", " if (!$blocked && grep(/^none$/, @{$CONFIG->{acl}{$k}{pass}}));
-		$allowed = &translate('All Internet') . ", " if (!$allowed && grep(/^(all|any)$/, @{$CONFIG->{acl}{$k}{pass}}));
-		if ($blocked =~ s/, $//) {
+		$blocked = &translate('All Internet') . ", " if (!$blocked && grep(/^none$/o, @{$CONFIG->{acl}{$k}{pass}}));
+		$allowed = &translate('All Internet') . ", " if (!$allowed && grep(/^(all|any)$/o, @{$CONFIG->{acl}{$k}{pass}}));
+		if ($blocked =~ s/$rex_cmsp//) {
 			$blocked = '<b>' . &translate('Blocked') . ' :</b> ' . $blocked;
 		}
-		if ($allowed =~ s/, $//) {
-			if (grep(/^none$/, @{$CONFIG->{acl}{$k}{pass}})) {
+		if ($allowed =~ s/$rex_cmsp//) {
+			if (grep(/^none$/o, @{$CONFIG->{acl}{$k}{pass}})) {
 				$allowed = '<b>' . &translate('Allow only') . ' :</b> ' . $allowed;
 			} else {
 				$allowed = '<b>' . &translate('Allow') . ' :</b> ' . $allowed;
@@ -1770,10 +1771,10 @@ sub show_acl
 				$whitelist .= "$bl, ";
 			}
 		}
-		if ($blacklist =~ s/, $//) {
+		if ($blacklist =~ s/$rex_cmsp//) {
 			$blacklist = "<br><b>" . &translate('DNS Blacklist') . ":</b> $blacklist";
 		}
-		if ($whitelist =~ s/, $//) {
+		if ($whitelist =~ s/$rex_cmsp//) {
 			$whitelist = "<br><b>" . &translate('DNS Whitelist') . ":</b> $whitelist";
 		}
 			
@@ -1820,12 +1821,12 @@ sub show_acl
 				}
 
 			}
-			$blocked = &translate('All Internet') . ", " if (!$blocked && grep(/^none$/, @{$CONFIG->{acl}{$k}{else}{pass}}));
-			$allowed = &translate('All Internet') . ", " if (!$allowed && grep(/^(all|any)$/, @{$CONFIG->{acl}{$k}{else}{pass}}));
-			if ($blocked =~ s/, $//) {
+			$blocked = &translate('All Internet') . ", " if (!$blocked && grep(/^none$/o, @{$CONFIG->{acl}{$k}{else}{pass}}));
+			$allowed = &translate('All Internet') . ", " if (!$allowed && grep(/^(all|any)$/o, @{$CONFIG->{acl}{$k}{else}{pass}}));
+			if ($blocked =~ s/$rex_cmsp//) {
 				$blocked = '<b>' . &translate('Blocked') . ' :</b> ' . $blocked;
 			}
-			if ($allowed =~ s/, $//) {
+			if ($allowed =~ s/$rex_cmsp//) {
 				if (grep(/^none$/, @{$CONFIG->{acl}{$k}{else}{pass}})) {
 					$allowed = '<b>' . &translate('Allow only') . ' :</b> ' . $allowed;
 				} else {
@@ -1839,10 +1840,10 @@ sub show_acl
 					$whitelist .= "$bl, ";
 				}
 			}
-			if ($blacklist =~ s/, $//) {
+			if ($blacklist =~ s/$rex_cmsp//) {
 				$blacklist = "<br><b>" . &translate('DNS Blacklist') . ":</b> $blacklist";
 			}
-			if ($whitelist =~ s/, $//) {
+			if ($whitelist =~ s/$rex_cmsp//) {
 				$whitelist = "<br><b>" . &translate('DNS Whitelist') . ":</b> $whitelist";
 			}
 			$rewrite = '';
@@ -1890,10 +1891,10 @@ sub show_acl
 	}
 	$blocked = &translate('All Internet') . ", " if (!$blocked && grep(/^none$/, @{$CONFIG->{acl}{default}{pass}}));
 	$allowed = &translate('All Internet') . ", " if (!$allowed && grep(/^(all|any)$/, @{$CONFIG->{acl}{default}{pass}}));
-	if ($blocked =~ s/, $//) {
+	if ($blocked =~ s/$rex_cmsp//) {
 		$blocked = '<b>' . &translate('Blocked') . ' :</b> ' . $blocked;
 	}
-	if ($allowed =~ s/, $//) {
+	if ($allowed =~ s/$rex_cmsp//) {
 		if (grep(/^none$/, @{$CONFIG->{acl}{default}{pass}})) {
 			$allowed = '<b>' . &translate('Allow only') . ' :</b> ' . $allowed;
 		} else {
@@ -1907,10 +1908,10 @@ sub show_acl
 			$whitelist .= "$bl, ";
 		}
 	}
-	if ($blacklist =~ s/, $//) {
+	if ($blacklist =~ s/$rex_cmsp//) {
 		$blacklist = "<br><b>" . &translate('DNS Blacklist') . ":</b> $blacklist";
 	}
-	if ($whitelist =~ s/, $//) {
+	if ($whitelist =~ s/$rex_cmsp//) {
 		$whitelist = "<br><b>" . &translate('DNS Whitelist') . ":</b> $whitelist";
 	}
 	if (exists $CONFIG->{acl}{default}{extended}{within}) {
@@ -1958,10 +1959,10 @@ sub show_acl
 		}
 		$blocked = &translate('All Internet') . ", " if (!$blocked && grep(/^none$/, @{$CONFIG->{acl}{default}{else}{pass}}));
 		$allowed = &translate('All Internet') . ", " if (!$allowed && grep(/^(all|any)$/, @{$CONFIG->{acl}{default}{else}{pass}}));
-		if ($blocked =~ s/, $//) {
+		if ($blocked =~ s/$rex_cmsp//) {
 			$blocked = '<b>' . &translate('Blocked') . ' :</b> ' . $blocked;
 		}
-		if ($allowed =~ s/, $//) {
+		if ($allowed =~ s/$rex_cmsp//) {
 			if (grep(/^none$/, @{$CONFIG->{acl}{default}{else}{pass}})) {
 				$allowed = '<b>' . &translate('Allow only') . ' :</b> ' . $allowed;
 			} else {
@@ -1975,10 +1976,10 @@ sub show_acl
 				$whitelist .= "$bl, ";
 			}
 		}
-		if ($blacklist =~ s/, $//) {
+		if ($blacklist =~ s/$rex_cmsp//) {
 			$blacklist = "<br><b>" . &translate('DNS Blacklist') . ":</b> $blacklist";
 		}
-		if ($whitelist =~ s/, $//) {
+		if ($whitelist =~ s/$rex_cmsp//) {
 			$whitelist = "<br><b>" . &translate('DNS Whitelist') . ":</b> $whitelist";
 		}
 		$rewrite = '';
@@ -2124,7 +2125,7 @@ sub edit_acls
 	print "</td></tr>\n";
 
 	print "<tr><th align=\"right\">", &translate('Redirect url'), "</th><td><input type=\"text\" size=\"50\" name=\"redirect\" value=\"", $CGI->escapeHTML($CONFIG->{acl}{$name}{redirect}), "\" />";
-	print "&nbsp;<input type=\"button\" name=\"redirectlist\" value=\"", &translate('From list'), "\" onclick=\"window.open('$ENV{SCRIPT_NAME}?action=redirectlist&acl=$ACL&opener=redirect&lang=$LANG','redlistwin','scrollbars=yes,status=no,toolbar=no,width=600,height=400,resizable=yes'); return false;\">";
+	print "&nbsp;<input type=\"button\" name=\"redirectlist\" value=\"", &translate('From list'), "\" onclick=\"window.open('", $CGI->escapeHTML("$ENV{SCRIPT_NAME}?action=redirectlist&acl=$ACL&opener=redirect&lang=$LANG"), "','redlistwin','scrollbars=yes,status=no,toolbar=no,width=600,height=400,resizable=yes'); return false;\">";
 	print "</td></tr>\n";
 	print "<tr><th align=\"right\">", &translate('Log file'), "</th><td><input type=\"text\" size=\"50\" name=\"log\" value=\"$CONFIG->{acl}{$name}{log}\" /></td></tr>\n";
 
@@ -2201,7 +2202,7 @@ sub edit_acls
 	print "</td></tr>\n";
 
 	print "<tr><th align=\"right\">", &translate('Redirect url'), "</th><td><input type=\"text\" size=\"50\" name=\"eredirect\" value=\"", $CGI->escapeHTML($CONFIG->{acl}{$name}{else}{redirect}), "\" />";
-	print "&nbsp;<input type=\"button\" name=\"eredirectlist\" value=\"", &translate('From list'), "\" onclick=\"window.open('$ENV{SCRIPT_NAME}?action=redirectlist&acl=$ACL&opener=eredirect&lang=$LANG','eredlistwin','scrollbars=yes,status=no,toolbar=no,width=600,height=400,resizable=yes'); return false;\">";
+	print "&nbsp;<input type=\"button\" name=\"eredirectlist\" value=\"", &translate('From list'), "\" onclick=\"window.open('", $CGI->escapeHTML("$ENV{SCRIPT_NAME}?action=redirectlist&acl=$ACL&opener=eredirect&lang=$LANG"), "','eredlistwin','scrollbars=yes,status=no,toolbar=no,width=600,height=400,resizable=yes'); return false;\">";
 	print "</td></tr>\n";
 	print "<tr><th align=\"right\">", &translate('Log file'), "</th><td><input type=\"text\" size=\"50\" name=\"elog\" value=\"$CONFIG->{acl}{$name}{else}{log}\" /></td></tr>\n";
 	print "<tr><th colspan=\"2\"><hr /></th></tr>\n";
@@ -2459,7 +2460,6 @@ sub save_config
 		$ERROR = "Can't save configuration to file $CONF_FILE: $!\n";
 		return 0;
 	}
-	#print OUT "$content\n";
 	print OUT "${$content}\n";
 	close(OUT);
 
@@ -2484,23 +2484,25 @@ sub show_listcontent
 
 	if (!$bl || !-e "$CONFIG->{dbhome}/$bl") {
 		&error("No file set");
-		print "<input type=\"button\" name=\"save\" value=\"", &translate('Close'), "\" onclick=\"window.close(); return false;\">\n";
+		print "<input type=\"button\" name=\"close\" value=\"", &translate('Close'), "\" onclick=\"window.close(); return false;\">\n";
 	} else {
 		print "<h2>", &translate('List'), " : $bl</h2>\n";
 
 		if (not open(IN, "$CONFIG->{dbhome}/$bl")) {
 			&error("Can't read file $CONFIG->{dbhome}/$bl: $!");
+			print "<input type=\"button\" name=\"close\" value=\"", &translate('Close'), "\" onclick=\"window.close(); return false;\">\n";
 		} else {
 			print "<table><tr><th align=\"left\">\n";
 			print "<textarea name=\"content\" cols=\"45\" rows=\"42\" wrap=\"off\">\n";
 			while (<IN>) {
-				print "$_";
+				print $CGI->escapeHTML("$_");
 			}
 			close(IN);
 			print "</textarea>\n";
 			print "</th></tr>\n";
-			print "<tr><th align=\"center\"></th></tr>\n";
+			print "<tr><th align=\"center\">&nbsp;</th></tr>\n";
 			print "<tr><th><input type=\"button\" name=\"save\" value=\"", &translate('Apply change'), "\" onclick=\"document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\"></th></tr>\n";
+			print "<tr><th><input type=\"button\" name=\"close\" value=\"", &translate('Close'), "\" onclick=\"window.close(); return false;\"></th></tr>\n";
 			print "</table>\n";
 		}
 	}
@@ -3129,7 +3131,11 @@ sub show_log_schedule
 {
 	my ($type, $elt, $key, $colspan) = @_;
 
-	$colspan = "colspan=\"$colspan\"" if ($colspan);
+	if ($colspan && ($colspan =~ /^[0-9]+$/) && ($colspan > 1) ) {
+		$colspan = " colspan=\"$colspan\"";
+	} else {
+		$colspan = "";
+	}
 
 	my $v = $CONFIG->{$type}{$key}{log} || '';
 	my $anon = '';
@@ -3137,9 +3143,9 @@ sub show_log_schedule
 		$anon = "(" . &translate('anonymized') . ")";
 	}
 	if ($v) {
-		print "<tr><th>&nbsp;</th><td $colspan><b>", &translate('Log file'), "</b> : ";
+		print "<tr><th>&nbsp;</th><td$colspan><b>", &translate('Log file'), "</b> : ";
 	} else {
-		print "<tr><th>&nbsp;</th><td $colspan><b>", &translate('No log file'), "</b>";
+		print "<tr><th>&nbsp;</th><td$colspan><b>", &translate('No log file'), "</b>";
 	}
 	print "$v $anon";
 	print "</td><th><a href=\"\" onclick=\"document.forms[0].$elt.value='$key'; document.forms[0].oldvalue.value='", &encode_url("log $CONFIG->{$type}{$key}{log}"), "'; document.forms[0].action.value='${elt}sedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Edit'), "\">$IMG_EDIT</a></th>";
@@ -3159,9 +3165,9 @@ sub show_log_schedule
 		$sched = 'outside';
 		$label = 'Outside schedule';
 	}
-	print "<tr><th>&nbsp;</th><td $colspan><b>", &translate($label), "</b> $CONFIG->{$type}{$key}{$sched}</td>";
+	print "<tr><th>&nbsp;</th><td$colspan><b>", &translate($label), "</b> $CONFIG->{$type}{$key}{$sched}</td>";
 	my $prefix = $sched || 'within';
-	print "</td><th><a href=\"\" onclick=\"document.forms[0].$elt.value='$key'; document.forms[0].oldvalue.value='", &encode_url("$prefix $CONFIG->{$type}{$key}{$sched}"), "'; document.forms[0].action.value='${elt}sedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Edit'), "\">$IMG_EDIT</a></th>";
+	print "<th><a href=\"\" onclick=\"document.forms[0].$elt.value='$key'; document.forms[0].oldvalue.value='", &encode_url("$prefix $CONFIG->{$type}{$key}{$sched}"), "'; document.forms[0].action.value='${elt}sedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Edit'), "\">$IMG_EDIT</a></th>";
 	if ($sched) {
 		print "<th><a href=\"\" onclick=\"document.forms[0].$elt.value='$key'; document.forms[0].oldvalue.value='", &encode_url("$prefix $CONFIG->{$type}{$key}{$sched}"), "'; document.forms[0].action.value='${elt}sdelete'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Delete'), "\">$IMG_DELETE</a></th>";
 	} else {
@@ -3175,7 +3181,7 @@ sub show_editor
 	my ($type, $path) = @_;
 
 	if (grep(/^$type$/, 'iplist', 'userlist')) {
-		$path = "<a href=\"\" onclick=\"window.open('$ENV{SCRIPT_NAME}?action=editfile&path=$path','filewin','scrollbars=yes,status=no,toolbar=no,width=400,height=800,resizable=yes,screenX=1,screenY=1,top=1,left=1'); return false;\" target=\"_new\" style=\"font-weight: normal;\">$path</a>";
+		$path = "<a href=\"\" onclick=\"window.open('". $CGI->escapeHTML("$ENV{SCRIPT_NAME}?action=editfile&path=$path"). "','filewin','scrollbars=yes,status=no,toolbar=no,width=400,height=800,resizable=yes,screenX=1,screenY=1,top=1,left=1'); return false;\" target=\"_new\" style=\"font-weight: normal;\">$path</a>";
 	}
 
 	return $path;
@@ -3199,45 +3205,47 @@ sub show_filecontent
 	print "<input type=\"hidden\" name=\"apply\" value=\"\" />\n";
 	print "<input type=\"hidden\" name=\"filename\" value=\"$file\" />\n";
 
-	print "<table><tr>\n";
-
 	if (!$file) {
 		&error("No file set");
+		print "<input type=\"button\" name=\"close\" value=\"", &translate('Close'), "\" onclick=\"window.close(); return false;\">\n";
 	} else {
 		$file = "$CONFIG->{dbhome}/$file" if ($file !~ /^\//);
 		print "<h2>", &translate('File'), " : $file</h2>\n";
-		if (!$tail) {
-			if (-e "$file" && not open(IN, "$file")) {
-				&error("Can't read file $file: $!");
-			} else {
+
+		if (!-e "$file" || not open(IN, "$file") ) {
+			&error("Can't read file $file: $!");
+			print "<input type=\"button\" name=\"close\" value=\"", &translate('Close'), "\" onclick=\"window.close(); return false;\">\n";
+		} else {
+			print "<table>\n";
+			if (!$tail) {
 				if ($ACTION eq 'editfile') {
-					print "<th align=\"left\">\n";
+					print "<tr><th align=\"left\">\n";
 					print "<textarea name=\"content\" cols=\"47\" rows=\"42\" wrap=\"off\">\n";
-					if (-e "$file") {
-						while (<IN>) {
-							print "$_";
-						}
-						close(IN);
+					while (<IN>) {
+						print "$_";
 					}
+					close(IN);
 					print "</textarea>\n";
 					print "</th></tr>\n";
-					print "<tr><th align=\"center\"></th></tr>\n";
+					print "<tr><th align=\"center\">&nbsp;</th></tr>\n";
 					print "<tr><th><input type=\"button\" name=\"save\" value=\"", &translate('Apply change'), "\" onclick=\"document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\"></th></tr>\n";
 				} else {
-					print "<th align=\"left\" style=\"font-weight: normal;\"><pre>\n";
+					print "<tr><th align=\"left\" style=\"font-weight: normal;\"><pre>\n";
 					while (<IN>) {
 						print "$_";
 					}
 					print "</pre></th></tr>\n";
 				}
+			} else {
+				print "<tr><th align=\"left\" style=\"font-weight: normal;\"><pre>\n";
+				print `$TAIL -n $LOG_LINES $file`;
+				print "</pre></th></tr>\n";
 			}
-		} else {
-			print "<th align=\"left\" style=\"font-weight: normal;\"><pre>\n";
-			print `$TAIL -n $LOG_LINES $file`;
-			print "</pre></th></tr>\n";
+			print "<tr><th><input type=\"button\" name=\"close\" value=\"", &translate('Close'), "\" onclick=\"window.close(); return false;\"></th></tr>\n";
+			print "</table>\n";
 		}
 	}
-	print "<tr><th><input type=\"button\" name=\"close\" value=\"", &translate('Close'), "\" onclick=\"window.close(); return false;\"></th></tr></table>\n";
+
 	print $CGI->end_form();
 	print $CGI->end_html();
 }
@@ -3376,7 +3384,7 @@ sub show_logs
 		print "<tr><th>", &translate('No log file'), ".</th></tr>\n";
 	} else {
 		foreach my $name (@files) {
-			print "<tr><th size=\"20\" style=\"text-align: right;\">$IMG_LOG</th><th style=\"text-align: left;\"><a href=\"\" onclick=\"window.open('$ENV{SCRIPT_NAME}?action=viewfile&path=$CONFIG->{logdir}/$name&tail=1','filewin','scrollbars=yes,status=no,toolbar=no,width=800,height=800,resizable=yes,screenX=1,screenY=1,top=1,left=1'); return false;\" target=\"_new\">$name</a></th></tr>\n";
+			print "<tr><th size=\"20\" style=\"text-align: right;\">$IMG_LOG</th><th style=\"text-align: left;\"><a href=\"\" onclick=\"window.open('", $CGI->escapeHTML("$ENV{SCRIPT_NAME}?action=viewfile&path=$CONFIG->{logdir}/$name&tail=1"), "','filewin','scrollbars=yes,status=no,toolbar=no,width=800,height=800,resizable=yes,screenX=1,screenY=1,top=1,left=1'); return false;\" target=\"_new\">$name</a></th></tr>\n";
 		}
 	}
 	print "</table>\n";
@@ -3408,7 +3416,7 @@ sub sc_smgr_header
 	print "<a href=\"\" onclick=\"document.forms[0].view.value='trustclients'; document.forms[0].submit(); return false;\">", &translate('Trusted Clients'), "</a> |\n";
 	print "<br><hr>\n";
 	print "<a href=\"\" onclick=\"document.forms[0].view.value='dump'; document.forms[0].submit(); return false;\">", &translate('View Configuration'), "</a> | \n";
-	print "<a href=\"\" onclick=\"window.open('$ENV{SCRIPT_NAME}?action=squidclamav&view=showlog&path=$CONFIG->{logfile}&lang=$LANG','filewin','scrollbars=yes,status=no,toolbar=no,width=850,height=800,resizable=yes,screenX=1,screenY=1,top=1,left=1'); return false;\" target=\"_new\">", &translate('View log'), "</a> |\n" if ($CONFIG->{logfile} && -e $CONFIG->{logfile});
+	print "<a href=\"\" onclick=\"window.open('", $CGI->escapeHTML("$ENV{SCRIPT_NAME}?action=squidclamav&view=showlog&path=$CONFIG->{logfile}&lang=$LANG"), "','filewin','scrollbars=yes,status=no,toolbar=no,width=850,height=800,resizable=yes,screenX=1,screenY=1,top=1,left=1'); return false;\" target=\"_new\">", &translate('View log'), "</a> |\n" if ($CONFIG->{logfile} && -e $CONFIG->{logfile});
 	if ($SQUIDCLAMAV eq 'c-icap') {
 		print "<a href=\"\" onclick=\"document.forms[0].view.value='cicap'; document.forms[0].submit(); return false;\">", &translate('Reload c-icap'), "</a> |\n";
 	} elsif ($SQUID_WRAPPER) {
@@ -3719,12 +3727,12 @@ sub sc_apply_change
 			my $val = $CGI->param($p) || '';
 			next if (!$val);
 			my $tmp = $val;
-			$tmp =~ s/([^\\])\\/$1\\\\/g;
+			$tmp =~ s/([^\\])\\/$1\\\\/go;
 			next if ($OLD && ($tmp eq $OLD));
 			push(@{$CONFIG->{'abort'}}, $val) if ($p =~ /^abort\d+$/o);
 			push(@{$CONFIG->{'abortcontent'}}, $val) if ($p =~ /^abortcontent\d+$/o);
-			map { s/([^\\])\//$1\\\//g } @{$CONFIG->{'abort'}};
-			map { s/([^\\])\//$1\\\//g } @{$CONFIG->{'abortcontent'}};
+			map { s/([^\\])\//$1\\\//go } @{$CONFIG->{'abort'}};
+			map { s/([^\\])\//$1\\\//go } @{$CONFIG->{'abortcontent'}};
 		}
 	}
 
@@ -3734,10 +3742,10 @@ sub sc_apply_change
 		foreach my $p ($CGI->param()) {
 			next if ($p !~ /^whitelist/o);
 			my $tmp = $CGI->param($p);
-			$tmp =~ s/([^\\])\\/$1\\\\/g;
+			$tmp =~ s/([^\\])\\/$1\\\\/go;
 			next if ($OLD && ($OLD eq $tmp));
 			push(@{$CONFIG->{'whitelist'}}, $CGI->param($p)) if ($p =~ /^whitelist\d+$/o);
-			map { s/([^\\])\//$1\\\//g } @{$CONFIG->{'whitelist'}};
+			map { s/([^\\])\//$1\\\//go } @{$CONFIG->{'whitelist'}};
 		}
 	}
 
@@ -3745,11 +3753,11 @@ sub sc_apply_change
 	if ($VIEW eq 'trustusers') {
 		delete $CONFIG->{'trustuser'};
 		foreach my $p ($CGI->param()) {
-			next if ($p !~ /^trustuser/);
+			next if ($p !~ /^trustuser/o);
 			my $tmp = $CGI->param($p);
-			$tmp =~ s/([^\\])\\/$1\\\\/g;
+			$tmp =~ s/([^\\])\\/$1\\\\/go;
 			next if ($OLD && ($OLD eq $tmp));
-			push(@{$CONFIG->{'trustuser'}}, $CGI->param($p)) if ($p =~ /^trustuser\d+$/);
+			push(@{$CONFIG->{'trustuser'}}, $CGI->param($p)) if ($p =~ /^trustuser\d+$/o);
 		}
 	}
 
@@ -3759,7 +3767,7 @@ sub sc_apply_change
 		foreach my $p ($CGI->param()) {
 			next if ($p !~ /^trustclient/o);
 			my $tmp = $CGI->param($p);
-			$tmp =~ s/([^\\])\\/$1\\\\/g;
+			$tmp =~ s/([^\\])\\/$1\\\\/go;
 			next if ($OLD && ($OLD eq $tmp));
 			push(@{$CONFIG->{'trustclient'}}, $CGI->param($p)) if ($p =~ /^trustclient\d+$/o);
 		}
