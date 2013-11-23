@@ -856,7 +856,7 @@ sub add_item
 		if (open(IN, "$file")) {
 			while (my $l = <IN>) {
 				chomp($l);
-				$l =~ s/\r//gso;
+				$l =~ s/\r//gs;
 				next if (!$l);
 				# check if item already exists
 				if (grep($_ eq $l, @items)) {
@@ -918,7 +918,7 @@ sub remove_item
 	if (open(IN, "$file")) {
 		while (my $l = <IN>) {
 			chomp($l);
-			$l =~ s/\r//gso;
+			$l =~ s/\r//gs;
 			next if (!$l);
 			# check if item exists
 			if (grep($_ eq $l, @items)) {
@@ -982,7 +982,7 @@ sub add_hist_item
 		if (open(IN, "$file")) {
 			while (my $l = <IN>) {
 				chomp($l);
-				$l =~ s/\r//gso;
+				$l =~ s/\r//gs;
 				next if (!$l);
 				# check if item already exists
 				if (grep($_ eq $l, @items)) {
@@ -3068,7 +3068,7 @@ sub get_translation
 	if (open(IN, "$basedir/menu.dat")) {
 		while (<IN>) {
 			chomp;
-			s/\r//gso;
+			s/\r//gs;
 			next if (/^#/ || !$_);
 			my ($key, $val) = split(/\t+/);
 			$translate{$key} = $val;
@@ -3852,7 +3852,7 @@ sub read_sgm_config
 	} else {
 		while (my $l = <IN>) {
 			chomp($l);
-			$l =~ s/\r//gso;
+			$l =~ s/\r//gs;
 			$l =~ s/[\s\t]*\#.*//;
 			next if (!$l);
 			my ($key, $val) = split(/[\s\t]+/, $l, 2);
