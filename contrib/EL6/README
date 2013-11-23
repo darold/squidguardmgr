@@ -30,8 +30,8 @@ CentOS 6 distribution.
     squidguardmgr          -- logrotate configuration file.
 
 Note:
-You don't need to permit read nor write access to these files for squid account.
-If you want (may be you do want) to limit access to  SquidGuard Manager Web GUI,
-generate .htpasswd file using htpasswd command, then look into the commented-out 
-lines in squidguardmgr.cf.
+You don't need to permit 'squid' account read nor write access to these files.
+If you want (maybe you do want) to authenticate user to access SquidGuard Manager
+Web GUI, generate .htpasswd file using htpasswd command, then look into the 
+commented-out lines in squidguardmgr.cf.
 Enjoy ;-)
