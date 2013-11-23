@@ -63,19 +63,20 @@ example:
 
 <h4>Search Users in MySQL database:</h4>
 <pre>
-Used to define a select statement to retreive a username from a mysql database. 
+    Used to define a select statement to retreive a username from a mysql database. 
 
 Example:
     select login from pusers
 
-Attention: The query must not be ended by a trailing ";" and must not contain more than four statements.
-Additionally keep in mind, that the name "user" is already used as a token by squidGuard. Don't use it in your query.
+    Attention: The query must not be ended by a trailing ";" and must not contain more than four statements.
+    Additionally keep in mind, that the name "user" is already used as a token by squidGuard. Don't use it in your query.
 </pre>
 
 <h4>Program returning user list:</h4>
 <pre>
-Used to specify a command that will return a list of usernames onto stdout.
-The value must be an absolute path to an executable program. This program must be executable by the user running squidGuard (most of the time 'squid').
+    Used to specify a command that will return a list of usernames onto stdout.
+    The value must be an absolute path to an executable program. This program must be executable
+    by the user running squidGuard (most of the time 'squid').
 </pre>
 
 <p>
