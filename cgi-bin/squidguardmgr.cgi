@@ -704,24 +704,26 @@ sub get_blacklists
 
 sub get_blacklists_description
 {
+	my %blinfo = ();
 
 	if (open(IN, "$LANGDIR/$LANG/$BLDESC")) {
 		while (<IN>) {
 			chomp;
-			my ($k, $a, $v) = split(/\t+/);
-			$CONFIG->{$k}{alias} = $a if ($v);
-			$CONFIG->{$k}{description} = $v || $a;
+			my ($k, $a, $v) = split(/\t/);
+			$blinfo{$k}{'alias'} = $a || '';
+			$blinfo{$k}{'description'} = $v || '';
 		}
 		close(IN);
 	}
 
+	return \%blinfo;
 }
 
 sub show_blacklists
 {
 
 	print "<h2>", &translate('Lists management'), "</h2>\n";
-	my %blinfo = &get_blacklists_description();
+	my $blinfo = &get_blacklists_description();
 	my @bl = &get_blacklists();
 	my $i = 0;
 	print "<table width=\"100%\">\n";
@@ -730,7 +732,7 @@ sub show_blacklists
 			print "<tr>\n";
 		}
 		my $in_use = &acl_in_use($bl[$i]);
-		print "<td align=\"left\" title=\"$blinfo{$bl[$i]}{description}\"><a href=\"\" onclick=\"document.forms[0].action.value='bledit'; document.forms[0].blacklist.value='$bl[$i]'; document.forms[0].submit(); return false;\" style=\"font-weight: normal;\">", ($blinfo{$bl[$i]}{alias} || $bl[$i]), "</a>";
+		print "<td align=\"left\" title=\"$blinfo->{$bl[$i]}{description}\"><a href=\"\" onclick=\"document.forms[0].action.value='bledit'; document.forms[0].blacklist.value='$bl[$i]'; document.forms[0].submit(); return false;\" style=\"font-weight: normal;\">", ($blinfo->{$bl[$i]}{alias} || $bl[$i]), "</a>";
 		print "<a href=\"\" onclick=\"if (confirm('WARNING: ", &translate('This will remove the list from your system.'), &translate('Are you sure to continue?'), "')) { document.forms[0].action.value='bldelete'; document.forms[0].blacklist.value='$bl[$i]'; document.forms[0].submit(); } return false;\" title=\"", &translate('Remove'), "\">$IMG_SMALL_REMOVE</a>" if (!$in_use);
 		print "<font title=\"", &translate('still in use'), "\">$IMG_SMALL_NOREMOVE</font>" if ($in_use);
 		print "</td>\n";
@@ -783,10 +785,10 @@ sub edit_blacklist
 {
 	my $bl = shift;
 
-	my %blinfo = &get_blacklists_description();
-	print "<h2>", &translate('List'), ": ", ($blinfo{$bl}{alias} || $bl), "</h2>\n";
-	print "<table><tr><td>", &translate('Alias'), ":</td><td colspan=\"2\"><input type=\"text\" name=\"alias\" value=\"$blinfo{$bl}{alias}\" size=\"30\"></td></tr>\n";
-	print "<tr><td>", &translate('Description'), ":</td><td><input type=\"text\" name=\"description\" value=\"$blinfo{$bl}{description}\" size=\"60\"></td><th><input type=\"button\" name=\"modify\" value=\"", &translate('Modify'), "\" onclick=\"document.forms[0].action.value='bledit'; document.forms[0].apply.value='descr'; document.forms[0].submit(); return false;\"></th></tr></table>\n";
+	my $blinfo = &get_blacklists_description();
+	print "<h2>", &translate('List'), ": ", ($blinfo->{$bl}{alias} || $bl), "</h2>\n";
+	print "<table><tr><td>", &translate('Alias'), ":</td><td colspan=\"2\"><input type=\"text\" name=\"alias\" value=\"$blinfo->{$bl}{alias}\" size=\"30\"></td></tr>\n";
+	print "<tr><td>", &translate('Description'), ":</td><td><input type=\"text\" name=\"description\" value=\"$blinfo->{$bl}{description}\" size=\"60\"></td><th><input type=\"button\" name=\"modify\" value=\"", &translate('Modify'), "\" onclick=\"document.forms[0].action.value='bledit'; document.forms[0].apply.value='descr'; document.forms[0].submit(); return false;\"></th></tr></table>\n";
 	print "<input type=\"hidden\" name=\"path\" value=\"\">\n";
 	print "<table width=\"100%\"><tr><td>\n";
 	print "<table>\n";
@@ -1485,7 +1487,7 @@ sub edit_sources
 sub show_categories
 {
 
-	my %blinfo = &get_blacklists_description();
+	my $blinfo = &get_blacklists_description();
 	my @bl = &get_blacklists();
 
 	print "<h2>", &translate('Filters Configuration'), "</h2>\n";
@@ -1518,7 +1520,7 @@ sub show_categories
 			my $list = $CONFIG->{dest}{$k}{$type . 'list'} || '';
 			if ($list) {
 				$list =~ s/\/.*//;
-				$list = $blinfo{$list}{alias} || $list;
+				$list = $blinfo->{$list}{alias} || $list;
 				print "<td>$list</td>";
 			} else {
 				print "<td>&nbsp;</td>";
@@ -1557,7 +1559,7 @@ sub show_categories
 					my $list = $CONFIG->{dest}{$k}{else}{$type . 'list'} || '';
 					if ($list) {
 						$list =~ s/\/.*//;
-						$list = $blinfo{$list}{alias} || $list;
+						$list = $blinfo->{$list}{alias} || $list;
 						print "<td>$list</td>";
 					} else {
 						print "<td>&nbsp;</td>";
@@ -1604,7 +1606,7 @@ sub edit_categories
 		print "<input type=\"hidden\" name=\"else\" value=\"1\" />\n";
 	}
 
-	my %blinfo = &get_blacklists_description();
+	my $blinfo = &get_blacklists_description();
 	my @bl = &get_blacklists();
 
 	my $domain = '';
@@ -1658,7 +1660,7 @@ sub edit_categories
 		my $sel = '';
 		$sel = "selected=\"1\"" if ($domain eq "$bl[$j]/domains"); 
 		$sel = "selected=\"1\"" if ($default =~ /$bl[$j]/); 
-		print "<option value=\"$bl[$j]/domains\" $sel>" . ($blinfo{$bl[$j]}{alias} || $bl[$j]) . "</option>\n";
+		print "<option value=\"$bl[$j]/domains\" $sel>" . ($blinfo->{$bl[$j]}{alias} || $bl[$j]) . "</option>\n";
 	}
 	print "</select>\n";
 	print "</th></tr>\n";
@@ -1668,7 +1670,7 @@ sub edit_categories
 	foreach (my $j = 0; $j <= $#bl; $j++) {
 		my $sel = '';
 		$sel = "selected=\"1\"" if ($url eq "$bl[$j]/urls"); 
-		print "<option value=\"$bl[$j]/urls\" $sel>" . ($blinfo{$bl[$j]}{alias} || $bl[$j]) . "</option>\n";
+		print "<option value=\"$bl[$j]/urls\" $sel>" . ($blinfo->{$bl[$j]}{alias} || $bl[$j]) . "</option>\n";
 	}
 	print "</select>\n";
 	print "</th></tr>\n";
@@ -1678,7 +1680,7 @@ sub edit_categories
 	foreach (my $j = 0; $j <= $#bl; $j++) {
 		my $sel = '';
 		$sel = "selected=\"1\"" if ($expression eq "$bl[$j]/expressions"); 
-		print "<option value=\"$bl[$j]/expressions\" $sel>" . ($blinfo{$bl[$j]}{alias} || $bl[$j]) . "</option>\n";
+		print "<option value=\"$bl[$j]/expressions\" $sel>" . ($blinfo->{$bl[$j]}{alias} || $bl[$j]) . "</option>\n";
 	}
 	print "</select>\n";
 	print "</th></tr>\n";
@@ -1707,7 +1709,7 @@ sub edit_categories
 sub show_acl
 {
 
-	my %blinfo = &get_blacklists_description();
+	my $blinfo = &get_blacklists_description();
 	my @bl = &get_blacklists();
 	my $rex_dnsbl = qr/^dnsbl:/;
 	my $rex_notdnsbl = qr/^\!dnsbl:/;
@@ -1745,9 +1747,9 @@ sub show_acl
 				push(@dnsbl, $s);
 			} else {
 				if ($s =~ $rex_bang) {
-					$blocked .= ($blinfo{$tmp}{alias} || $tmp) . ", ";
+					$blocked .= ($blinfo->{$tmp}{alias} || $tmp) . ", ";
 				} else {
-					$allowed .= ($blinfo{$tmp}{alias} || $tmp) . ", ";
+					$allowed .= ($blinfo->{$tmp}{alias} || $tmp) . ", ";
 				}
 			}
 
@@ -1814,9 +1816,9 @@ sub show_acl
 					push(@dnsbl, $s);
 				} else {
 					if ($s =~ $rex_bang) {
-						$blocked .= ($blinfo{$tmp}{alias} || $tmp) . ", ";
+						$blocked .= ($blinfo->{$tmp}{alias} || $tmp) . ", ";
 					} else {
-						$allowed .= ($blinfo{$tmp}{alias} || $tmp) . ", ";
+						$allowed .= ($blinfo->{$tmp}{alias} || $tmp) . ", ";
 					}
 				}
 
@@ -1882,9 +1884,9 @@ sub show_acl
 			push(@dnsbl, $s);
 		} else {
 			if ($s =~ $rex_bang) {
-				$blocked .= ($blinfo{$tmp}{alias} || $tmp) . ", ";
+				$blocked .= ($blinfo->{$tmp}{alias} || $tmp) . ", ";
 			} else {
-				$allowed .= ($blinfo{$tmp}{alias} || $tmp) . ", ";
+				$allowed .= ($blinfo->{$tmp}{alias} || $tmp) . ", ";
 			}
 		}
 
@@ -1950,9 +1952,9 @@ sub show_acl
 				push(@dnsbl, $s);
 			} else {
 				if ($s =~ $rex_bang) {
-					$blocked .= ($blinfo{$tmp}{alias} || $tmp) . ", ";
+					$blocked .= ($blinfo->{$tmp}{alias} || $tmp) . ", ";
 				} else {
-					$allowed .= ($blinfo{$tmp}{alias} || $tmp) . ", ";
+					$allowed .= ($blinfo->{$tmp}{alias} || $tmp) . ", ";
 				}
 			}
 
@@ -2022,7 +2024,7 @@ sub edit_acls
 		&error(&translate('You must define some sources before'));
 		return;
 	}
-	my %blinfo = &get_blacklists_description();
+	my $blinfo = &get_blacklists_description();
 	my @bl = &get_blacklists();
 
 	print "<table align=\"center\" width=\"100%\">\n";
@@ -3925,20 +3927,25 @@ sub save_blacklist_description
 	chomp($alias);
 	chomp($description);
 
-	my %bldesc = &get_blacklists_description();
-	$bldesc{$bl}{alias} = $alias;
-	$bldesc{$bl}{description} = $description;
+	if ($alias eq '' && $description eq '') {
+		return;
+	}
+	my $bldesc = &get_blacklists_description();
+	$bldesc->{$bl}{alias} = $alias;
+	$bldesc->{$bl}{description} = $description;
 	if (not open(OUT, ">$LANGDIR/$LANG/$BLDESC")) {
 		$ERROR = "Can't open blacklists description $LANGDIR/$LANG/$BLDESC: $!\n";
 		return;
 	}
-	foreach my $l (sort keys %bldesc) {
+	foreach my $l (sort keys %{$bldesc}) {
 		print OUT "$l\t";
-		print OUT "$bldesc{$l}{alias}\t" if ($bldesc{$l}{alias});
-		print OUT "$bldesc{$l}{description}\n";
+		print OUT "$bldesc->{$l}{alias}" if ($bldesc->{$l}{alias});
+		print OUT "\t";
+		print OUT "$bldesc->{$l}{description}\n";
 	}
 	close(OUT);
 
+	%{$bldesc} = ();
 }
 
 sub encode_url
