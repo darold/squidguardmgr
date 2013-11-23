@@ -791,7 +791,7 @@ sub edit_blacklist
 	print "<table width=\"100%\"><tr><td>\n";
 	print "<table>\n";
 	foreach ('domains', 'urls', 'expressions') {
-		print "<tr><th align=\"right\">", &translate(ucfirst($_)), "<br><a href=\"\" onclick=\"window.open('", $CGI->escapeHTML("$ENV{SCRIPT_NAME}?action=viewlist&path=$bl/$_&lang=$LANG"), "','blwin','scrollbars=yes,status=no,toolbar=no,width=400,height=800,resizable=yes,screenX=1,screenY=1,top=1,left=1'); return false;\" target=\"_new\" title=\"", &translate('Edit'), "\">$IMG_EDIT</a>&nbsp;&nbsp;<a href=\"\" onclick=\"document.forms[0].action.value='rebuild'; document.forms[0].blacklist.value='$bl/$_'; document.forms[0].submit(); return false;\" title=\"", &translate('Rebuild database'), "\">$IMG_REBUILD</a></th><th align=\"left\"><textarea name=\"${bl}_$_\" cols=\"50\" rows=\"5\" wrap=\"off\"></textarea></th></tr>\n";
+		print "<tr><th align=\"right\">", &translate(ucfirst($_)), "<br><a href=\"\" onclick=\"window.open('", $CGI->escapeHTML("$ENV{SCRIPT_NAME}?action=viewlist&path=$bl/$_&lang=$LANG"), "','blwin','scrollbars=yes,status=no,toolbar=no,width=420,height=800,resizable=yes,screenX=1,screenY=1,top=1,left=1'); return false;\" target=\"_new\" title=\"", &translate('Edit'), "\">$IMG_EDIT</a>&nbsp;&nbsp;<a href=\"\" onclick=\"document.forms[0].action.value='rebuild'; document.forms[0].blacklist.value='$bl/$_'; document.forms[0].submit(); return false;\" title=\"", &translate('Rebuild database'), "\">$IMG_REBUILD</a></th><th align=\"left\"><textarea name=\"${bl}_$_\" cols=\"50\" rows=\"5\" wrap=\"off\"></textarea></th></tr>\n";
 	}
 	print "<tr><th colspan=\"2\" align=\"right\"><input type=\"button\" name=\"remove\" value=\"", &translate('Remove'), "\" onclick=\"document.forms[0].action.value='bledit'; document.forms[0].apply.value='remove'; document.forms[0].submit(); return false;\">&nbsp;&nbsp;<input type=\"button\" name=\"add\" value=\"", &translate('Add'), "\" onclick=\"document.forms[0].action.value='bledit'; document.forms[0].apply.value='add'; document.forms[0].submit(); return false;\"></th></tr>\n";
 	print "</table>\n";
@@ -2486,14 +2486,25 @@ sub show_listcontent
 		&error("No file set");
 		print "<input type=\"button\" name=\"close\" value=\"", &translate('Close'), "\" onclick=\"window.close(); return false;\">\n";
 	} else {
-		print "<h2>", &translate('List'), " : $bl</h2>\n";
+		my $ismozilla = 0;
+		if ($ENV{'HTTP_USER_AGENT'} =~ /(?!.+MSIE)Mozilla\/[45]\.[0-9]+/i) {
+			$ismozilla = 1;
+		}
+		if (! $ismozilla) {
+			print "<h2 style='word-wrap: break-word;'>";
+		} else {
+			print "<h2>";
+		}
+		print &translate('List'), " : $bl</h2>\n";
 
 		if (not open(IN, "$CONFIG->{dbhome}/$bl")) {
 			&error("Can't read file $CONFIG->{dbhome}/$bl: $!");
 			print "<input type=\"button\" name=\"close\" value=\"", &translate('Close'), "\" onclick=\"window.close(); return false;\">\n";
 		} else {
+			my $col = 45;
+			$col = 41 if ($ismozilla);
 			print "<table><tr><th align=\"left\">\n";
-			print "<textarea name=\"content\" cols=\"45\" rows=\"42\" wrap=\"off\">\n";
+			print "<textarea name=\"content\" cols=\"$col\" rows=\"42\" wrap=\"off\">\n";
 			while (<IN>) {
 				print $CGI->escapeHTML("$_");
 			}
@@ -3181,7 +3192,7 @@ sub show_editor
 	my ($type, $path) = @_;
 
 	if (grep(/^$type$/, 'iplist', 'userlist')) {
-		$path = "<a href=\"\" onclick=\"window.open('". $CGI->escapeHTML("$ENV{SCRIPT_NAME}?action=editfile&path=$path"). "','filewin','scrollbars=yes,status=no,toolbar=no,width=400,height=800,resizable=yes,screenX=1,screenY=1,top=1,left=1'); return false;\" target=\"_new\" style=\"font-weight: normal;\">$path</a>";
+		$path = "<a href=\"\" onclick=\"window.open('". $CGI->escapeHTML("$ENV{SCRIPT_NAME}?action=editfile&path=$path"). "','filewin','scrollbars=yes,status=no,toolbar=no,width=420,height=800,resizable=yes,screenX=1,screenY=1,top=1,left=1'); return false;\" target=\"_new\" style=\"font-weight: normal;\">$path</a>";
 	}
 
 	return $path;
@@ -3200,7 +3211,6 @@ sub show_filecontent
 		-style  => { -src => $CSS_FILE },
 		-script  => { -src => $JS_FILE },
 	);
-
 	print $CGI->start_form();
 	print "<input type=\"hidden\" name=\"apply\" value=\"\" />\n";
 	print "<input type=\"hidden\" name=\"filename\" value=\"$file\" />\n";
@@ -3209,8 +3219,17 @@ sub show_filecontent
 		&error("No file set");
 		print "<input type=\"button\" name=\"close\" value=\"", &translate('Close'), "\" onclick=\"window.close(); return false;\">\n";
 	} else {
+		my $ismozilla = 0;
+		if ($ENV{'HTTP_USER_AGENT'} =~ /(?!.+MSIE)Mozilla\/[45]\.[0-9]+/i) {
+			$ismozilla = 1;
+		}
 		$file = "$CONFIG->{dbhome}/$file" if ($file !~ /^\//);
-		print "<h2>", &translate('File'), " : $file</h2>\n";
+		if (! $ismozilla) {
+			print "<h2 style='word-wrap: break-word;'>";
+		} else {
+			print "<h2>";
+		}
+		print &translate('File'), " : $file</h2>\n";
 
 		if (!-e "$file" || not open(IN, "$file") ) {
 			&error("Can't read file $file: $!");
@@ -3219,8 +3238,10 @@ sub show_filecontent
 			print "<table>\n";
 			if (!$tail) {
 				if ($ACTION eq 'editfile') {
+					my $col = 47;
+					$col = 42 if ($ismozilla);
 					print "<tr><th align=\"left\">\n";
-					print "<textarea name=\"content\" cols=\"47\" rows=\"42\" wrap=\"off\">\n";
+					print "<textarea name=\"content\" cols=\"$col\" rows=\"42\" wrap=\"off\">\n";
 					while (<IN>) {
 						print "$_";
 					}
