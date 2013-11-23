@@ -1,9 +1,9 @@
 <p>
-The Access Control List, ACL, allow to combie the previous object definitions into distinct rulesets for each source (client group) or in a default ACL.
+The Access Control List, ACL, allows you to combine the previous object definitions into distinct rulesets for each source (client group) or in a default ACL.
 </p>
 
 <p>
-The default section defines fallbacks for all acl rulesets. Thus if you define a rewrite rule here it will be used in acls where there are no rewrite rules defined. (i.e. the other acls inherits the definitions in the default acl optionally overruled by own definitions). The default rule set is used for all clients that match no sources (client group) and for client groups (sources)  with no acls declared.
+The default section defines fallbacks for all acl rulesets. Thus if you define a rewrite rule here it will be used in acls where there are no rewrite rules defined. (i.e. the other acls inherit the definitions in the default acl optionally overruled by own definitions). The default rule set is used for all clients that match no sources (client group) and for client groups (sources) with no acls declared.
 </p>
 
 <p>
@@ -11,7 +11,7 @@ The <b>Deny ip addresses in Urls</b> can be used to enforce the use of domainnam
 </p>
 
 <p>
-The <b>Default access</b> allow you to choose the default behaviour of the acl. <b>Only the selected list (none)</b> should be used to terminate pass rules where only the listed destination groups should pass. <b>All Internet (all | any)</b> is the default and be used to allow full access to Internet provide that the destination is not found in the blacklist groups.
+The <b>Default access</b> allows you to choose the default behaviour of the acl. <b>Only the selected list (none)</b> should be used to terminate pass rules where only the listed destination groups should pass. <b>All Internet (all | any)</b> is the default and be used to allow full access to Internet provided that the destination is not found in the blacklist groups.
 </p>
 
 <p>
@@ -19,19 +19,19 @@ The <b>Default access</b> allow you to choose the default behaviour of the acl. 
 </p>
 
 <p>
-<b>Deny access to</b> must be used to define blacklist groups that should not pass (i.e. be redirected to the actual redirect  URL). That mean that there must also be a redirect definition for eiter that destination group, the actual acl or the default acl.
+<b>Deny access to</b> must be used to define blacklist groups that should not pass (i.e. be redirected to the actual redirect URL). That means that there must also be a redirect definition for eiter that destination group, the actual acl or the default acl.
 </p>
 
 <p>
-The <b>DNS Whitelist</b> allow you to use a set of Internet DNS blacklist engine to allow destinations for the actual acl.
+The <b>DNS Whitelist</b> allows you to use a set of Internet DNS blacklist engine to allow destinations for the actual acl.
 </p>
 
 <p>
-The <b>DNS Blacklist</b> allow you to use a set of Internet DNS blacklist engine to block destinations for the actual acl.
+The <b>DNS Blacklist</b> allows you to use a set of Internet DNS blacklist engine to block destinations for the actual acl.
 </p>
 
 <p>
-The <b>Use rewrite rules</b> allow you to declares the substitution rulsets that applies to the actual acl.
+The <b>Use rewrite rules</b> allows you to declare the substitution rulsets that apply to the actual acl.
 </p>
 
 <p>

@@ -28,7 +28,7 @@ Example:
 
 </pre>
 
-<h4>Domains names (multiple):</h4>
+<h4>Domain names (multiple):</h4>
 <pre>
     foo.com [...]
 
@@ -46,7 +46,7 @@ where:
 
 <h4>File of users list (single):</h4>
 <pre>
-    The value must be a single filename. Where filename is either a path relative to dbhome or an absolute path to a database file.
+    The value must be a single filename, where the filename is either a path relative to dbhome or an absolute path to a database file.
     The file format is simply RFC-931 usernames optionally followed by a `:' and a comment (i.e. /etc/passwd or a .htpasswd file may be used)
     separated by a newline as in the user declaration.
 </pre>
@@ -69,13 +69,13 @@ Example:
     select login from pusers
 
 Attention: The query must not be ended by a trailing ";" and must not contain more than four statements.
-Additionally keep in mind, that the name "user" is already used as a token by squidGuard. Don't use it in your query. 
+Additionally keep in mind, that the name "user" is already used as a token by squidGuard. Don't use it in your query.
 </pre>
 
 <h4>Program returning user list:</h4>
 <pre>
-Used to specifies a command to run that will write a list of usernames on stdout.
-The value must be an absolute path to an executable program. This program must be executable by the user running squidGuard (most of the time squid).
+Used to specify a command that will return a list of usernames onto stdout.
+The value must be an absolute path to an executable program. This program must be executable by the user running squidGuard (most of the time 'squid').
 </pre>
 
 <p>
