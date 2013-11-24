@@ -124,18 +124,18 @@
 .\" ========================================================================
 .\"
 .IX Title "SQUIDGUARDMGR 1"
-.TH SQUIDGUARDMGR 1 "2013-11-20" "perl v5.14.2" "User Contributed Perl Documentation"
+.TH SQUIDGUARDMGR 1 "2013-11-24" "perl v5.14.2" "User Contributed Perl Documentation"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
 .nh
 .SH "NAME"
-SquidGuard Manager \- Web GUI for squidGuard and SquidClamav administration
+SquidGuard Manager \- Web GUI for SquidGuard and SquidClamav administration
 .SH "DESCRIPTION"
 .IX Header "DESCRIPTION"
-SquidGuard Manager is a Perl \s-1CGI\s0 Web \s-1GUI\s0 for squidGuard and SquidClamav administration. It allow full management of SquidGuard blocklist and ACLs. You can also manage graphicaly your SquidClamav configuration.
+SquidGuard Manager is a Perl \s-1CGI\s0 Web \s-1GUI\s0 for squidGuard and SquidClamav administration. It allows full management of SquidGuard blocklist and ACLs. You can also manage graphicaly your SquidClamav configuration.
 .PP
-This program support all configurations directives of SquidGuard and SquidClamav
+This program supports all configuration directives of SquidGuard and SquidClamav
 without intrusive modification, i\-e you can still edit the configuration files
 by hand before and after using SquidGuard Manager.
 .SH "FEATURES"
@@ -144,11 +144,11 @@ by hand before and after using SquidGuard Manager.
 .IX Subsection "SquidGuard Manager GUI interfaces"
 .IP "Globals" 4
 .IX Item "Globals"
-This interface allow you to define SquidGuard globals variables.
+This interface allows you to define SquidGuard global variables.
 .IP "Schedules" 4
 .IX Item "Schedules"
-This interface allow you to define schedules time to be used in other SquidGuard
-object (Sources, \s-1URL\s0 Rewrites, Filters and ACLs).
+This interface allows you to define schedules time in order to use in other
+SquidGuard objects (Sources, \s-1URL\s0 Rewrites, Filters and ACLs).
 .IP "Sources" 4
 .IX Item "Sources"
 Use this interface to define sources like users, groups, Ip addresses, range of
@@ -156,50 +156,52 @@ Ip addresses or networks to apply policies on them. These can be issued from a
 list, a file, an ldap query, a mysql query or a command line utility.
 .IP "Url rewriting" 4
 .IX Item "Url rewriting"
-This interface allow you to define as many as \s-1URL\s0 rewriting rules that you want
-\&. They will be applied by SquidGuard following regex pattern matching.
+This interface allows you to define as many \s-1URL\s0 rewriting rules as you want.
+They will be applied by SquidGuard following regex pattern matching.
 .IP "Filters" 4
 .IX Item "Filters"
-This interface allow you to defined \s-1URL\s0 destination groups based on predefined
+This interface allows you to defined \s-1URL\s0 destination groups based on predefined
 lists of domain, url or regexp expressions.
 .IP "ACLs" 4
 .IX Item "ACLs"
-This is the central place where you defined your access rules to apply to the
-different source object following the defined filter destination
+This is the central place where you define what source objects follow what
+filters and when. Here everything fits together.
 .IP "View Configuration" 4
 .IX Item "View Configuration"
-This interface allow you to see the SquidGuard configuration file.
+This interface allows you to see the SquidGuard configuration file.
 .IP "Manage Lists" 4
 .IX Item "Manage Lists"
-This interface allow you to manage all lists by editing them fully or adding,
+This interface allows you to manage all lists by editing them fully or adding,
 removing and searching entries.
 .IP "Logs" 4
 .IX Item "Logs"
-This interface allow you to consult all log files you have defined in the
+This interface allow you to consult different log files you have defined in the
 SquidGuard object configuration.
 .IP "SquidClamav" 4
 .IX Item "SquidClamav"
-Links you to a \s-1GUI\s0 interface to administer SquidClamav configuration file.
-This interface is enable only if you have SquidClamav installed on the system.
+This link leads you to the \s-1GUI\s0 interface to administer SquidClamav configuration
+file. This interface is enabled only if you have SquidClamav installed on your
+system.
 .IP "Restart Squid" 4
 .IX Item "Restart Squid"
-This link allow you to 'reconfigure' Squid when changes to SquidGuard and/or
-SquidClamav redirectors configuration files are done.
+This link allows you to 'reconfigure' or quick-restart Squid to make it
+recognize SquidGuard and/or SquidClamav configuration changes you made.
 .SS "SquidClamav Manager \s-1GUI\s0 interfaces"
 .IX Subsection "SquidClamav Manager GUI interfaces"
-Since release 1.4 SquidClamav Manager is able to manage both Squidclamav v5.x
+Since release 1.4 SquidClamav Manager is able to manage both SquidClamav v5.x
 and v6.x branch.
 .IP "Globals" 4
 .IX Item "Globals"
-This interface allow you to manage SquidClamav globals variables.
+This interface allows you to manage SquidClamav global variables.
 .IP "Virus Scanning" 4
 .IX Item "Virus Scanning"
-This interface allow you to desactivate virus scan based on regex pattern on
-\&\s-1URL\s0 or Content-Type.
+This interface allows you to exclude \s-1URL\s0 or Content-Type from virus scan by
+defining regexp patterns.
 .IP "Whitelists" 4
 .IX Item "Whitelists"
-Use this interface to define which domain name or site hostname to whitelist,
-i\-e there will be no virus scan nor call to SquidGuard on these sites.
+Use this interface to define which domain name or site hostname to be
+whitelisted, i\-e there happens no virus scan nor call to SquidGuard on these
+sites.
 .IP "Trusted Users" 4
 .IX Item "Trusted Users"
 Use this interface to define which users (\s-1RFC\-931\s0 usernames) will be excluded
@@ -210,40 +212,41 @@ Use this interface to define which client hostnames or ip addresses will be
 excluded from virus scan and SquidGuard blocklists.
 .IP "View Configuration" 4
 .IX Item "View Configuration"
-This interface allow you to see the SquidClamav configuration file.
+This interface allows you to see the SquidClamav configuration file.
 .IP "View log" 4
 .IX Item "View log"
-This interface allow you to consult the SquidClamav log file.
+This interface allows you to consult the SquidClamav log file.
 .PP
 In resume you can do all you're doing by hand in dedicated \s-1HTML\s0 interfaces,
-modification are written immediatly to configuration files.
+modifications are written immediately to configuration files.
 .SH "REQUIREMENT"
 .IX Header "REQUIREMENT"
 SquidGuard Manager may run on any Unix like \s-1OS\s0 with any modern Perl installation
 using the perl \s-1CGI\s0 module. It must be run on a proxy server hosting squidGuard.
 .PP
-You need to run this \s-1CGI\s0 script using Apache \s-1HTTP\s0 server and the httpd daemon
-must run be run as uid and gid holding SquidGuard (most of the time this is
+You need to run this \s-1CGI\s0 script using Apache \s-1HTTP\s0 server. And the httpd daemon
+must be run as uid and gid holding SquidGuard (most of the time this is
 squid cache effective user/group). This is to allow SquidGuard Manager to read
 and write into the configuration files to manage blocklists and acls. If you
-use SquidClamav, it must also be run under the same user.
+use SquidClamav, it must be run under the same user too.
 .PP
-SquidGuard Manager use some system commands to manage blocklists and log files.
-Your system must have the following binariesi installed: diff, grep, find, rm
+SquidGuard Manager uses some system commands to manage blocklists and log files.
+Your system must have the following binaries installed: diff, grep, find, rm
 and tail.
 .SH "INSTALLATION"
 .IX Header "INSTALLATION"
-To install SquidGuard Manager you must be root as you need to set specials
-grants on the filesystem.
+To install SquidGuard Manager you must be able to gain root privilege so
+that installer script can put files with appropriate permission.
 .SS "Prepare your system"
 .IX Subsection "Prepare your system"
 SquidGuard Manager need to have read/write access onto SquidGuard configuration
-file and the dbhome directory. It also must have read access onto the log file.
+file and the dbhome directory. It must also have read rights onto the log file.
 If you use the SquidClamav Manager \s-1GUI\s0 it also need read/write access on the
 squidclamav.conf file as well as the log file.
 .PP
-For that SquidGuard Manager must be run as the user under which squidguard and
-squidclamav are run. Most of the time this is the Squid cache effective user.
+For that reason SquidGuard Manager must be run as the user under which
+SquidGuard and SquidClamav are run. Most of the time this is the Squid cache
+effective user.
 .PP
 .Vb 3
 \&        chown \-R squid:squid /usr/local/squidGuard
@@ -251,46 +254,54 @@ squidclamav are run. Most of the time this is the Squid cache effective user.
 \&        chown \-R squid:squid /etc/squidguard.conf /var/lib/squidguard
 .Ve
 .PP
-To allow httpd to run squidguardmgr.cgi as a different user or group you must
-edit your httpd.conf file and change the User/Group directive to the user and
-group running Squid.
+To allow httpd to run squidguardmgr.cgi as appropriate user/group you must
+edit your httpd.conf file and set the User and Group directives to the user
+and group running Squid.
 .PP
-To be able to reconfigure squid after configuration change from the web \s-1GUI\s0
-SquidGuard Manager use a setuid wrapper as root user. So you system may support
-this feature or will need to do that by hand.
+After configuration changes squid ought to be 'reconfigure'd, in other words
+quick-restarted. SquidGuard Manager Web \s-1GUI\s0 does it by using a 'setuid root'ed
+wrapper. If your system doesn't support the feature unfortunately, you may need
+to do that by hand.
 .PP
-\&\s-1IMPORTANT:\s0 SquidGuard Manager do not support symbolic link into the SquidGuard
-dbhome directory. You need to remove these symbolic links from your system and
-modify your squidguard.conf file to replace them by the directories real names.
+\&\s-1IMPORTANT:\s0 SquidGuard Manager doesn't support symbolic links in the SquidGuard
+dbhome directory. If it is your case, you need to remove those symbolic links
+and modify your squidguard.conf file  so that points the real files and
+directories.
 .SS "Automatic installation"
 .IX Subsection "Automatic installation"
-Execute the install script and answer to the questions as follow:
+Execute the install script and answer to some questions it ask:
 .PP
-.Vb 2
-\&        perl Makefile.PL
-\&        make && make install
+.Vb 4
+\&        $ perl Makefile.PL
+\&        $ make
+\&        $ su
+\&        # make install
 .Ve
 .PP
-By default it will install all files into /var/www/squidguardmgr/ and give
-you a configuration sample to include in your httpd.conf. After that restart
-your httpd server and take a look at http://my.proxy.dom/squidguardmgr/
+By default it will install all files into /var/www/squidguardmgr/ and show you
+a configuration sample that should be included in your httpd.conf. Also, you
+can find some Apache configuration samples in contrib/ directory of the
+SquidGuard Manager source repository. Once you have done, restart httpd server
+and take a look at http://my.proxy.dom/squidguardmgr/ or 
+http://my.proxy.dom:port/squidguardmgr/
 .PP
-You can fully customize this installation by using the following variables:
+You can fully customize this installation by passing the following variables
+to Makefile.PL:
 .PP
 .Vb 10
-\&        CONFFILE => Where is the SquidGuard configuration file
-\&        DBHOME => Where is the SquidGuard DB directory
-\&        LOGDIR => Where is the SquidGuard log directory
-\&        WWWDIR => SquidGuard Manager base directory installation
-\&        CGIDIR => Where to install CGI: WWWDIR/CGIDIR. Default: WWWDIR
-\&        HTMLDIR =>  Where to install css,js and images files: WWWDIR/HTMLDIR. Default: WWWDIR
-\&        LANGDIR => Translation directory to use (en_US or fr_FR). Default: en_US
-\&        BASEURL => Base url where css,js and images files will be found. Default: /squidguardmgr
+\&        CONFFILE => Absolute path to the SquidGuard configuration file
+\&        DBHOME => Absolute path to the SquidGuard DB directory
+\&        LOGDIR => Absolute path to the SquidGuard log directory
+\&        WWWDIR => Absolute path to the SquidGuard Manager base installation directory
+\&        CGIDIR => Relative path from WWWDIR to install CGI script. Default equals WWWDIR
+\&        HTMLDIR =>  Relative path from WWWDIR to install css, js and image files. Default equals WWWDIR
+\&        LANGDIR => Translation language to use (en_US or fr_FR). Default: en_USA\*oX
+\&        BASEURL => Path part of the base url to access SquidGuard Manager Web GUI. Default: /squidguardmgr
 \&        SQUIDUSR => User running Squid
 \&        SQUIDGRP => Group running Squid
-\&        SQUIDCLAMAV => Path to squidclamav binary (v5.x only)
+\&        SQUIDCLAMAV => Absolute path to the squidclamav binary (v5.x only)
 \&        CICAP_SOCKET => c\-icap server control socket (v6.x only)
-\&        SQUIDCLAMAVCONF => Path to squidclamav.conf file
+\&        SQUIDCLAMAVCONF => Absolute path to squidclamav.conf file
 .Ve
 .PP
 For packaging there's two more configuration variables:
@@ -302,12 +313,13 @@ For packaging there's two more configuration variables:
 .PP
 Example:
 .PP
-.Vb 7
-\&        perl Makefile.PL CONFFILE=/usr/local/etc/squidguard.conf \e
-\&        DBHOME=/usr/local/squidguard/database \e
+.Vb 8
+\&        perl Makefile.PL \e
+\&        CONFFILE=/usr/local/etc/squidguard.conf \e
+\&        DBHOME=/usr/local/squidguard/db \e
 \&        LOGDIR=/usr/local/logs/squidguard \e
 \&        WWWDIR=/usr/local/apache CGIDIR=cgi\-bin/admin HTMLDIR=htdocs/admin \e
-\&        LANGDIR=fr_FR BASEURL=/admin/ SQUIDUSR=squid SQUIDGRP=squid \e
+\&        LANGDIR=fr_FR BASEURL=/admin SQUIDUSR=squid SQUIDGRP=squid \e
 \&        SQUIDCLAMAV=/usr/local/bin/squidclamav \e
 \&        SQUIDCLAMAVCONF=/etc/squidclamav.conf
 \&
@@ -320,9 +332,9 @@ SquidGuard Manager css, js and images files will be copied under the directory
 /usr/local/apache/htdocs/admin/. Squidguard Manager will expect to find the
 SquidGuard configuration file at /usr/local/etc/squidguard.conf and the log
 and SquidGuard databases respectively at /usr/local/logs/squidguard and
-/usr/local/squidguard/database. All installed files will be owned by the squid
-user and squid group. The squid wrapper (use to reconfigure squid after change)
-will be setuid as root user.
+/usr/local/squidguard/db. All the installed files will be owned by user squid
+and group squid. The squid wrapper (use to reconfigure squid after change)
+will be setuid root.
 .SS "Manual installation"
 .IX Subsection "Manual installation"
 Copy all files from the cgi-bin repository into the \s-1CGI\s0 script directory of
@@ -332,31 +344,34 @@ server and chown the entire directory to the user and group running httpd.
 Copy all files from the htdocs repository into your DocumentRoot directory or
 any other subdirectory and check that they can be read by your httpd server.
 .PP
-Edit the squidguardmgr.conf file into you cgi directory and check that all path
-are conform to your installation.
+Edit the squidguardmgr.conf file into your cgi directory and check that all
+paths conforms to your installation.
 .PP
 If you want to be able to reload Squid redirector from the \s-1GUI\s0 interface after
 your SquidGuard and/or SquidClamav modification, you must compile and install
-the squid_wrapper with suid root into the squidguardmgr.cgi repository:
+the squid_wrapper with suid root into the squidguardmgr.cgi directory.
+.PP
+Before compilation you may need to edit squid_wrapper.c and change the
+\&\s-1SQUID_BINARY\s0 definition to point correctly to your squid binary.
+.PP
+Then as root:
 .PP
 .Vb 4
 \&        cd squid_wrapper/
 \&        cc \-o /path/squidguardmgr/cgi/squid_wrapper squid_wrapper.c
 \&        chown root.root /path/squidguardmgr/cgi/squid_wrapper
-\&        chmod +s /path/squidguardmgr/cgi/squid_wrapper
+\&        chmod u+s /path/squidguardmgr/cgi/squid_wrapper
 .Ve
-.PP
-Before that you must edit squid_wrapper.c and change the path to squid binary.
 .SH "CONFIGURATION"
 .IX Header "CONFIGURATION"
-SquidGuard Manager need some configuration informations. They are stored into
-the squidguardmgr.conf file. During the automatic installation this file is
-self generated.
+SquidGuard Manager needs some configuration. They are stored in the
+squidguardmgr.conf file. During the automatic installation this file
+will be generated automatically.
 .IP "\s-1SQUIDGUARD\s0    /usr/local/squidGuard/bin/squidGuard" 4
 .IX Item "SQUIDGUARD    /usr/local/squidGuard/bin/squidGuard"
-This directive allow you to configure the path to the SquidGuard program. If you
-set it to off or no, the SquidGuard Manager interface will be disabled and it
-will only show the SquidClamav Manager interface.
+This directive allows you to configure the path to the SquidGuard program. If
+you set it to off or no, the SquidGuard Manager interface will be disabled and
+it will only show the SquidClamav Manager interface.
 .IP "\s-1CONF_FILE\s0     /usr/local/squidGuard/squidguard.conf" 4
 .IX Item "CONF_FILE     /usr/local/squidGuard/squidguard.conf"
 Configure the path to the SquidGuard configuration file.
@@ -375,41 +390,46 @@ Path to the SquidClamav configuration file.
 .IP "\s-1LANG\s0          en_US" 4
 .IX Item "LANG          en_US"
 Used to set the language, default is en_US.
-Current translation are: en_US, fr_FR.
+Current available \s-1LANGS\s0 are: en_US, fr_FR.
 .IP "\s-1SQUID_WRAPPER\s0 /var/www/squidguargmgr/squid_wrapper" 4
 .IX Item "SQUID_WRAPPER /var/www/squidguargmgr/squid_wrapper"
-Command wrapper to reload Squid. You must use this wrapper as squid can only
-be reload as root. This wrapper will execute the following system command as
-root user: /usr/local/squid/sbin/squid \-k reconfigure
+Command wrapper to reload Squid. Why you need this wrapper is because only root
+can do it. This wrapper will execute the following system command as root user:
+.Sp
+.Vb 1
+\&        /path/to/squid/bin/squid \-k reconfigure
+.Ve
 .IP "\s-1IMG_DIR\s0      /squidguargmgr/images" 4
 .IX Item "IMG_DIR      /squidguargmgr/images"
-SquidGuard Manager base \s-1URL\s0 where images are stored.
+Path part of SquidGuard Manager \s-1URL\s0 where images are found.
 .IP "\s-1CSS_FILE\s0     /squidguargmgr/squidguardmgr.css" 4
 .IX Item "CSS_FILE     /squidguargmgr/squidguardmgr.css"
-SquidGuard Manager Style Sheet \s-1CSS\s0 \s-1URL\s0.
+SquidGuard Manager \s-1URL\s0 to point to the Style Sheet(\s-1CSS\s0) file.
 .IP "\s-1JS_FILE\s0      /squidguargmgr/squidguardmgr.js" 4
 .IX Item "JS_FILE      /squidguargmgr/squidguardmgr.js"
-SquidGuard Manager Javascript \s-1URL\s0.
+SquidGuard Manager \s-1URL\s0 which points to Javascript(js) file.
 .IP "\s-1LOG_LINES\s0   1000" 4
 .IX Item "LOG_LINES   1000"
-Number of last lines displayed from log files.
+Number of last lines out of log files to display.
 .IP "\s-1DNSBL\s0        your.preferred.blacklist.com,other.preferred.blacklist.com" 4
 .IX Item "DNSBL        your.preferred.blacklist.com,other.preferred.blacklist.com"
-Comma separated list of \s-1DNS\s0 Blacklists if you have SquidGuard 1.5 or more put
-here the \s-1DNSBL\s0 you want to use.
+Comma separated list of \s-1DNS\s0 Blacklists. If you have SquidGuard 1.5 or above put
+here the DNSBLs you want to use.
 .IP "\s-1TAIL\s0, \s-1FIND\s0, \s-1DIFF\s0, \s-1RM\s0, \s-1GREP\s0" 4
 .IX Item "TAIL, FIND, DIFF, RM, GREP"
-These optionals configuration directives are used to overide the default path
+These optional configuration directives are used to override the default path
 to the system commands /usr/bin/tail, /usr/bin/find, /usr/bin/diff, /usr/bin/rm
 and /usr/bin/grep.
 .IP "\s-1KEEP_DIFF\s0" 4
 .IX Item "KEEP_DIFF"
-Allow keeping added/removed items from squidGuard blocklists as diff files
-to be able to recover changes after a fresh download of blocklists. Default
-value is 1, enabled. To disable this feature set it to 0.
-.SH "AUTHOR"
-.IX Header "AUTHOR"
+This enables record of added/removed items from squidGuard blacklists in diff
+files which can be used to recover changes after a fresh download of blacklists.
+Default value is 1, enabled. Set it to 0 to disable this feature.
+.SH "AUTHORS"
+.IX Header "AUTHORS"
 Gilles Darold <gilles \f(CW@nospam\fR@ darold.net>
+.PP
+Tatsuya Nonogaki <winfield \f(CW@nospam\fR@support.email.ne.jp>
 .SH "COPYRIGHT"
 .IX Header "COPYRIGHT"
 Copyright (c) 2010\-2013 Gilles Darold \- All rights reserved.
@@ -430,5 +450,5 @@ Copyright (c) 2010\-2013 Gilles Darold \- All rights reserved.
 .Ve
 .SH "BUGS"
 .IX Header "BUGS"
-Your volontee to help construct a better software by submitting bug report or
+Your volonteer to help construct a better software by submitting bug report or
 feature request as well as code contribution are welcome.
