@@ -90,8 +90,10 @@ FEATURES
     View log
         This interface allows you to consult the SquidClamav log file.
 
-    In resume you can do all you're doing by hand in dedicated HTML
-    interfaces, modifications are written immediately to configuration files.
+    In resume SquidGuard Manager is capable of every configuration task on
+    SquidGuard and SquidClamav which otherwise you have to perform by opening
+    terminal, editing files, becoming root and running commands manually. 
+    Modifications are written immediately to the configuration files.
 
 REQUIREMENT
     SquidGuard Manager may run on any  Unix like OS  with any modern Perl
