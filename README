@@ -166,11 +166,16 @@ INSTALLATION
             CONFFILE => Absolute path to the SquidGuard configuration file
             DBHOME => Absolute path to the SquidGuard DB directory
             LOGDIR => Absolute path to the SquidGuard log directory
-            WWWDIR => Absolute path to the SquidGuard Manager base installation directory
-            CGIDIR => Relative path from WWWDIR to install CGI script. Default equals WWWDIR
-            HTMLDIR =>  Relative path from WWWDIR to install css, js and image files. Default equals WWWDIR
-            LANGDIR => Translation language to use (en_US or fr_FR). Default: en_US
-            BASEURL => Path part of the base url to access SquidGuard Manager Web GUI. Default: /squidguardmgr
+            WWWDIR => Absolute path to the SquidGuard Manager base
+                      installation directory
+            CGIDIR => Relative path from WWWDIR to install CGI script.
+                      Default equals WWWDIR
+            HTMLDIR => Relative path from WWWDIR to install css, js and
+                      image files. Default equals WWWDIR
+            LANGDIR => Translation language to use (en_US or fr_FR).
+                      Default: en_US
+            BASEURL => Path part of the base url to access SquidGuard
+                      Manager Web GUI. Default: /squidguardmgr
             SQUIDUSR => User running Squid
             SQUIDGRP => Group running Squid
             SQUIDCLAMAV => Absolute path to the squidclamav binary (v5.x only)
