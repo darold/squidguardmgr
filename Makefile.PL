@@ -324,7 +324,7 @@ install -m 644 --owner=$squid_user --group=$squid_group htdocs/squidguardmgr.js 
 cp -rf htdocs/images/ $DESTDIR$WWWDIR$HTMLDIR
 chown -R $squid_user:$squid_group $DESTDIR$WWWDIR$HTMLDIR
 install -m 755 --owner=0 --group=0 squid_wrapper/squid_wrapper $DESTDIR$WWWDIR$CGIDIR
-chmod +s $DESTDIR$WWWDIR$CGIDIR/squid_wrapper
+chmod u+s $DESTDIR$WWWDIR$CGIDIR/squid_wrapper
 };
 if (!$ENV{QUIET}) {
 	print INST qq{
