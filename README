@@ -182,16 +182,18 @@ INSTALLATION
 
     Example:
 
-            perl Makefile.PL \
-            CONFFILE=/usr/local/etc/squidguard.conf \
-            DBHOME=/usr/local/squidguard/db \
-            LOGDIR=/usr/local/logs/squidguard \
-            WWWDIR=/usr/local/apache CGIDIR=cgi-bin/admin HTMLDIR=htdocs/admin \
-            LANGDIR=fr_FR BASEURL=/admin SQUIDUSR=squid SQUIDGRP=squid \
-            SQUIDCLAMAV=/usr/local/bin/squidclamav \
-            SQUIDCLAMAVCONF=/etc/squidclamav.conf
+            $ perl Makefile.PL \
+              CONFFILE=/usr/local/etc/squidguard.conf \
+              DBHOME=/usr/local/squidguard/db \
+              LOGDIR=/usr/local/logs/squidguard \
+              WWWDIR=/usr/local/apache CGIDIR=cgi-bin/admin HTMLDIR=htdocs/admin \
+              LANGDIR=fr_FR BASEURL=/admin SQUIDUSR=squid SQUIDGRP=squid \
+              SQUIDCLAMAV=/usr/local/bin/squidclamav \
+              SQUIDCLAMAVCONF=/etc/squidclamav.conf
 
-            make && make install
+            $ make
+            $ su
+            # make install
 
     This will install SquidGuard Manager CGI squidguardmgr.cgi,
     squidguardmgr.conf, squid_wrapper and all language files under
