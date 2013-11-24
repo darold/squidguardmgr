@@ -5,8 +5,8 @@ CentOS 6 distribution.
 
 # Structure
 
-/etc/httpd/
-    \_ conf/               -- This is ServerRoot of the httpd daemon.
+/etc/httpd/                -- This is ServerRoot of the httpd daemon.
+    \_ conf/
         squidguardmgr.conf -- Apache configuration file.
         .htpasswd          -- Optional but recommended. See note.
     \_ conf.d/
