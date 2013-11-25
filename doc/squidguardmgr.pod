@@ -115,8 +115,10 @@ This interface allows you to consult the SquidClamav log file.
 
 =back
 
-In resume you can do all you're doing by hand in dedicated HTML interfaces,
-modifications are written immediately to configuration files.
+In resume SquidGuard Manager is capable of every configuration task on
+SquidGuard and SquidClamav which otherwise you have to perform by opening
+terminal, editing files, becoming root and running commands manually.
+Modifications are written immediately to the configuration files.
 
 =head1 REQUIREMENT
 
@@ -189,11 +191,16 @@ to Makefile.PL:
 	CONFFILE => Absolute path to the SquidGuard configuration file
 	DBHOME => Absolute path to the SquidGuard DB directory
 	LOGDIR => Absolute path to the SquidGuard log directory
-	WWWDIR => Absolute path to the SquidGuard Manager base installation directory
-	CGIDIR => Relative path from WWWDIR to install CGI script. Default equals WWWDIR
-	HTMLDIR =>  Relative path from WWWDIR to install css, js and image files. Default equals WWWDIR
-	LANGDIR => Translation language to use (en_US or fr_FR). Default: en_USœ
-	BASEURL => Path part of the base url to access SquidGuard Manager Web GUI. Default: /squidguardmgr
+	WWWDIR => Absolute path to the SquidGuard Manager base installation
+	          directory
+	CGIDIR => Relative path from WWWDIR to install CGI script.
+	          Default equals WWWDIR
+	HTMLDIR => Relative path from WWWDIR to install css, js and
+	           image files. Default equals WWWDIR
+	LANGDIR => Translation language to use (en_US or fr_FR).
+	           Default: en_US
+	BASEURL => Path part of the base url to access SquidGuard
+	           Manager Web GUI. Default: /squidguardmgr
 	SQUIDUSR => User running Squid
 	SQUIDGRP => Group running Squid
 	SQUIDCLAMAV => Absolute path to the squidclamav binary (v5.x only)
@@ -211,12 +218,16 @@ Example:
 	CONFFILE=/usr/local/etc/squidguard.conf \
 	DBHOME=/usr/local/squidguard/db \
 	LOGDIR=/usr/local/logs/squidguard \
-	WWWDIR=/usr/local/apache CGIDIR=cgi-bin/admin HTMLDIR=htdocs/admin \
-	LANGDIR=fr_FR BASEURL=/admin SQUIDUSR=squid SQUIDGRP=squid \
+	WWWDIR=/usr/local/apache \
+	CGIDIR=cgi-bin/admin HTMLDIR=htdocs/admin \
+	LANGDIR=fr_FR BASEURL=/admin \
+	SQUIDUSR=squid SQUIDGRP=squid \
 	SQUIDCLAMAV=/usr/local/bin/squidclamav \
 	SQUIDCLAMAVCONF=/etc/squidclamav.conf
 
-	make && make install
+	make
+	su
+	make install
 
 This will install SquidGuard Manager CGI squidguardmgr.cgi, squidguardmgr.conf,
 squid_wrapper and all language files under /usr/local/apache/cgi-bin/admin/. All
@@ -252,6 +263,7 @@ Then as root:
 	cd squid_wrapper/
 	cc -o /path/squidguardmgr/cgi/squid_wrapper squid_wrapper.c
 	chown root.root /path/squidguardmgr/cgi/squid_wrapper
+	chmod 755 /path/squidguardmgr/cgi/squid_wrapper
 	chmod u+s /path/squidguardmgr/cgi/squid_wrapper
 
 =head1 CONFIGURATION

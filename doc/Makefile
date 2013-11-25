@@ -1,0 +1,24 @@
+SHELL = /bin/sh
+POD2MAN = /usr/bin/pod2man
+POD2TXT = /usr/bin/pod2text
+PODSRC = squidguardmgr.pod
+MMAN = squidguardmgr.3
+TREADME = ../README
+TINSTALL = ../INSTALL
+OUTFILES = $(MMAN) $(TREADME) $(TINSTALL)
+
+.PHONY: all clean
+
+all: $(OUTFILES)
+
+$(MMAN): $(PODSRC)
+	$(POD2MAN) $< $@
+
+$(TREADME): $(PODSRC)
+	$(POD2TXT) $< $@
+
+$(TINSTALL): $(PODSRC)
+	$(POD2TXT) $< $@
+
+clean:
+	-rm -f $(OUTFILES)
