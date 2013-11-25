@@ -3400,7 +3400,7 @@ sub show_logs
 		$ERROR = "can't opendir $CONFIG->{logdir}: $!";
 		return;
 	}
-	my @files = grep { !/^\./ && !/\.(gz|tgz|bz2|zip)$/ && -f "$CONFIG->{logdir}/$_" } readdir(DIR);
+	my @files = grep { !/^\./ && -f "$CONFIG->{logdir}/$_" } readdir(DIR);
 	print "<table >\n";
 	print "<tr><td colspan=\"2\">", &show_help('logs'), "</td></tr>\n";
 	if ($#files == -1) {
