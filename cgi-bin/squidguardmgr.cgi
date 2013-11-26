@@ -3407,13 +3407,7 @@ sub show_logs
 		print "<tr><th>", &translate('No log file'), ".</th></tr>\n";
 	} else {
 		foreach my $name (@files) {
-			print "<tr><th size=\"20\" style=\"text-align: right;\">$IMG_LOG</th><th style=\"text-align: left;\">";
-			if ($name =~ /\.(gz|bz2|zip|tgz)$/i) {
-				print "$name";
-			} else {
-				print "<a href=\"\" onclick=\"window.open('", $CGI->escapeHTML("$ENV{SCRIPT_NAME}?action=viewfile&path=$CONFIG->{logdir}/$name&tail=1"), "','filewin','scrollbars=yes,status=no,toolbar=no,width=800,height=800,resizable=yes,screenX=1,screenY=1,top=1,left=1'); return false;\" target=\"_new\">$name</a>";
-			}
-			print "</th></tr>\n";
+			print "<tr><th size=\"20\" style=\"text-align: right;\">$IMG_LOG</th><th style=\"text-align: left;\"><a href=\"\" onclick=\"window.open('", $CGI->escapeHTML("$ENV{SCRIPT_NAME}?action=viewfile&path=$CONFIG->{logdir}/$name&tail=1"), "','filewin','scrollbars=yes,status=no,toolbar=no,width=800,height=800,resizable=yes,screenX=1,screenY=1,top=1,left=1'); return false;\" target=\"_new\">$name</a></th></tr>\n";
 		}
 	}
 	print "</table>\n";
