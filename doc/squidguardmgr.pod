@@ -27,19 +27,21 @@ SquidGuard objects (Sources, URL Rewrites, Filters and ACLs).
 
 =item Sources
 
-Use this interface to define sources like users, groups, Ip addresses, range of
-Ip addresses or networks to apply policies on them. These can be issued from a
+Use this interface to define sources like users, groups, Ip addresses, range
+of Ip addresses or networks to apply policies on. These can be issued from a
 list, a file, an ldap query, a mysql query or a command line utility.
 
 =item Url rewriting
 
-This interface allows you to define as many URL rewriting rules as you want.
-They will be applied by SquidGuard following regex pattern matching.
+This interface allows you to define URL rewriting groups, each consists of
+one or more Sed style substitution rules. They can be applied to source groups
+in ACLs menu.
 
 =item Filters
 
-This interface allows you to defined URL destination groups based on predefined
-lists of domain, url or regexp expressions.
+Destination Groups filter selector in other words. In this interface you can
+shape each group by selecting a list for domain, url or regexp filter from
+those you defined in Manage Lists interface.
 
 =item ACLs
 
@@ -52,13 +54,13 @@ This interface allows you to see the SquidGuard configuration file.
 
 =item Manage Lists
 
-This interface allows you to manage all lists by editing them fully or adding,
-removing and searching entries.
+This interface allows you to build blocklists for each destination group.
+You can edit a whole list or add/remove individual entries.
 
-=item Logs
+=item View logs
 
-This interface allow you to consult different log files you have defined in the
-SquidGuard object configuration.
+This menu allows you to consult all log files in the log directory you'd
+defined in the SquidGuard global configuration.
 
 =item SquidClamav
 
@@ -69,7 +71,7 @@ system.
 =item Restart Squid
 
 This link allows you to 'reconfigure' or quick-restart Squid to make it
-recognize SquidGuard and/or SquidClamav configuration changes you made.
+recognize the changes you made to SquidGuard and/or SquidClamav configuration.
 
 =back
 

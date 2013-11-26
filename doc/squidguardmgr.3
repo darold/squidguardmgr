@@ -124,7 +124,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SQUIDGUARDMGR 1"
-.TH SQUIDGUARDMGR 1 "2013-11-25" "perl v5.10.1" "User Contributed Perl Documentation"
+.TH SQUIDGUARDMGR 1 "2013-11-26" "perl v5.10.1" "User Contributed Perl Documentation"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -151,17 +151,19 @@ This interface allows you to define schedules time in order to use in other
 SquidGuard objects (Sources, \s-1URL\s0 Rewrites, Filters and ACLs).
 .IP "Sources" 4
 .IX Item "Sources"
-Use this interface to define sources like users, groups, Ip addresses, range of
-Ip addresses or networks to apply policies on them. These can be issued from a
+Use this interface to define sources like users, groups, Ip addresses, range
+of Ip addresses or networks to apply policies on. These can be issued from a
 list, a file, an ldap query, a mysql query or a command line utility.
 .IP "Url rewriting" 4
 .IX Item "Url rewriting"
-This interface allows you to define as many \s-1URL\s0 rewriting rules as you want.
-They will be applied by SquidGuard following regex pattern matching.
+This interface allows you to define \s-1URL\s0 rewriting groups, each consists of
+one or more Sed style substitution rules. They can be applied to source groups
+in ACLs menu.
 .IP "Filters" 4
 .IX Item "Filters"
-This interface allows you to defined \s-1URL\s0 destination groups based on predefined
-lists of domain, url or regexp expressions.
+Destination Groups filter selector in other words. In this interface you can
+shape each group by selecting a list for domain, url or regexp filter from
+those you defined in Manage Lists interface.
 .IP "ACLs" 4
 .IX Item "ACLs"
 This is the central place where you define what source objects follow what
@@ -171,12 +173,12 @@ filters and when. Here everything fits together.
 This interface allows you to see the SquidGuard configuration file.
 .IP "Manage Lists" 4
 .IX Item "Manage Lists"
-This interface allows you to manage all lists by editing them fully or adding,
-removing and searching entries.
-.IP "Logs" 4
-.IX Item "Logs"
-This interface allow you to consult different log files you have defined in the
-SquidGuard object configuration.
+This interface allows you to build blocklists for each destination group.
+You can edit a whole list or add/remove individual entries.
+.IP "View logs" 4
+.IX Item "View logs"
+This menu allows you to consult all log files in the log directory you'd
+defined in the SquidGuard global configuration.
 .IP "SquidClamav" 4
 .IX Item "SquidClamav"
 This link leads you to the \s-1GUI\s0 interface to administer SquidClamav configuration
@@ -185,7 +187,7 @@ system.
 .IP "Restart Squid" 4
 .IX Item "Restart Squid"
 This link allows you to 'reconfigure' or quick-restart Squid to make it
-recognize SquidGuard and/or SquidClamav configuration changes you made.
+recognize the changes you made to SquidGuard and/or SquidClamav configuration.
 .SS "SquidClamav Manager \s-1GUI\s0 interfaces"
 .IX Subsection "SquidClamav Manager GUI interfaces"
 Since release 1.4 SquidClamav Manager is able to manage both SquidClamav v5.x
