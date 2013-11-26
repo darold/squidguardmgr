@@ -129,9 +129,9 @@ using the perl CGI module. It must be run on a proxy server hosting squidGuard.
 
 You need to run this CGI script using Apache HTTP server. And the httpd daemon
 must be run as uid and gid holding SquidGuard (most of the time this is
-Squid cache effective user/group). This allows SquidGuard Manager to read
-and write the configuration files to manage blocklists and acls. If you use
-SquidClamav, it must be run under the same user too.
+squid cache effective user/group). This is to allow SquidGuard Manager to read
+and write into the configuration files to manage blocklists and acls. If you
+use SquidClamav, it must be run under the same user too.
 
 SquidGuard Manager uses some system commands to manage blocklists and log files.
 Your system must have the following binaries installed: diff, grep, find, rm
@@ -144,9 +144,9 @@ that installer script can put files with appropriate permission.
 
 =head2 Prepare your system
 
-SquidGuard Manager needs to have read/write access onto SquidGuard configuration
+SquidGuard Manager need to have read/write access onto SquidGuard configuration
 file and the dbhome directory. It must also have read rights onto the log file.
-If you use the SquidClamav Manager GUI it also requires read/write access to the
+If you use the SquidClamav Manager GUI it also need read/write access on the
 squidclamav.conf file as well as the log file.
 
 For that reason SquidGuard Manager must be run as the user under which
@@ -168,12 +168,12 @@ to do that by hand.
 
 IMPORTANT: SquidGuard Manager doesn't support symbolic links in the SquidGuard
 dbhome directory. If it is your case, you need to remove those symbolic links
-and modify your squidguard.conf file  so that refers to the real files and
+and modify your squidguard.conf file  so that points the real files and
 directories.
 
 =head2 Automatic installation
 
-Execute the install script and answer to some questions it asks:
+Execute the install script and answer to some questions it ask:
 
 	$ perl Makefile.PL
 	$ make
@@ -184,7 +184,7 @@ By default it will install all files into /var/www/squidguardmgr/ and show you
 a configuration sample that should be included in your httpd.conf. Also, you
 can find some Apache configuration samples in contrib/ directory of the
 SquidGuard Manager source repository. Once you have done, restart httpd server
-and take a look at http://my.proxy.dom/squidguardmgr/ or
+and take a look at http://my.proxy.dom/squidguardmgr/ or 
 http://my.proxy.dom:port/squidguardmgr/
 
 You can fully customize this installation by passing the following variables
@@ -211,7 +211,7 @@ to Makefile.PL:
 
 For packaging there's two more configuration variables:
 
-	DESTDIR => Directory prefix where install will be done
+	DESTDIR => Directory prefix wher install will be done
 	QUIET => Do not display the post install message
 
 Example:
@@ -233,13 +233,13 @@ Example:
 
 This will install SquidGuard Manager CGI squidguardmgr.cgi, squidguardmgr.conf,
 squid_wrapper and all language files under /usr/local/apache/cgi-bin/admin/. All
-SquidGuard Manager css, js and image files will be copied under the directory
+SquidGuard Manager css, js and images files will be copied under the directory
 /usr/local/apache/htdocs/admin/. Squidguard Manager will expect to find the
 SquidGuard configuration file at /usr/local/etc/squidguard.conf and the log
 and SquidGuard databases respectively at /usr/local/logs/squidguard and
 /usr/local/squidguard/db. All the installed files will be owned by user squid
-and group squid. The squid wrapper (used to reconfigure squid after change)
-will be setuid root unconditionally.
+and group squid. The squid wrapper (use to reconfigure squid after change)
+will be setuid root.
 
 =head2 Manual installation
 
@@ -250,12 +250,12 @@ server and chown the entire directory to the user and group running httpd.
 Copy all files from the htdocs repository into your DocumentRoot directory or
 any other subdirectory and check that they can be read by your httpd server.
 
-Edit the squidguardmgr.conf file in your cgi directory and check that all
+Edit the squidguardmgr.conf file into your cgi directory and check that all
 paths conforms to your installation.
 
 If you want to be able to reload Squid redirector from the GUI interface after
 your SquidGuard and/or SquidClamav modification, you must compile and install
-the squid_wrapper with suid root into the squidguardmgr cgi directory.
+the squid_wrapper with suid root into the squidguardmgr.cgi directory.
 
 Before compilation you may need to edit squid_wrapper.c and change the
 SQUID_BINARY definition to point correctly to your squid binary.
@@ -304,7 +304,7 @@ Path to the SquidClamav configuration file.
 =item LANG          en_US
 
 Used to set the language, default is en_US.
-Current available LANGs are: en_US, fr_FR.
+Current available LANGS are: en_US, fr_FR.
 
 =item SQUID_WRAPPER /var/www/squidguargmgr/squid_wrapper
 
@@ -352,7 +352,7 @@ Default value is 1, enabled. Set it to 0 to disable this feature.
 
 Gilles Darold <gilles @nospam@ darold.net>
 
-Tatsuya Nonogaki <winfield @nospam@ support.email.ne.jp>
+Tatsuya Nonogaki <winfield @nospam@support.email.ne.jp>
 
 =head1 COPYRIGHT
 
@@ -373,7 +373,7 @@ Copyright (c) 2010-2013 Gilles Darold - All rights reserved.
 
 =head1 BUGS
 
-Your volunteer to help construct a better software by submitting bug report or
+Your volonteer to help construct a better software by submitting bug report or
 feature request as well as code contribution are welcome.
 
 
