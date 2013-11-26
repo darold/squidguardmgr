@@ -6,15 +6,13 @@
 		This menu allows you to define scheduled time to be used in other SquidGuard objects (Sources, URL Rewrites, Filters and ACLs).
 
 	<b>Sources:</b>
-		Use this menu to define sources like users, groups, Ip addresses, range of Ip addresses or networks to apply policies on.
+		Use this menu to define sources like users, groups, Ip addresses, range of Ip addresses or networks to apply policies on them.
 
 	<b>Url rewriting:</b>
-		This menu allows you to define URL rewriting groups, each consists of one or more <i>Sed</i> style substitution rules. They can be
-		applied to source groups in <b>ACLs</b> menu.
+		This menu allows you to define as many URL rewriting rules as you want that will be applied by SquidGuard on pattern matching.
 
 	<b>Filters:</b>
-		Destination Groups filter selector. In this menu you can shape each group by selecting a list for domain, url or regexp filter
-		from those you defined in <b>Manage Lists</b> memu.
+		This menu allows you to define URL destination groups based on the predefined lists of domain, url or regexp expressions.
 
 	<b>ACLs:</b>
 		This is the central place where you define what source objects follow what filters and when. Here everything fits together.
@@ -23,9 +21,9 @@
 		This menu allows you to examine the SquidGuard configuration file.
 
 	<b>Manage Lists:</b>
-		This menu allows you to build blocklists for each destination group. You can edit a whole list or add/remove individual entries.
+		This menu allows you to manage blocklists by editing them fully or adding/removing entries.
 
-	<b>View logs:</b>
+	<b>Logs:</b>
 		This menu allows you to consult all log files in the log directory you'd defined in the SquidGuard global configuration.
 
 	<b>SquidClamav:</b>
@@ -33,6 +31,6 @@
 		only if you have SquidClamav installed on your system.
 
 	<b>Restart Squid</b>
-		This link allows you to 'reconfigure' or <i>quick-restart</i> Squid to make it recognize the changes you made to SquidGuard and/or
+		This link allows you to 'reconfigure' or quick-restart Squid to make it recognize the changes you made on SquidGuard and/or
 		SquidClamav configuration.
 </pre>
