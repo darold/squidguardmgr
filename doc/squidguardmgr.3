@@ -124,7 +124,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SQUIDGUARDMGR 1"
-.TH SQUIDGUARDMGR 1 "2013-11-26" "perl v5.10.1" "User Contributed Perl Documentation"
+.TH SQUIDGUARDMGR 1 "2013-11-27" "perl v5.10.1" "User Contributed Perl Documentation"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -230,9 +230,9 @@ using the perl \s-1CGI\s0 module. It must be run on a proxy server hosting squid
 .PP
 You need to run this \s-1CGI\s0 script using Apache \s-1HTTP\s0 server. And the httpd daemon
 must be run as uid and gid holding SquidGuard (most of the time this is
-squid cache effective user/group). This is to allow SquidGuard Manager to read
-and write into the configuration files to manage blocklists and acls. If you
-use SquidClamav, it must be run under the same user too.
+Squid cache effective user/group). This allows SquidGuard Manager to read
+and write the configuration files to manage blocklists and acls. If you use
+SquidClamav, it must be run under the same user too.
 .PP
 SquidGuard Manager uses some system commands to manage blocklists and log files.
 Your system must have the following binaries installed: diff, grep, find, rm
@@ -243,9 +243,9 @@ To install SquidGuard Manager you must be able to gain root privilege so
 that installer script can put files with appropriate permission.
 .SS "Prepare your system"
 .IX Subsection "Prepare your system"
-SquidGuard Manager need to have read/write access onto SquidGuard configuration
+SquidGuard Manager needs to have read/write access onto SquidGuard configuration
 file and the dbhome directory. It must also have read rights onto the log file.
-If you use the SquidClamav Manager \s-1GUI\s0 it also need read/write access on the
+If you use the SquidClamav Manager \s-1GUI\s0 it also requires read/write access to the
 squidclamav.conf file as well as the log file.
 .PP
 For that reason SquidGuard Manager must be run as the user under which
@@ -269,11 +269,11 @@ to do that by hand.
 .PP
 \&\s-1IMPORTANT:\s0 SquidGuard Manager doesn't support symbolic links in the SquidGuard
 dbhome directory. If it is your case, you need to remove those symbolic links
-and modify your squidguard.conf file  so that points the real files and
+and modify your squidguard.conf file  so that refers to the real files and
 directories.
 .SS "Automatic installation"
 .IX Subsection "Automatic installation"
-Execute the install script and answer to some questions it ask:
+Execute the install script and answer to some questions it asks:
 .PP
 .Vb 4
 \&        $ perl Makefile.PL
@@ -286,7 +286,7 @@ By default it will install all files into /var/www/squidguardmgr/ and show you
 a configuration sample that should be included in your httpd.conf. Also, you
 can find some Apache configuration samples in contrib/ directory of the
 SquidGuard Manager source repository. Once you have done, restart httpd server
-and take a look at http://my.proxy.dom/squidguardmgr/ or 
+and take a look at http://my.proxy.dom/squidguardmgr/ or
 http://my.proxy.dom:port/squidguardmgr/
 .PP
 You can fully customize this installation by passing the following variables
@@ -316,7 +316,7 @@ to Makefile.PL:
 For packaging there's two more configuration variables:
 .PP
 .Vb 2
-\&        DESTDIR => Directory prefix wher install will be done
+\&        DESTDIR => Directory prefix where install will be done
 \&        QUIET => Do not display the post install message
 .Ve
 .PP
@@ -341,13 +341,13 @@ Example:
 .PP
 This will install SquidGuard Manager \s-1CGI\s0 squidguardmgr.cgi, squidguardmgr.conf,
 squid_wrapper and all language files under /usr/local/apache/cgi\-bin/admin/. All
-SquidGuard Manager css, js and images files will be copied under the directory
+SquidGuard Manager css, js and image files will be copied under the directory
 /usr/local/apache/htdocs/admin/. Squidguard Manager will expect to find the
 SquidGuard configuration file at /usr/local/etc/squidguard.conf and the log
 and SquidGuard databases respectively at /usr/local/logs/squidguard and
 /usr/local/squidguard/db. All the installed files will be owned by user squid
-and group squid. The squid wrapper (use to reconfigure squid after change)
-will be setuid root.
+and group squid. The squid wrapper (used to reconfigure squid after change)
+will be setuid root unconditionally.
 .SS "Manual installation"
 .IX Subsection "Manual installation"
 Copy all files from the cgi-bin repository into the \s-1CGI\s0 script directory of
@@ -357,12 +357,12 @@ server and chown the entire directory to the user and group running httpd.
 Copy all files from the htdocs repository into your DocumentRoot directory or
 any other subdirectory and check that they can be read by your httpd server.
 .PP
-Edit the squidguardmgr.conf file into your cgi directory and check that all
+Edit the squidguardmgr.conf file in your cgi directory and check that all
 paths conforms to your installation.
 .PP
 If you want to be able to reload Squid redirector from the \s-1GUI\s0 interface after
 your SquidGuard and/or SquidClamav modification, you must compile and install
-the squid_wrapper with suid root into the squidguardmgr.cgi directory.
+the squid_wrapper with suid root into the squidguardmgr cgi directory.
 .PP
 Before compilation you may need to edit squid_wrapper.c and change the
 \&\s-1SQUID_BINARY\s0 definition to point correctly to your squid binary.
@@ -404,7 +404,7 @@ Path to the SquidClamav configuration file.
 .IP "\s-1LANG\s0          en_US" 4
 .IX Item "LANG          en_US"
 Used to set the language, default is en_US.
-Current available \s-1LANGS\s0 are: en_US, fr_FR.
+Current available LANGs are: en_US, fr_FR.
 .IP "\s-1SQUID_WRAPPER\s0 /var/www/squidguargmgr/squid_wrapper" 4
 .IX Item "SQUID_WRAPPER /var/www/squidguargmgr/squid_wrapper"
 Command wrapper to reload Squid. Why you need this wrapper is because only root
@@ -443,7 +443,7 @@ Default value is 1, enabled. Set it to 0 to disable this feature.
 .IX Header "AUTHORS"
 Gilles Darold <gilles \f(CW@nospam\fR@ darold.net>
 .PP
-Tatsuya Nonogaki <winfield \f(CW@nospam\fR@support.email.ne.jp>
+Tatsuya Nonogaki <winfield \f(CW@nospam\fR@ support.email.ne.jp>
 .SH "COPYRIGHT"
 .IX Header "COPYRIGHT"
 Copyright (c) 2010\-2013 Gilles Darold \- All rights reserved.
@@ -464,5 +464,5 @@ Copyright (c) 2010\-2013 Gilles Darold \- All rights reserved.
 .Ve
 .SH "BUGS"
 .IX Header "BUGS"
-Your volonteer to help construct a better software by submitting bug report or
+Your volunteer to help construct a better software by submitting bug report or
 feature request as well as code contribution are welcome.
