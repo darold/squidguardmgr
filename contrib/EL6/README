@@ -3,6 +3,17 @@ This is sample configuration files to drive an Apache 2.2 instance for
 SquidGuard Manager on RHEL/CentOS 6.x.  Many files were borrowed  from 
 CentOS 6 distribution.
 
+As you may already know, httpd has to be run under user/group 'squid' to
+hold SquidGuard Manager. Most of the time, the effective uid/gid of the
+main default httpd is 'apache'. In this way, you are able to run a
+dedicated httpd process for SquidGuard Manager keeping the default httpd
+configurations intact.
+
+Note also that httpd in this sample binds to TCP port other than 80 (3128
+actually). Thus main httpd could be run simultaneously. Be careful, as 3128
+is the default port of squid cache, you may need to change that of either
+this httpd or squid cache daemon.
+
 # Structure
 
 /etc/httpd/                -- This is ServerRoot of the httpd daemon.
@@ -30,7 +41,8 @@ CentOS 6 distribution.
     squidguardmgr          -- logrotate configuration file.
 
 Note:
-You don't need to permit 'squid' account read nor write access to these files.
+You don't need to permit 'squid' account read nor write access to these files
+except for the contents subtree (/var/www/sgmgr and squid-gui).
 If you want (maybe you do want) to authenticate user to access SquidGuard Manager
 Web GUI, generate .htpasswd file using htpasswd command, then look into the 
 commented-out lines in squidguardmgr.cf.
