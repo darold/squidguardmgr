@@ -121,6 +121,7 @@ $ACTION = 'squidclamav' if ($SQUIDGUARD =~ /^(no|off|disable)/i);
 my $IMG_LOGO     = "<img src=\"$IMG_DIR/squidguardmgr-logo.png\" align=\"center\" border=\"0\">";
 my $IMG_REDIRECT = "<img src=\"$IMG_DIR/redirect.png\" border=\"no\">";
 my $IMG_EDIT     = "<img src=\"$IMG_DIR/edit.png\" width=\"15\" height=\"15\" border=\"no\">";
+my $IMG_EDIT_EX  = "<img src=\"$IMG_DIR/edit-exist.png\" width=\"15\" height=\"15\" border=\"no\">";
 my $IMG_ADD      = "<img src=\"$IMG_DIR/new.png\" width=\"15\" height=\"15\" border=\"no\">";
 my $IMG_DELETE   = "<img src=\"$IMG_DIR/trash.png\" width=\"15\" height=\"15\" border=\"no\">";
 my $IMG_NODELETE = "<img src=\"$IMG_DIR/notrash.png\" width=\"15\" height=\"15\" border=\"no\">";
@@ -793,14 +794,19 @@ sub edit_blacklist
 	print "<table width=\"100%\"><tr><td>\n";
 	print "<table>\n";
 	foreach ('domains', 'urls', 'expressions') {
-		print "<tr><th align=\"right\">", &translate(ucfirst($_)), "<br><a href=\"\" onclick=\"window.open('", $CGI->escapeHTML("$ENV{SCRIPT_NAME}?action=viewlist&path=$bl/$_&lang=$LANG"), "','blwin','scrollbars=yes,status=no,toolbar=no,width=420,height=800,resizable=yes,screenX=1,screenY=1,top=1,left=1'); return false;\" target=\"_new\" title=\"", &translate('Edit'), "\">$IMG_EDIT</a>&nbsp;&nbsp;<a href=\"\" onclick=\"document.forms[0].action.value='rebuild'; document.forms[0].blacklist.value='$bl/$_'; document.forms[0].submit(); return false;\" title=\"", &translate('Rebuild database'), "\">$IMG_REBUILD</a></th><th align=\"left\"><textarea name=\"${bl}_$_\" cols=\"50\" rows=\"5\" wrap=\"off\"></textarea></th></tr>\n";
+		print "<tr><th align=\"right\">", &translate(ucfirst($_)), "<br>";
+		if (-e "$DBHOME/$bl/$_") {
+			print "<a href=\"\" onclick=\"window.open('", $CGI->escapeHTML("$ENV{SCRIPT_NAME}?action=viewlist&path=$bl/$_&lang=$LANG"), "','blwin','scrollbars=yes,status=no,toolbar=no,width=420,height=800,resizable=yes,screenX=1,screenY=1,top=1,left=1'); return false;\" target=\"_new\" title=\"", &translate('Edit'), "\">$IMG_EDIT_EX</a>&nbsp;&nbsp;<a href=\"\" onclick=\"document.forms[0].action.value='rebuild'; document.forms[0].blacklist.value='$bl/$_'; document.forms[0].submit(); return false;\" title=\"", &translate('Rebuild database'), "\">$IMG_REBUILD</a>";
+		} else {
+			print "$IMG_EDIT&nbsp;&nbsp;$IMG_REBUILD";
+		}
+		print "</th><th align=\"left\"><textarea name=\"${bl}_$_\" cols=\"50\" rows=\"5\" wrap=\"off\"></textarea></th></tr>\n";
 	}
 	print "<tr><th colspan=\"2\" align=\"right\"><input type=\"button\" name=\"remove\" value=\"", &translate('Remove'), "\" onclick=\"document.forms[0].action.value='bledit'; document.forms[0].apply.value='remove'; document.forms[0].submit(); return false;\">&nbsp;&nbsp;<input type=\"button\" name=\"add\" value=\"", &translate('Add'), "\" onclick=\"document.forms[0].action.value='bledit'; document.forms[0].apply.value='add'; document.forms[0].submit(); return false;\"></th></tr>\n";
 	print "</table>\n";
 	print "</td><td>\n";
 	print &show_help('bledit');
 	print "</td></tr></table>\n";
-
 
 }
 
