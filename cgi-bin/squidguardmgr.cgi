@@ -121,7 +121,7 @@ $ACTION = 'squidclamav' if ($SQUIDGUARD =~ /^(no|off|disable)/i);
 my $IMG_LOGO     = "<img src=\"$IMG_DIR/squidguardmgr-logo.png\" align=\"center\" border=\"0\">";
 my $IMG_REDIRECT = "<img src=\"$IMG_DIR/redirect.png\" border=\"no\">";
 my $IMG_EDIT     = "<img src=\"$IMG_DIR/edit.png\" width=\"15\" height=\"15\" border=\"no\">";
-my $IMG_EDIT_EX  = "<img src=\"$IMG_DIR/edit-exist.png\" width=\"15\" height=\"15\" border=\"no\">";
+my $IMG_EDIT_NOX = "<img src=\"$IMG_DIR/edit-blur.png\" width=\"15\" height=\"15\" border=\"no\">";
 my $IMG_ADD      = "<img src=\"$IMG_DIR/new.png\" width=\"15\" height=\"15\" border=\"no\">";
 my $IMG_DELETE   = "<img src=\"$IMG_DIR/trash.png\" width=\"15\" height=\"15\" border=\"no\">";
 my $IMG_NODELETE = "<img src=\"$IMG_DIR/notrash.png\" width=\"15\" height=\"15\" border=\"no\">";
@@ -131,6 +131,7 @@ my $IMG_NOREMOVE = "<img src=\"$IMG_DIR/noremove.png\" width=\"15\" height=\"15\
 my $IMG_SMALL_NOREMOVE = "<img src=\"$IMG_DIR/noremove.png\" width=\"10\" height=\"10\" border=\"no\">";
 my $IMG_NOIP     = "<img src=\"$IMG_DIR/checked.png\" width=\"15\" height=\"15\" border=\"no\">";
 my $IMG_REBUILD  = "<img src=\"$IMG_DIR/rebuild.png\" width=\"15\" height=\"15\" border=\"no\">";
+my $IMG_REBUILD_NOX = "<img src=\"$IMG_DIR/rebuild-blur.png\" width=\"15\" height=\"15\" border=\"no\">";
 my $IMG_LOG      = "<img src=\"$IMG_DIR/log.png\" width=\"15\" height=\"15\" border=\"no\">";
 
 # Get translated strings
@@ -796,9 +797,9 @@ sub edit_blacklist
 	foreach ('domains', 'urls', 'expressions') {
 		print "<tr><th align=\"right\">", &translate(ucfirst($_)), "<br>";
 		if (-e "$DBHOME/$bl/$_") {
-			print "<a href=\"\" onclick=\"window.open('", $CGI->escapeHTML("$ENV{SCRIPT_NAME}?action=viewlist&path=$bl/$_&lang=$LANG"), "','blwin','scrollbars=yes,status=no,toolbar=no,width=420,height=800,resizable=yes,screenX=1,screenY=1,top=1,left=1'); return false;\" target=\"_new\" title=\"", &translate('Edit'), "\">$IMG_EDIT_EX</a>&nbsp;&nbsp;<a href=\"\" onclick=\"document.forms[0].action.value='rebuild'; document.forms[0].blacklist.value='$bl/$_'; document.forms[0].submit(); return false;\" title=\"", &translate('Rebuild database'), "\">$IMG_REBUILD</a>";
+			print "<a href=\"\" onclick=\"window.open('", $CGI->escapeHTML("$ENV{SCRIPT_NAME}?action=viewlist&path=$bl/$_&lang=$LANG"), "','blwin','scrollbars=yes,status=no,toolbar=no,width=420,height=800,resizable=yes,screenX=1,screenY=1,top=1,left=1'); return false;\" target=\"_new\" title=\"", &translate('Edit'), "\">$IMG_EDIT</a>&nbsp;&nbsp;<a href=\"\" onclick=\"document.forms[0].action.value='rebuild'; document.forms[0].blacklist.value='$bl/$_'; document.forms[0].submit(); return false;\" title=\"", &translate('Rebuild database'), "\">$IMG_REBUILD</a>";
 		} else {
-			print "$IMG_EDIT&nbsp;&nbsp;$IMG_REBUILD";
+			print "$IMG_EDIT_NOX&nbsp;&nbsp;$IMG_REBUILD_NOX";
 		}
 		print "</th><th align=\"left\"><textarea name=\"${bl}_$_\" cols=\"50\" rows=\"5\" wrap=\"off\"></textarea></th></tr>\n";
 	}
