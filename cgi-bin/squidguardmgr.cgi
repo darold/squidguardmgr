@@ -2533,6 +2533,8 @@ sub show_listcontent
 sub save_listcontent
 {
 	my $bl = shift;
+	my $delbl;
+	my $nline = 0;
 
 	print $CGI->header();
 	print $CGI->start_html(
@@ -2553,9 +2555,16 @@ sub save_listcontent
 	map { s/^[\s]+//; s/[\s]+$//; } @datas;
 	if (not open(OUT, ">$CONFIG->{dbhome}/$bl.tmp")) {
 		&error("Can't read file $bl.tmp: $!");
+		print $CGI->end_form();
+		print $CGI->end_html();
+		return;
 	} else {
 		foreach my $l (@datas) {
-			print OUT "$l\n" if ($l);
+			chomp($l);
+			if ($l) {
+				print OUT "$l\n";
+				$nline++;
+			}
 		}
 		close(OUT);
 	}
@@ -2582,17 +2591,35 @@ sub save_listcontent
 			unlink("$CONFIG->{dbhome}/$bl.tmpdiff");
 		}
 		unlink("$CONFIG->{dbhome}/$bl");
+		$delbl = 1 if ($nline == 0);
 	} else {
 		$DIFF = '';
 	}
 	rename("$CONFIG->{dbhome}/$bl.tmp", "$CONFIG->{dbhome}/$bl");
-	if (!$DIFF) {
+
+	if ($delbl) {
+		unlink("$CONFIG->{dbhome}/$bl");
+		unlink("$CONFIG->{dbhome}/$bl.db");
+	} elsif ($nline == 0) {
+		unlink("$CONFIG->{dbhome}/$bl");
+	} elsif (!$DIFF) {
 		&rebuild_database($bl);
 	}
 	print "<h2>", &translate('List'), " : $bl</h2>\n";
-
-	print "<table><tr><th><input type=\"button\" name=\"save\" value=\"", &translate('Close'), "\" onclick=\"window.close(); return false;\"></th></tr></table>\n";
-
+	if ($delbl) {
+		print "<p><font style=\"color: darkred; background: white;\">No lines left, $bl deleted.</font></p>\n";
+	} else {
+		print "<p><font style=\"color: darkred; background: white;\">$bl updated.</font></p>\n";
+	}
+	print "<table><tr><th><input type=\"button\" name=\"save\" value=\"", &translate('Close');
+	if ($delbl) {
+		my $cat = $bl;
+		$cat =~ s#/.*$##;
+		print "\" onclick=\"window.opener.location.href='", $CGI->escapeHTML("$ENV{SCRIPT_NAME}?action=bledit&blacklist=$cat"), "'; window.close(); return false;\">";
+	} else {
+		print "\" onclick=\"window.close(); return false;\">";
+	}
+	print "</th></tr></table>\n";
 
 	print $CGI->end_form();
 	print $CGI->end_html();
