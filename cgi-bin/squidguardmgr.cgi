@@ -1535,7 +1535,7 @@ sub show_categories
 		}
 		my $img = '&nbsp;';
 		$img = $IMG_REDIRECT if ($CONFIG->{dest}{$k}{redirect});
-		print "<td nowrap=\"1\" title=\"$CONFIG->{dest}{$k}{redirect}\" style=\"text-align: center;\">$img</td><td nowrap=\"1\">";
+		print "<td nowrap=\"1\" title=\"", $CGI->escapeHTML("$CONFIG->{dest}{$k}{redirect}"), "\" style=\"text-align: center;\">$img</td><td nowrap=\"1\">";
 		my $v = $CONFIG->{dest}{$k}{log} || '';
 		my $anon = '';
 		if ($v =~ s/anonymous[\s\t]+(.*)/$1/) {
@@ -1572,7 +1572,7 @@ sub show_categories
 						print "<td>&nbsp;</td>";
 					}
 				}
-				print "<td nowrap=\"1\" title=\"$CONFIG->{dest}{$k}{else}{redirect}\">", substr($CONFIG->{dest}{$k}{else}{redirect}, 0, 60), "</td><td nowrap=\"1\">";
+				print "<td nowrap=\"1\" title=\"", $CGI->escapeHTML("$CONFIG->{dest}{$k}{else}{redirect}"), "\">", substr($CONFIG->{dest}{$k}{else}{redirect}, 0, 60), "</td><td nowrap=\"1\">";
 				my $v = $CONFIG->{dest}{$k}{else}{log} || '';
 				my $anon = '';
 				if ($v =~ s/anonymous[\s\t]+(.*)/$1/) {
@@ -1799,7 +1799,7 @@ sub show_acl
 		$schedule = '&nbsp;' if ($schedule eq "");
 		$fqdn = '&nbsp;' if ($fqdn eq "");
 		$rewrite = '&nbsp;' if ($rewrite eq "");
-		print "<tr><th align=\"left\">$k</th><td>$schedule</td><td>$allowed<br>$blocked$whitelist$blacklist</td><td style=\"text-align: center;\">$fqdn</td><td>$rewrite</td><td title=\"$CONFIG->{acl}{$k}{redirect}\" style=\"text-align: center;\">$img</td><th><a href=\"\" onclick=\"document.forms[0].acl.value='$k'; document.forms[0].action.value='aclsedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Edit'), "\">$IMG_EDIT</a></th><th><a href=\"\" onclick=\"document.forms[0].acl.value='$k'; document.forms[0].action.value='aclsdelete'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Delete'), "\">$IMG_DELETE</a></th></tr>\n";
+		print "<tr><th align=\"left\">$k</th><td>$schedule</td><td>$allowed<br>$blocked$whitelist$blacklist</td><td style=\"text-align: center;\">$fqdn</td><td>$rewrite</td><td title=\"", $CGI->escapeHTML("$CONFIG->{acl}{$k}{redirect}"), "\" style=\"text-align: center;\">$img</td><th><a href=\"\" onclick=\"document.forms[0].acl.value='$k'; document.forms[0].action.value='aclsedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Edit'), "\">$IMG_EDIT</a></th><th><a href=\"\" onclick=\"document.forms[0].acl.value='$k'; document.forms[0].action.value='aclsdelete'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Delete'), "\">$IMG_DELETE</a></th></tr>\n";
 		my $sources = '';
 		if (exists $CONFIG->{acl}{$k}{else}) {
 			$fqdn = '';
@@ -1861,7 +1861,7 @@ sub show_acl
 			$img = $IMG_REDIRECT if ($CONFIG->{acl}{$k}{else}{redirect});
 			$fqdn = '&nbsp;' if ($fqdn eq "");
 			$rewrite = '&nbsp;' if ($rewrite eq "");
-			print "<tr><th align=\"right\">", &translate('else'), "</th><td>&nbsp;</td><td>$allowed<br>$blocked$whitelist$blacklist</td><td style=\"text-align: center;\">$fqdn</td><td>$rewrite</td><td title=\"$CONFIG->{acl}{$k}{else}{redirect}\" style=\"text-align: center;\">$img</td><th colspan=\"2\">&nbsp;</th></tr>\n";
+			print "<tr><th align=\"right\">", &translate('else'), "</th><td>&nbsp;</td><td>$allowed<br>$blocked$whitelist$blacklist</td><td style=\"text-align: center;\">$fqdn</td><td>$rewrite</td><td title=\"", $CGI->escapeHTML("$CONFIG->{acl}{$k}{else}{redirect}"), "\" style=\"text-align: center;\">$img</td><th colspan=\"2\">&nbsp;</th></tr>\n";
 		}
 		print "<tr><th align=\"left\" colspan=\"8\"><hr></th></tr>\n";
 	}
@@ -1935,7 +1935,7 @@ sub show_acl
 	$schedule = '&nbsp;' if ($schedule eq "");
 	$fqdn = '&nbsp;' if ($fqdn eq "");
 	$rewrite = '&nbsp;' if ($rewrite eq "");
-	print "<tr><th align=\"left\">", &translate('Default ACL'), "</th><td>$schedule</td><td>$allowed<br>$blocked$whitelist$blacklist</td><td style=\"text-align: center;\">$fqdn</td><td>$rewrite</td><td title=\"$CONFIG->{acl}{default}{redirect}\" style=\"text-align: center;\">$img</td><th><a href=\"\" onclick=\"document.forms[0].acl.value='default'; document.forms[0].action.value='aclsedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Edit'), "\">$IMG_EDIT</a></th><th>&nbsp;</th></tr>\n";
+	print "<tr><th align=\"left\">", &translate('Default ACL'), "</th><td>$schedule</td><td>$allowed<br>$blocked$whitelist$blacklist</td><td style=\"text-align: center;\">$fqdn</td><td>$rewrite</td><td title=\"", $CGI->escapeHTML("$CONFIG->{acl}{default}{redirect}"), "\" style=\"text-align: center;\">$img</td><th><a href=\"\" onclick=\"document.forms[0].acl.value='default'; document.forms[0].action.value='aclsedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Edit'), "\">$IMG_EDIT</a></th><th>&nbsp;</th></tr>\n";
 	my $sources = '';
 	if (exists $CONFIG->{acl}{default}{else}) {
 		$fqdn = '';
@@ -1997,7 +1997,7 @@ sub show_acl
 		$img = $IMG_REDIRECT if ($CONFIG->{acl}{default}{else}{redirect});
 		$fqdn = '&nbsp;' if ($fqdn eq "");
 		$rewrite = '&nbsp;' if ($rewrite eq "");
-		print "<tr><th align=\"right\">", &translate('else'), "</th><td>&nbsp;</td><td>$allowed<br>$blocked$whitelist$blacklist</td><td style=\"text-align: center;\">$fqdn</td><td>$rewrite</td><td title=\"$CONFIG->{acl}{default}{else}{redirect}\" style=\"text-align: center;\">$img</td><td colspan=\"2\">&nbsp;</td></tr>\n";
+		print "<tr><th align=\"right\">", &translate('else'), "</th><td>&nbsp;</td><td>$allowed<br>$blocked$whitelist$blacklist</td><td style=\"text-align: center;\">$fqdn</td><td>$rewrite</td><td title=\"", $CGI->escapeHTML("$CONFIG->{acl}{default}{else}{redirect}"), "\" style=\"text-align: center;\">$img</td><td colspan=\"2\">&nbsp;</td></tr>\n";
 	}
 	print "<tr><th align=\"left\" colspan=\"8\"><hr></th></tr>\n";
 
