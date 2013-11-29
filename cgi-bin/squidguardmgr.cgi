@@ -3267,7 +3267,8 @@ sub show_filecontent
 		}
 		print &translate('File'), " : $file</h2>\n";
 
-		if (!-e "$file" || not open(IN, "$file") ) {
+		my $ret = open(IN, "$file");
+		if (! $ret && (-e "$file" || $ACTION ne 'editfile') ) {
 			&error("Can't read file $file: $!");
 			print "<input type=\"button\" name=\"close\" value=\"", &translate('Close'), "\" onclick=\"window.close(); return false;\">\n";
 		} else {
@@ -3310,21 +3311,8 @@ sub show_filecontent
 sub save_filecontent
 {
 	my $file = shift;
-
-	my $content = $CGI->param('content') || '';
-	$content =~ s/\r//gs;
-	my @datas = split(/\n+/, $content);
-	$content = '';
-	map { s/^[\s]+//; s/[\s]+$//; } @datas;
-	$file = "$CONFIG->{dbhome}/$file" if ($file !~ /^\//);
-	if (not open(OUT, ">$file")) {
-		&error("Can't read file $file: $!");
-	} else {
-		foreach my $l (@datas) {
-			print OUT "$l\n" if ($l);
-		}
-		close(OUT);
-	}
+	my $hadfile;
+	my $nline = 0;
 
 	print $CGI->header();
 	print $CGI->start_html(
@@ -3338,9 +3326,40 @@ sub save_filecontent
 	print "<input type=\"hidden\" name=\"apply\" value=\"\" />\n";
 	print "<input type=\"hidden\" name=\"filename\" value=\"$file\" />\n";
 
+	my $content = $CGI->param('content') || '';
+	$content =~ s/\r//gs;
+	my @datas = split(/\n+/, $content);
+	$content = '';
+	map { s/^[\s]+//; s/[\s]+$//; } @datas;
+	$file = "$CONFIG->{dbhome}/$file" if ($file !~ /^\//);
+	$hadfile = 1 if (-e "$file");
+	if (not open(OUT, ">$file")) {
+		&error("Can't read file $file: $!");
+		print $CGI->end_form();
+		print $CGI->end_html();
+		return;
+	} else {
+		foreach my $l (@datas) {
+			chomp($l);
+			if ($l) {
+				print OUT "$l\n";
+				$nline++;
+			}
+		}
+		close(OUT);
+	}
+	if ($nline == 0) {
+		unlink("$file");
+	}
 	print "<h2>", &translate('File'), " : $file</h2>\n";
-
-	print "<table><tr><th><input type=\"button\" name=\"save\" value=\"", &translate('Close'), "\" onclick=\"window.close(); return false;\"></th></tr></table>\n";
+	if ($nline == 0) {
+		if ($hadfile) {
+			print "<p><font style=\"color: darkred; background: white;\">No lines left, $file deleted.</font></p>\n";
+		}
+	} else {
+		print "<p><font style=\"color: darkred; background: white;\">$file updated.</font></p>\n";
+	}
+	print "<table><tr><th><input type=\"button\" name=\"close\" value=\"", &translate('Close'), "\" onclick=\"window.close(); return false;\"></th></tr></table>\n";
 
 	print $CGI->end_form();
 	print $CGI->end_html();
