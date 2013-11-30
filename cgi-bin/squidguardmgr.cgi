@@ -4014,9 +4014,6 @@ sub save_blacklist_description
 	chomp($alias);
 	chomp($description);
 
-	if ($alias eq '' && $description eq '') {
-		return;
-	}
 	my $bldesc = &get_blacklists_description();
 	$bldesc->{$bl}{alias} = $alias;
 	$bldesc->{$bl}{description} = $description;
@@ -4025,6 +4022,7 @@ sub save_blacklist_description
 		return;
 	}
 	foreach my $l (sort keys %{$bldesc}) {
+		next if ($l eq $bl && (!$alias && !$description) );
 		print OUT "$l\t";
 		print OUT "$bldesc->{$l}{alias}" if ($bldesc->{$l}{alias});
 		print OUT "\t";
