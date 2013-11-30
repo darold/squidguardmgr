@@ -1368,7 +1368,11 @@ sub show_sources
 			next if (!grep(/^$key$/, @SRC_KEYWORD));
 			foreach (@{$CONFIG->{src}{$k}{$key}}) {
 				print "<tr><th>&nbsp;</th><td><b>", &translate($SRC_ALIAS{$key}), "</b>: ", &show_editor($key, $_), "</td><th><a href=\"\" onclick=\"document.forms[0].source.value='$k'; document.forms[0].oldvalue.value='", &encode_url("$key $_"), "'; document.forms[0].action.value='sourcesedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Edit'), "\">$IMG_EDIT</a></th>";
-				print "<th><a href=\"\" onclick=\"document.forms[0].source.value='$k'; document.forms[0].oldvalue.value='", &encode_url("$key $_"), "'; document.forms[0].action.value='sourcesdelete'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Delete'), "\">$IMG_DELETE</a></th>";
+				if (! $delete && scalar(@{$CONFIG->{src}{$k}{$key}}) == 1) {
+					print "<th title=\"", &translate('Still in use'), "\">$IMG_NODELETE</th>";
+				} else {
+					print "<th><a href=\"\" onclick=\"document.forms[0].source.value='$k'; document.forms[0].oldvalue.value='", &encode_url("$key $_"), "'; document.forms[0].action.value='sourcesdelete'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Delete'), "\">$IMG_DELETE</a></th>";
+				}
 				print "</tr>\n";
 			}
 		}
@@ -2800,12 +2804,21 @@ sub apply_change
 				$val = quotemeta($val);
 				if ($else) {
 					@{$CONFIG->{src}{$name}{else}{$key}} = grep(!/^$val$/, @{$CONFIG->{src}{$name}{else}{$key}});
+					if (scalar(@{$CONFIG->{src}{$name}{else}{$key}}) < 1) {
+						delete $CONFIG->{src}{$name}{else}{$key};
+					}
 				} else {
 					@{$CONFIG->{src}{$name}{$key}} = grep(!/^$val$/, @{$CONFIG->{src}{$name}{$key}});
+					if (scalar(@{$CONFIG->{src}{$name}{$key}}) < 1) {
+						delete $CONFIG->{src}{$name}{$key};
+					}
 				}
 			} else {
 				if ($else) {
 					delete $CONFIG->{src}{$name}{else}{$key};
+					if (scalar(keys %{$CONFIG->{src}{$name}{else}}) < 1) {
+						delete $CONFIG->{src}{$name}{else};
+					}
 				} else {
 					delete $CONFIG->{src}{$name}{$key};
 				}
@@ -2835,6 +2848,9 @@ sub apply_change
 		if (!exists $CONFIG->{src}{$name}{within} && !exists $CONFIG->{src}{$name}{outside}) {
 			delete $CONFIG->{src}{$name}{else};
 		}
+		if (scalar(keys %{$CONFIG->{src}{$name}}) < 1) {
+			delete $CONFIG->{src}{$name};
+		}
 		$ACTION = 'sources';
 
 	} elsif ($CGI->param('source')) {
@@ -2850,12 +2866,21 @@ sub apply_change
 				$val = quotemeta($val);
 				if ($else) {
 					@{$CONFIG->{src}{$name}{else}{$key}} = grep(!/^$val$/, @{$CONFIG->{src}{$name}{else}{$key}});
+					if (scalar(@{$CONFIG->{src}{$name}{else}{$key}}) < 1) {
+						delete $CONFIG->{src}{$name}{else}{$key};
+					}
 				} else {
 					@{$CONFIG->{src}{$name}{$key}} = grep(!/^$val$/, @{$CONFIG->{src}{$name}{$key}});
+					if (scalar(@{$CONFIG->{src}{$name}{$key}}) < 1) {
+						delete $CONFIG->{src}{$name}{$key};
+					}
 				}
 			} else {
 				if ($else) {
 					delete $CONFIG->{src}{$name}{else}{$key};
+					if (scalar(keys %{$CONFIG->{src}{$name}{else}}) < 1) {
+						delete $CONFIG->{src}{$name}{else};
+					}
 				} else {
 					delete $CONFIG->{src}{$name}{$key};
 				}
@@ -2869,6 +2894,9 @@ sub apply_change
 		}
 		if (!exists $CONFIG->{src}{$name}{within} && !exists $CONFIG->{src}{$name}{outside}) {
 			delete $CONFIG->{src}{$name}{else};
+		}
+		if (scalar(keys %{$CONFIG->{src}{$name}}) < 1) {
+			delete $CONFIG->{src}{$name};
 		}
 		$ACTION = 'sources';
 	}
