@@ -1531,8 +1531,9 @@ sub show_categories
 			my $list = $CONFIG->{dest}{$k}{$type . 'list'} || '';
 			if ($list) {
 				$list =~ s/\/.*//;
+				my $sbl = $list;
 				$list = $blinfo->{$list}{alias} || $list;
-				print "<td>$list</td>";
+				print "<td><a href='", $CGI->escapeHTML("$ENV{SCRIPT_NAME}?action=bledit&blacklist=$sbl"), "'>$list</a></td>";
 			} else {
 				print "<td>&nbsp;</td>";
 			}
@@ -1570,8 +1571,9 @@ sub show_categories
 					my $list = $CONFIG->{dest}{$k}{else}{$type . 'list'} || '';
 					if ($list) {
 						$list =~ s/\/.*//;
+						my $sbl = $list;
 						$list = $blinfo->{$list}{alias} || $list;
-						print "<td>$list</td>";
+						print "<td><a href='", $CGI->escapeHTML("$ENV{SCRIPT_NAME}?action=bledit&blacklist=$sbl"), "'>$list</a></td>";
 					} else {
 						print "<td>&nbsp;</td>";
 					}
