@@ -728,24 +728,40 @@ sub show_blacklists
 	my $blinfo = &get_blacklists_description();
 	my @bl = &get_blacklists();
 	my $i = 0;
-	print "<table width=\"100%\">\n";
-	foreach ($i = 0; $i <= $#bl; $i++) {
-		if (($i % 10) == 0) {
-			print "<tr>\n";
-		}
-		my $in_use = &acl_in_use($bl[$i]);
-		print "<td align=\"left\" title=\"$blinfo->{$bl[$i]}{description}\"><a href=\"\" onclick=\"document.forms[0].action.value='bledit'; document.forms[0].blacklist.value='$bl[$i]'; document.forms[0].submit(); return false;\" style=\"font-weight: normal;\">", ($blinfo->{$bl[$i]}{alias} || $bl[$i]), "</a>";
-		print "<a href=\"\" onclick=\"if (confirm('WARNING: ", &translate('This will remove the list from your system.'), &translate('Are you sure to continue?'), "')) { document.forms[0].action.value='bldelete'; document.forms[0].blacklist.value='$bl[$i]'; document.forms[0].submit(); } return false;\" title=\"", &translate('Remove'), "\">$IMG_SMALL_REMOVE</a>" if (!$in_use);
-		print "<font title=\"", &translate('still in use'), "\">$IMG_SMALL_NOREMOVE</font>" if ($in_use);
-		print "</td>\n";
-		if ($i =~ /9$/) {
-			print "</tr>\n";
-		}
-	}
-	print "<tr>\n" if ($i !~ /9$/);
-	print "</table>\n";
-	print "<table width=\"100%\">\n";
+
+	print '<table width="100%">', "\n";
 	print "<tr><th style=\"text-align:left;\"><input type=\"text\" name=\"search\" value=\"\" size=\"50\" maxlength=\"128\"> <input type=\"button\" name=\"dosearch\" value=\"", &translate('Search'), "\" onclick=\"document.forms[0].action.value='search'; document.forms[0].blacklist.value='all'; document.forms[0].submit(); return false;\"></th><th style=\"text-align: center;\"><input type=\"button\" name=\"create\" value=\"", &translate('Create a list'), "\" onclick=\"var bl = prompt('", &translate('Enter the new list name'), "'); if (bl != undefined) { document.forms[0].action.value='categoriesedit'; document.forms[0].blacklist.value=bl; document.forms[0].submit(); } return false;\"></th><th style=\"text-align: right;\"><input type=\"button\" name=\"rebuild\" value=\"", &translate('Rebuild all databases'), "\" onclick=\"document.forms[0].action.value='rebuild'; document.forms[0].blacklist.value='all'; document.forms[0].submit(); return false;\"></th></tr>\n";
+	print '<tr><th colspan="3" align="left"><hr /></th></tr>', "\n";
+	print '</table>', "\n";
+
+	print '<table width="100%">', "\n";
+	print '<tr><th nowrap="1" align="left">List directory</th><th nowrap="1" align="left">Alias</th><th nowrap="1" align="left">Description</th><th nowrap="1">Domains</th><th nowrap="1">Urls</th><th nowrap="1">Expressions</th><th colspan="2" nowrap="1">Action</th></tr>', "\n";
+	print '<tr><th colspan="8" align="left"><hr /></th></tr>', "\n";
+	foreach ($i = 0; $i <= $#bl; $i++) {
+		my $in_use = &acl_in_use($bl[$i]);
+		my $t;
+		print "<tr>\n";
+		print "<th nowrap=\"1\" align=\"left\">$bl[$i]</th>\n";
+		print "<td nowrap=\"1\" align=\"left\">", ($blinfo->{$bl[$i]}{alias} || "&nbsp;"), "</td>\n";
+		print "<td align=\"left\">", (substr($blinfo->{$bl[$i]}{description},0,24) || "&nbsp;"), "</td>\n";
+		foreach $t ( ('domains', 'urls', 'expressions') ) {
+			print '<td style="text-align:center"';
+			if (-e "$CONFIG->{dbhome}/$bl[$i]/$t") {
+				print " title=\"file exists\">$IMG_NOIP</td>\n";
+			} else {
+				print ">&nbsp;</td>\n";
+			}
+		}
+		print "<th style=\"text-align:center\"><a href=\"\" onclick=\"document.forms[0].action.value='bledit'; document.forms[0].blacklist.value='$bl[$i]'; document.forms[0].submit(); return false;\" style=\"font-weight: normal;\" title=\"Edit\">$IMG_EDIT</a></th>\n";
+		print '<th style="text-align:center">';
+		if ($in_use) {
+			print "<font title=\"", &translate('still in use'), "\">$IMG_NODELETE</font>";
+		} else {
+			print "<a href=\"\" onclick=\"if (confirm('WARNING: This will remove the whole directory from your system. Are you sure to continue?')) { document.forms[0].action.value='bldelete'; document.forms[0].blacklist.value='$bl[$i]'; document.forms[0].submit(); } return false;\" title=\"Delete\">$IMG_DELETE</a>";
+		}
+		print "</th></tr>\n";
+		print '<tr><th colspan="8" align="left"><hr /></th></tr>', "\n";
+	}
 	print "</table>\n";
 	print &show_help('blacklists');
 
