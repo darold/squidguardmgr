@@ -478,14 +478,10 @@ sub get_configuration
 			$cur_rew = '';
 			$cur_dest = '';
 			next;
-		} elsif ($l =~ /^(dest|destination)[\s\t]+.*\{/) {
-			my @params = split('[\s\t]+', $l);
-			$enter_acl = 0;
-			$cur_dest = $params[1];
-			if ($params[2] && $params[3]) {
-				$CONFIG->{dest}{$cur_dest}{$params[2]} = $params[3];
-			}
+		} elsif ($l =~ /^(dest|destination)[\s\t]+([^\s\t]+)[\s\t]+\{/) {
+			$cur_dest = $2;
 			$cur_time = '';
+			$enter_acl = 0;
 			$cur_src = '';
 			$cur_rew = '';
 			next;
@@ -506,13 +502,11 @@ sub get_configuration
 			$rew_else = 1;
 			next;
 		}
-		if ($enter_acl) {
-			if ($l =~ /^([^\s\t]+)[\s\t]+(outside|within)[\s\t]+([^\s\t]+)[\s\t]+\{/) {
-				$cur_acl = $1;
-				$CONFIG->{acl}{$cur_acl}{'extended'}{$2} = $3;
-			} elsif ($l =~ /^([^\s\t]+)[\s\t]+\{/) {
-				$cur_acl = $1;
-			}
+		if ($enter_acl && ($l =~ /^([^\s\t]+)[\s\t]+(outside|within)[\s\t]+([^\s\t]+)[\s\t]+\{/) ) {
+			$cur_acl = $1;
+			$CONFIG->{acl}{$cur_acl}{'extended'}{$2} = $3
+		} elsif ($enter_acl && ($l =~ /^([^\s\t]+)[\s\t]+\{/) ) {
+			$cur_acl = $1;
 		}
 
 		my ($k, $v) = split(/[\t\s]+/, $l, 2);
@@ -1600,9 +1594,7 @@ sub show_categories
 						print "<td>&nbsp;</td>";
 					}
 				}
-				$img = '&nbsp;';
-				$img = $IMG_REDIRECT if ($CONFIG->{dest}{$k}{else}{redirect});
-				print "<td nowrap=\"1\" title=\"", $CGI->escapeHTML("$CONFIG->{dest}{$k}{else}{redirect}"), "\" style=\"text-align: center;\">$img</td><td nowrap=\"1\">";
+				print "<td nowrap=\"1\" title=\"", $CGI->escapeHTML("$CONFIG->{dest}{$k}{else}{redirect}"), "\">", substr($CONFIG->{dest}{$k}{else}{redirect}, 0, 60), "</td><td nowrap=\"1\">";
 				my $v = $CONFIG->{dest}{$k}{else}{log} || '';
 				my $anon = '';
 				if ($v =~ s/anonymous[\s\t]+(.*)/$1/) {
@@ -2346,25 +2338,18 @@ sub dump_config
 
 	$config .= "\n# Destination classes\n";
 	foreach my $t (sort keys %{$CONFIG->{dest}}) {
-		my $head = "dest $t";
-		my $body = '';
 #		if ($CONFIG->{dest}{$t}{'outside'}) {
 #			$config .= "dest $t outside $CONFIG->{dest}{$t}{'outside'} {\n";
 #		} elsif ($CONFIG->{dest}{$t}{'within'}) {
 #			$config .= "dest $t within $CONFIG->{dest}{$t}{'within'} {\n";
 #		} else {
-#			$config .= "dest $t {\n";
+			$config .= "dest $t {\n";
 #			delete $CONFIG->{dest}{$t}{'else'};
 #		}
 		foreach my $k (sort keys %{$CONFIG->{dest}{$t}}) {
 			next if (grep(/^$k$/, 'else'));
-			if ($k eq "within" || $k eq "outside") {
-				$head .= " $k $CONFIG->{dest}{$t}{$k}";
-			} else {
-				$body .= "\t$k\t$CONFIG->{dest}{$t}{$k}\n";
-			}
+			$config .= "\t$k\t$CONFIG->{dest}{$t}{$k}\n";
 		}
-		$config .= "$head {\n". "$body";
 		if (exists $CONFIG->{dest}{$t}{else} && (scalar keys %{$CONFIG->{dest}{$t}{else}} > 0) ) {
 			$config .= "} else {\n";
 			foreach my $k (sort keys %{$CONFIG->{dest}{$t}{else}}) {
@@ -2949,14 +2934,13 @@ sub apply_change
 			my $redirect = $CGI->param('redirect') || '';
 			my $log = $CGI->param('log') || '';
 			my $anon = $CGI->param('anonymous') || '';
+			delete $CONFIG->{dest}{$name}{within};
+			delete $CONFIG->{dest}{$name}{outside};
+			if ($time) {
+				$time =~ /^(within|outside) (.*)/;
+				$CONFIG->{dest}{$name}{$1} = $2;
+			}
 			if (!$else) {
-				if ($time) {
-					$time =~ /^(within|outside) (.*)/;
-					$CONFIG->{dest}{$name}{$1} = $2;
-				} else {
-					delete $CONFIG->{dest}{$name}{within};
-					delete $CONFIG->{dest}{$name}{outside};
-				}
 				if ($domain) {
 					$CONFIG->{dest}{$name}{domainlist} = $domain;
 				} else {
