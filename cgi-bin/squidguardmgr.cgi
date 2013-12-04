@@ -552,18 +552,19 @@ sub get_configuration
 			next;
 		}
 		# Parse source definitions
-		if ($cur_src && grep(/^$k$/, @SRC_KEYWORD)) {
-			if (!$src_else) {
-				push(@{$CONFIG->{src}{$cur_src}{$k}}, $v);
+		if ($cur_src) {
+			if (grep(/^$k$/, @SRC_KEYWORD)) {
+				if (!$src_else) {
+					push(@{$CONFIG->{src}{$cur_src}{$k}}, $v);
+				} else {
+					push(@{$CONFIG->{src}{$cur_src}{else}{$k}}, $v);
+				}
 			} else {
-				push(@{$CONFIG->{src}{$cur_src}{else}{$k}}, $v);
-			}
-			next;
-		} elsif ($cur_src) {
-			if (!$src_else) {
-				$CONFIG->{src}{$cur_src}{$k} = $v;
-			} else {
-				$CONFIG->{src}{$cur_src}{else}{$k} = $v;
+				if (!$src_else) {
+					$CONFIG->{src}{$cur_src}{$k} = $v;
+				} else {
+					$CONFIG->{src}{$cur_src}{else}{$k} = $v;
+				}
 			}
 			next;
 		}
@@ -1525,7 +1526,7 @@ sub show_categories
 		print "<p><input type=\"button\" name=\"autocreate\" value=\"", &translate('Autocreate'), "\" title=\"", &translate('Autocreate filters from blacklist database'), "\" onclick=\"document.forms[0].action.value='autocreate'; document.forms[0].submit(); return false;\"></p>\n";
 	}
 	print "<table align=\"center\" width=\"90%\">\n";
-	print "<tr><th align=\"left\" nowrap=\"1\">", &translate('Rule name'), "</th><th align=\"left\" nowrap=\"1\">", &translate('Schedules'), "</th><th align=\"left\">", &translate('Domains'), "</th><th align=\"left\">", &translate('Urls'), "</th><th align=\"left\">", &translate('Expressions'), "</th><th align=\"left\">", &translate('Redirection'), "</th><th align=\"left\">", &translate('Log file'), "</th><th colspan=\"2\">", &translate('Action'), "</th></tr>\n";
+	print "<tr><th align=\"left\" nowrap=\"1\">", &translate('Rule name'), "</th><th align=\"left\" nowrap=\"1\">", &translate('Schedules'), "</th><th align=\"left\">", &translate('Domains'), "</th><th align=\"left\">", &translate('Urls'), "</th><th align=\"left\">", &translate('Expressions'), "</th><th align=\"center\">", &translate('Redirection'), "</th><th align=\"left\">", &translate('Log file'), "</th><th colspan=\"2\">", &translate('Action'), "</th></tr>\n";
 	print "<tr><th colspan=\"9\"><hr></th></tr>\n";
 	foreach my $k (sort keys %{$CONFIG->{dest}}) {
 		my $delete = 1;
@@ -1596,7 +1597,9 @@ sub show_categories
 						print "<td>&nbsp;</td>";
 					}
 				}
-				print "<td nowrap=\"1\" title=\"", $CGI->escapeHTML("$CONFIG->{dest}{$k}{else}{redirect}"), "\">", substr($CONFIG->{dest}{$k}{else}{redirect}, 0, 60), "</td><td nowrap=\"1\">";
+				$img = '&nbsp;';
+				$img = $IMG_REDIRECT if ($CONFIG->{dest}{$k}{else}{redirect});
+				print "<td nowrap=\"1\" title=\"", $CGI->escapeHTML("$CONFIG->{dest}{$k}{else}{redirect}"), "\" style=\"text-align: center;\">$img</td><td nowrap=\"1\">";
 				my $v = $CONFIG->{dest}{$k}{else}{log} || '';
 				my $anon = '';
 				if ($v =~ s/anonymous[\s\t]+(.*)/$1/) {
@@ -2936,13 +2939,15 @@ sub apply_change
 			my $redirect = $CGI->param('redirect') || '';
 			my $log = $CGI->param('log') || '';
 			my $anon = $CGI->param('anonymous') || '';
-			delete $CONFIG->{dest}{$name}{within};
-			delete $CONFIG->{dest}{$name}{outside};
-			if ($time) {
-				$time =~ /^(within|outside) (.*)/;
-				$CONFIG->{dest}{$name}{$1} = $2;
-			}
 			if (!$else) {
+				if ($time) {
+					$time =~ /^(within|outside) (.*)/;
+					$CONFIG->{dest}{$name}{$1} = $2;
+					($1 eq 'within') ? delete $CONFIG->{dest}{$name}{outside} : delete $CONFIG->{dest}{$name}{within};
+				} else {
+					delete $CONFIG->{dest}{$name}{within};
+					delete $CONFIG->{dest}{$name}{outside};
+				}
 				if ($domain) {
 					$CONFIG->{dest}{$name}{domainlist} = $domain;
 				} else {
