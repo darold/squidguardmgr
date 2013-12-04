@@ -3320,7 +3320,7 @@ sub show_filecontent
 			&error("Can't read file $file: $!");
 			print "<input type=\"button\" name=\"close\" value=\"", &translate('Close'), "\" onclick=\"window.close(); return false;\">\n";
 		} else {
-			print "<table>\n";
+			print "<table width=\"100%\">\n";
 			if (!$tail) {
 				if ($ACTION eq 'editfile') {
 					my $col = 45;
@@ -3343,7 +3343,7 @@ sub show_filecontent
 					print "</pre></th></tr>\n";
 				}
 			} else {
-				print "<tr><th align=\"left\" style=\"font-weight: normal;\"><pre>\n";
+				print "<tr><th align=\"left\" style=\"font-weight: normal;\"><pre style=\"overflow:auto; white-space:pre-wrap; word-wrap:break-word;\">\n";
 				print `$TAIL -n $LOG_LINES $file`;
 				print "</pre></th></tr>\n";
 			}
