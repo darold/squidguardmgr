@@ -2534,7 +2534,7 @@ sub show_listcontent
 			&error("Can't read file $CONFIG->{dbhome}/$bl: $!");
 			print "<input type=\"button\" name=\"close\" value=\"", &translate('Close'), "\" onclick=\"window.close(); return false;\">\n";
 		} else {
-			my $col = 45;
+			my $col = 44;
 			$col = 41 if ($ismozilla);
 			print "<table><tr><th align=\"left\">\n";
 			print "<textarea name=\"content\" cols=\"$col\" rows=\"42\" wrap=\"off\">\n";
@@ -3323,7 +3323,7 @@ sub show_filecontent
 			print "<table>\n";
 			if (!$tail) {
 				if ($ACTION eq 'editfile') {
-					my $col = 47;
+					my $col = 45;
 					$col = 42 if ($ismozilla);
 					print "<tr><th align=\"left\">\n";
 					print "<textarea name=\"content\" cols=\"$col\" rows=\"42\" wrap=\"off\">\n";
@@ -3507,7 +3507,7 @@ sub show_logs
 	if ($#files == -1) {
 		print "<tr><th>", &translate('No log file'), ".</th></tr>\n";
 	} else {
-		foreach my $name (@files) {
+		foreach my $name (sort @files) {
 			print "<tr><th size=\"20\" style=\"text-align: right;\">$IMG_LOG</th><th style=\"text-align: left;\">";
 			if ($name =~ /\.(gz|bz2|zip|tgz)$/i) {
 				print "$name";
