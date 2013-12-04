@@ -552,18 +552,19 @@ sub get_configuration
 			next;
 		}
 		# Parse source definitions
-		if ($cur_src && grep(/^$k$/, @SRC_KEYWORD)) {
-			if (!$src_else) {
-				push(@{$CONFIG->{src}{$cur_src}{$k}}, $v);
+		if ($cur_src) {
+			if (grep(/^$k$/, @SRC_KEYWORD)) {
+				if (!$src_else) {
+					push(@{$CONFIG->{src}{$cur_src}{$k}}, $v);
+				} else {
+					push(@{$CONFIG->{src}{$cur_src}{else}{$k}}, $v);
+				}
 			} else {
-				push(@{$CONFIG->{src}{$cur_src}{else}{$k}}, $v);
-			}
-			next;
-		} elsif ($cur_src) {
-			if (!$src_else) {
-				$CONFIG->{src}{$cur_src}{$k} = $v;
-			} else {
-				$CONFIG->{src}{$cur_src}{else}{$k} = $v;
+				if (!$src_else) {
+					$CONFIG->{src}{$cur_src}{$k} = $v;
+				} else {
+					$CONFIG->{src}{$cur_src}{else}{$k} = $v;
+				}
 			}
 			next;
 		}
