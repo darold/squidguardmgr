@@ -502,11 +502,13 @@ sub get_configuration
 			$rew_else = 1;
 			next;
 		}
-		if ($enter_acl && ($l =~ /^([^\s\t]+)[\s\t]+(outside|within)[\s\t]+([^\s\t]+)[\s\t]+\{/) ) {
-			$cur_acl = $1;
-			$CONFIG->{acl}{$cur_acl}{'extended'}{$2} = $3
-		} elsif ($enter_acl && ($l =~ /^([^\s\t]+)[\s\t]+\{/) ) {
-			$cur_acl = $1;
+		if ($enter_acl) {
+			if ($l =~ /^([^\s\t]+)[\s\t]+(outside|within)[\s\t]+([^\s\t]+)[\s\t]+\{/) {
+				$cur_acl = $1;
+				$CONFIG->{acl}{$cur_acl}{'extended'}{$2} = $3;
+			} elsif ($l =~ /^([^\s\t]+)[\s\t]+\{/) {
+				$cur_acl = $1;
+			}
 		}
 
 		my ($k, $v) = split(/[\t\s]+/, $l, 2);
@@ -2166,7 +2168,7 @@ sub edit_acls
 	print "<input type=\"checkbox\" name=\"delelse\" value=\"0\" onchange=\"toggle_conditional(this);\" />";
 	print " ", &translate('Delete else clause'), "</th></tr>\n";
 	print "<tr><th colspan=\"2\"><hr></th></tr>\n";
-	print "<tr><th nowrap=\"1\" align=\"left\">&nbsp;</th>";;
+	print "<tr><th nowrap=\"1\" align=\"left\">&nbsp;</th>";
 	$sel = '';
 	$sel = 'checked="1" ' if (grep(/^\!in-addr$/, @{$CONFIG->{acl}{$name}{else}{pass}}));
 	print "<td><input type=\"checkbox\" name=\"edest\" value=\"!in-addr\" $sel>";
@@ -2962,7 +2964,7 @@ sub apply_change
 					delete $CONFIG->{dest}{$name}{redirect};
 				}
 				if ($log) {
-					$anon = 'anonymous ' if ($anon);;
+					$anon = 'anonymous ' if ($anon);
 					$CONFIG->{dest}{$name}{log} = $anon . $log;
 				} else {
 					delete $CONFIG->{dest}{$name}{log};
@@ -2989,7 +2991,7 @@ sub apply_change
 					delete $CONFIG->{dest}{$name}{else}{redirect};
 				}
 				if ($log) {
-					$anon = 'anonymous ' if ($anon);;
+					$anon = 'anonymous ' if ($anon);
 					$CONFIG->{dest}{$name}{else}{log} = $anon . $log;
 				} else {
 					delete $CONFIG->{dest}{$name}{else}{log};
