@@ -1288,6 +1288,7 @@ sub edit_rewrites
 	my $move_temp = '';
 	my $move_perm = '';
 	my $null = '';
+	my $validate;
 	my $val = $OLD;
 	print "<table align=\"center\" width=\"100%\"><tr><td>\n";
 	print "<table align=\"center\">\n";
@@ -1301,6 +1302,7 @@ sub edit_rewrites
 	if ($val =~ /^log[\s\t]+(.*)/) {
 		my $value = $1;
 		my $anon = '';
+		$validate = 1;
 		if ($value =~ s/anonymous[\s\t]+//) {
 			$anon = 'checked="1"';
 		}
@@ -1324,6 +1326,7 @@ sub edit_rewrites
 		print "</select>\n";
 		print "</td></tr>\n";
 	} else {
+		$validate = 1;
 		($null, $pattern, $substitute,$icase) = split(/\@/, $val);
 		if ($icase) {
 			if ($icase =~ /r/) {
@@ -1353,7 +1356,12 @@ sub edit_rewrites
 		print "</th></tr>\n";
 	}
 	print "<tr><th colspan=\"2\"><hr /></th></tr>\n";
-	print "<tr><th colspan=\"2\" align=\"right\"><input type=\"button\" name=\"save\" value=\"", &translate('Apply change'), "\" onclick=\"if (validate_rewrite() == true) { document.forms[0].apply.value='1'; document.forms[0].submit(); } return false;\"></th></tr>\n";
+	print "<tr><th colspan=\"2\" align=\"right\"><input type=\"button\" name=\"save\" value=\"", &translate('Apply change');
+	if ($validate) {
+		print "\" onclick=\"if (validate_rewrite() == true) { document.forms[0].apply.value='1'; document.forms[0].submit(); } return false;\"></th></tr>\n";
+	} else {
+		print "\" onclick=\"document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\"></th></tr>\n";
+	}
 	print "</table>\n";
 	print "</td></tr><tr><td>\n";
 	print &show_help('rewrites');
@@ -1434,6 +1442,7 @@ sub show_sources
 sub edit_sources
 {
 	my ($name, $else) = &normalyze(shift);
+	my $validate;
 
 	print "<h2>", &translate('Sources Edition'), "</h2>\n";
 	if ($else) {
@@ -1451,6 +1460,7 @@ sub edit_sources
 	if ($val =~ /^log[\s\t]+(.*)/) {
 		my $value = $1;
 		my $anon = '';
+		$validate = 1;
 		if ($value =~ s/anonymous[\s\t]+//) {
 			$anon = 'checked="1"';
 		}
@@ -1476,6 +1486,7 @@ sub edit_sources
 	} else {
 		my $type = '';
 		my $value = '';
+		$validate = 1;
 		foreach my $key (@SRC_KEYWORD) {
 			if (!$else) {
 				foreach (@{$CONFIG->{src}{$name}{$key}}) {
@@ -1507,7 +1518,12 @@ sub edit_sources
 		print "<input type=\"text\" size=\"50\" name=\"srcval\" value=\"$value\" /></td></tr>\n";
 	}
 	print "<tr><th colspan=\"2\"><hr></th></tr>\n";
-	print "<tr><th colspan=\"2\" align=\"right\"><input type=\"button\" name=\"save\" value=\"", &translate('Apply change'), "\" onclick=\"if (validate_source() == true) { document.forms[0].apply.value='1'; document.forms[0].submit();} return false;\"></th></tr>\n";
+	print "<tr><th colspan=\"2\" align=\"right\"><input type=\"button\" name=\"save\" value=\"", &translate('Apply change');
+	if ($validate) {
+		print "\" onclick=\"if (validate_source() == true) { document.forms[0].apply.value='1'; document.forms[0].submit();} return false;\"></th></tr>\n";
+	} else {
+		print "\" onclick=\"document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\"></th></tr>\n";
+	}
 	print "</table></td></tr><tr><td>\n";
 	print &show_help('sources');
 	print "</td></tr></table>\n";
