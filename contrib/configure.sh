@@ -2,7 +2,7 @@
 
 perl Makefile.PL \
  CONFFILE=/etc/squid/squidGuard.conf \
- DBHOME=/var/squidGuard/blacklist \
+ DBHOME=/var/squidGuard/blacklists \
  LOGDIR=/var/log/squidGuard \
  WWWDIR=/var/www/sgmgr \
  LANGDIR=en_US \
