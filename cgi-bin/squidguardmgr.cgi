@@ -3361,17 +3361,22 @@ sub show_filecontent
 					while (<IN>) {
 						print "$_";
 					}
+					close(IN);
 					print "</pre></th></tr>\n";
 				}
 			} else {
+				close(IN);
 				print "<tr><th align=\"left\" style=\"font-weight: normal;\"><pre style=\"overflow:auto; white-space:pre-wrap; word-wrap:break-word; word-break:break-all;\">\n";
-				print `$TAIL -n $LOG_LINES $file`;
+				open(IN, "$TAIL -n $LOG_LINES $file |");
+				while (<IN>) {
+					print $CGI->escapeHTML("$_");
+				}
+				close(IN);
 				print "</pre></th></tr>\n";
 			}
 			print "<tr><th><input type=\"button\" name=\"close\" value=\"", &translate('Close'), "\" onclick=\"window.close(); return false;\"></th></tr>\n";
 			print "</table>\n";
 		}
-		close(IN);
 	}
 
 	print $CGI->end_form();
