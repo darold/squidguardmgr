@@ -133,6 +133,8 @@ my $IMG_NOIP     = "<img src=\"$IMG_DIR/checked.png\" width=\"15\" height=\"15\"
 my $IMG_REBUILD  = "<img src=\"$IMG_DIR/rebuild.png\" width=\"15\" height=\"15\" border=\"no\">";
 my $IMG_REBUILD_NOX = "<img src=\"$IMG_DIR/rebuild-blur.png\" width=\"15\" height=\"15\" border=\"no\">";
 my $IMG_LOG      = "<img src=\"$IMG_DIR/log.png\" width=\"15\" height=\"15\" border=\"no\">";
+my $IMG_UP       = "<img src=\"$IMG_DIR/up.png\" width=\"15\" height=\"15\" border=\"no\">";
+my $IMG_DOWN     = "<img src=\"$IMG_DIR/down.png\" width=\"15\" height=\"15\" border=\"no\">";
 
 # Get translated strings
 my %LANG = &get_translation("$LANGDIR/$LANG");
@@ -444,6 +446,7 @@ sub get_configuration
 	my $src_else = '';
 	my $dest_else = '';
 	my $rew_else = '';
+	my $pos_src = 0;
 	while (my $l = <IN>) {
 		chomp($l);
 		$l =~ s/\#.*//;
@@ -463,6 +466,7 @@ sub get_configuration
 			$cur_rew = '';
 			$cur_time = '';
 			$cur_dest = '';
+			$pos_src++;
 			next;
 		} elsif ($l =~ /^(rew|rewrite)[\s\t]+([^\s\t]+)[\s\t]+\{/) {
 			$cur_rew = $2;
@@ -566,6 +570,7 @@ sub get_configuration
 					$CONFIG->{src}{$cur_src}{else}{$k} = $v;
 				}
 			}
+			$CONFIG->{src}{$cur_src}{'position'} = $pos_src;
 			next;
 		}
 		# Parse time rules
@@ -1050,8 +1055,9 @@ sub show_times
 	foreach my $k (sort keys %{$CONFIG->{time}}) {
 		# Do not activate Delete if this rule is in used
 		my $delete = 1;
-		foreach my $z (keys %{$CONFIG->{src}}) {
+		foreach my $z (sort { $CONFIG->{src}{$a}{'position'} <=> $CONFIG->{src}{$b}{'position'} } keys %{$CONFIG->{src}}) {
 			foreach my $e (keys %{$CONFIG->{src}{$z}}) {
+				next if ($e eq 'position');
 				if ($CONFIG->{src}{$z}{$e} eq $k) {
 					$delete = 0;
 					last;
@@ -1374,9 +1380,9 @@ sub show_sources
 	print "<h2>", &translate('Sources Configuration'), "</h2>\n";
 	print "<input type=\"hidden\" name=\"source\" value=\"\" />\n";
 	print "<table align=\"center\" width=\"80%\">\n";
-	print "<tr><th align=\"left\">", &translate('Rule name'), "</th><th>&nbsp;</th><th colspan=\"2\">", &translate('Action'), "</th></tr>\n";
-	print "<tr><td style=\"border: none;\" colspan=\"4\"><hr></td></tr>\n";
-	foreach my $k (sort keys %{$CONFIG->{src}}) {
+	print "<tr><th align=\"left\">", &translate('Rule name'), "</th><th>&nbsp;</th><th colspan=\"4\">", &translate('Action'), "</th></tr>\n";
+	print "<tr><td style=\"border: none;\" colspan=\"6\"><hr></td></tr>\n";
+	foreach my $k (sort { $CONFIG->{src}{$a}{'position'} <=> $CONFIG->{src}{$b}{'position'} } keys %{$CONFIG->{src}}) {
 		my $delete = 1;
 		foreach my $z (keys %{$CONFIG->{acl}}) {
 			if ($z eq $k) {
@@ -1384,23 +1390,30 @@ sub show_sources
 				last;
 			}
 		}
-		print "<tr><th align=\"left\">$k</th><th align=\"left\">&nbsp;</th><th><a href=\"\" onclick=\"document.forms[0].source.value='$k'; document.forms[0].action.value='sourcesedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Add an element'), "\">$IMG_ADD</a></th>";
+		my $pos = $CONFIG->{src}{$k}{'position'} || 0;
+		delete $CONFIG->{src}{$k}{'position'};
+		my $up = "<a href=\"\" onclick=\"document.forms[0].apply.value='1'; document.forms[0].source.value='$k : $pos'; document.forms[0].action.value='sourcesup'; document.forms[0].submit(); return false; \" title=\"" . &translate('Move up') . "\">$IMG_UP</a>";
+		$up = '&nbsp;' if ($pos == 1);
+		my $down = "<a href=\"\" onclick=\"document.forms[0].apply.value='1'; document.forms[0].source.value='$k : $pos'; document.forms[0].action.value='sourcesdown'; document.forms[0].submit(); return false;\" title=\"" . &translate('Move down') . "\">$IMG_DOWN</a>";
+		$down = '&nbsp;' if ($pos eq scalar keys %{$CONFIG->{src}});
+		print "<tr><th align=\"left\">$k</th><th align=\"left\">&nbsp;</th><th><a href=\"\" onclick=\"document.forms[0].source.value='$k'; document.forms[0].action.value='sourcesedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Add an element'), "\">$IMG_ADD</a></th><th>$up</th><th>$down</th>";
 		if ($delete) {
 			print "<th><a href=\"\" onclick=\"document.forms[0].source.value='$k'; document.forms[0].action.value='sourcesdelete'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Remove all'), "\">$IMG_REMOVE</a></th>";
 		} else {
 			print "<th title=\"", &translate('Still in use'), "\">$IMG_NOREMOVE</th>";
 		}
 		print "\n";
-		foreach my $key (sort keys %{$CONFIG->{src}{$k}}) {
+		foreach my $key (keys %{$CONFIG->{src}{$k}}) {
 			next if (!grep(/^$key$/, @SRC_KEYWORD));
 			foreach (@{$CONFIG->{src}{$k}{$key}}) {
-				print "<tr><th>&nbsp;</th><td><b>", &translate($SRC_ALIAS{$key}), "</b>: ", &show_editor($key, $_), "</td><th><a href=\"\" onclick=\"document.forms[0].source.value='$k'; document.forms[0].oldvalue.value='", &encode_url("$key $_"), "'; document.forms[0].action.value='sourcesedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Edit'), "\">$IMG_EDIT</a></th>";
+				print "<tr><th>&nbsp;</th><td><b>", &translate($SRC_ALIAS{$key}), "</b>: ", &show_editor($key, $_), "</td><th><a href=\"\" onclick=\"document.forms[0].source.value='$k'; document.forms[0].oldvalue.value='", &encode_url("$key $_"), "'; document.forms[0].action.value='sourcesedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Edit'), "\">$IMG_EDIT</a></th><th></th><th></th>";
 				if (! $delete && scalar(@{$CONFIG->{src}{$k}{$key}}) == 1) {
 					print "<th title=\"", &translate('Still in use'), "\">$IMG_NODELETE</th>";
 				} else {
 					print "<th><a href=\"\" onclick=\"document.forms[0].source.value='$k'; document.forms[0].oldvalue.value='", &encode_url("$key $_"), "'; document.forms[0].action.value='sourcesdelete'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Delete'), "\">$IMG_DELETE</a></th>";
 				}
 				print "</tr>\n";
+				$pos++;
 			}
 		}
 		&show_log_schedule('src', 'source', $k, 0);
@@ -1432,9 +1445,9 @@ sub show_sources
 			print "</tr>\n";
 
 		}
-		print "<tr><th colspan=\"4\"><hr></th></tr>\n";
+		print "<tr><th colspan=\"6\"><hr></th></tr>\n";
 	}
-	print "<tr><th colspan=\"4\" align=\"right\"><input type=\"button\" name=\"new\" value=\"", &translate('New Source'), "\" onclick=\"document.forms[0].source.value=''; document.forms[0].oldvalue.value=''; document.forms[0].action.value='sourcesedit'; document.forms[0].submit(); return false;\"></th></tr>\n";
+	print "<tr><th colspan=\"6\" align=\"right\"><input type=\"button\" name=\"new\" value=\"", &translate('New Source'), "\" onclick=\"document.forms[0].source.value=''; document.forms[0].oldvalue.value=''; document.forms[0].action.value='sourcesedit'; document.forms[0].submit(); return false;\"></th></tr>\n";
 	print "</table>\n";
 
 }
@@ -2084,7 +2097,7 @@ sub edit_acls
 		print "<tr><th colspan=\"2\" align=\"left\">", &translate('Source name'), " ";
 		print "<select name=\"acl\">\n";
 		print "<option value=\"\">", &translate('Select a source'), "</option>\n";
-		foreach my $k (sort keys %{$CONFIG->{src}}) {
+		foreach my $k (sort { $CONFIG->{src}{$a}{'position'} <=> $CONFIG->{src}{$b}{'position'} } keys %{$CONFIG->{src}}) {
 			if (!exists $CONFIG->{acl}{$k}) {
 				print "<option value=\"$k\">$k</option>\n";
 			}
@@ -2321,7 +2334,7 @@ sub dump_config
 	}
 
 	$config .= "\n# Source addresses\n";
-	foreach my $t (sort keys %{$CONFIG->{src}}) {
+	foreach my $t (sort { $CONFIG->{src}{$a}{'position'} <=> $CONFIG->{src}{$b}{'position'} } keys %{$CONFIG->{src}}) {
 #		if ($CONFIG->{src}{$t}{'outside'}) {
 #			$config .= "src $t outside $CONFIG->{src}{$t}{'outside'} {\n";
 #		} elsif ($CONFIG->{src}{$t}{'within'}) {
@@ -2895,6 +2908,10 @@ sub apply_change
 	} elsif ($CGI->param('source')) {
 
 		my $name = $CGI->param('source') || '';
+		my $pos = '';
+		if ($name =~ s/ : (\d+)$//) {
+			$pos = $1;
+		}
 		my $else = $CGI->param('else') || '';
 		($name, $else) = &normalyze($name);
 		my $oldval = $OLD;
@@ -2922,6 +2939,22 @@ sub apply_change
 					}
 				} else {
 					delete $CONFIG->{src}{$name}{$key};
+				}
+			}
+		} elsif ($ACTION eq 'sourcesup') {
+			foreach my $k (keys %{$CONFIG->{src}}) {
+				if ($CONFIG->{src}{$k}{'position'} == ($pos - 1)) {
+					$CONFIG->{src}{$k}{'position'}++;
+				} elsif ($CONFIG->{src}{$k}{'position'} == $pos) {
+					$CONFIG->{src}{$k}{'position'}--;
+				}
+			}
+		} elsif ($ACTION eq 'sourcesdown') {
+			foreach my $k (keys %{$CONFIG->{src}}) {
+				if ($CONFIG->{src}{$k}{'position'} == ($pos + 1)) {
+					$CONFIG->{src}{$k}{'position'}--;
+				} elsif ($CONFIG->{src}{$k}{'position'} == $pos) {
+					$CONFIG->{src}{$k}{'position'}++;
 				}
 			}
 		} else {
