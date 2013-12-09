@@ -1406,7 +1406,7 @@ sub show_sources
 		foreach my $key (keys %{$CONFIG->{src}{$k}}) {
 			next if (!grep(/^$key$/, @SRC_KEYWORD));
 			foreach (@{$CONFIG->{src}{$k}{$key}}) {
-				print "<tr><th>&nbsp;</th><td><b>", &translate($SRC_ALIAS{$key}), "</b>: ", &show_editor($key, $_), "</td><th><a href=\"\" onclick=\"document.forms[0].source.value='$k'; document.forms[0].oldvalue.value='", &encode_url("$key $_"), "'; document.forms[0].action.value='sourcesedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Edit'), "\">$IMG_EDIT</a></th><th></th><th></th>";
+				print "<tr><th>&nbsp;</th><td><b>", &translate($SRC_ALIAS{$key}), "</b>: ", &show_editor($key, $_), "</td><th><a href=\"\" onclick=\"document.forms[0].source.value='$k'; document.forms[0].oldvalue.value='", &encode_url("$key $_"), "'; document.forms[0].action.value='sourcesedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Edit'), "\">$IMG_EDIT</a></th><th>&nbsp;</th><th>&nbsp;</th>";
 				if (! $delete && scalar(@{$CONFIG->{src}{$k}{$key}}) == 1) {
 					print "<th title=\"", &translate('Still in use'), "\">$IMG_NODELETE</th>";
 				} else {
@@ -1419,7 +1419,7 @@ sub show_sources
 		&show_log_schedule('src', 'source', $k, 0);
 
 		if ($CONFIG->{src}{$k}{outside} || $CONFIG->{src}{$k}{within}) {
-			print "<tr><th>", &translate('if schedule not match'), "</th><th>&nbsp;</th><th><a href=\"\" onclick=\"document.forms[0].source.value='$k-else'; document.forms[0].action.value='sourcesedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Add an element'), "\">$IMG_ADD</a></th>";
+			print "<tr><th>", &translate('if schedule not match'), "</th><th>&nbsp;</th><th><a href=\"\" onclick=\"document.forms[0].source.value='$k-else'; document.forms[0].action.value='sourcesedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Add an element'), "\">$IMG_ADD</a></th><th>&nbsp;</th><th>&nbsp;</th>";
 			print "<th><a href=\"\" onclick=\"document.forms[0].source.value='$k-else'; document.forms[0].action.value='sourcesdelete'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Remove all'), "\">$IMG_REMOVE</a></th></tr>\n";
 			foreach my $key (sort keys %{$CONFIG->{src}{$k}{else}}) {
 				next if (!grep(/^$key$/, @SRC_KEYWORD));
@@ -1440,7 +1440,7 @@ sub show_sources
 				print "<tr><th>&nbsp;</th><td><b>", &translate('No log file'), "</b>";
 			}
 			print "$v $anon";
-			print "</td><th><a href=\"\" onclick=\"document.forms[0].source.value='$k-else'; document.forms[0].oldvalue.value='", &encode_url("log $CONFIG->{src}{$k}{else}{log}"), "'; document.forms[0].action.value='sourcesedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Edit'), "\">$IMG_EDIT</a></th>";
+			print "</td><th><a href=\"\" onclick=\"document.forms[0].source.value='$k-else'; document.forms[0].oldvalue.value='", &encode_url("log $CONFIG->{src}{$k}{else}{log}"), "'; document.forms[0].action.value='sourcesedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Edit'), "\">$IMG_EDIT</a></th><th>&nbsp;</th><th>&nbsp;</th>";
 			print "<th><a href=\"\" onclick=\"document.forms[0].source.value='$k-else'; document.forms[0].oldvalue.value='", &encode_url("log $CONFIG->{src}{$k}{else}{log}"), "'; document.forms[0].action.value='sourcesdelete'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Delete'), "\">$IMG_DELETE</a></th>";
 			print "</tr>\n";
 
@@ -2896,6 +2896,9 @@ sub apply_change
 				($type, $srcval) = split(/[\s\t]+/, $srcval, 2);
 				$CONFIG->{src}{$name}{$type} = $srcval;
 			}
+			if (!exists $CONFIG->{src}{$name}{'position'}) {
+				$CONFIG->{src}{$name}{'position'} = scalar($CONFIG->{src}{$name});
+			}
 		}
 		if (!exists $CONFIG->{src}{$name}{within} && !exists $CONFIG->{src}{$name}{outside}) {
 			delete $CONFIG->{src}{$name}{else};
@@ -3298,6 +3301,9 @@ sub show_log_schedule
 	}
 	print "$v $anon";
 	print "</td><th><a href=\"\" onclick=\"document.forms[0].$elt.value='$key'; document.forms[0].oldvalue.value='", &encode_url("log $CONFIG->{$type}{$key}{log}"), "'; document.forms[0].action.value='${elt}sedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Edit'), "\">$IMG_EDIT</a></th>";
+	if ($type eq "src") {
+		print "<th>&nbsp;</th><th>&nbsp;</th>";
+	}
 	if ($v) {
 		print "<th><a href=\"\" onclick=\"document.forms[0].$elt.value='$key'; document.forms[0].oldvalue.value='", &encode_url("log $CONFIG->{$type}{$key}{log}"), "'; document.forms[0].action.value='${elt}sdelete'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Delete'), "\">$IMG_DELETE</a></th>";
 	} else {
@@ -3317,6 +3323,9 @@ sub show_log_schedule
 	print "<tr><th>&nbsp;</th><td$colspan><b>", &translate($label), "</b> $CONFIG->{$type}{$key}{$sched}</td>";
 	my $prefix = $sched || 'within';
 	print "<th><a href=\"\" onclick=\"document.forms[0].$elt.value='$key'; document.forms[0].oldvalue.value='", &encode_url("$prefix $CONFIG->{$type}{$key}{$sched}"), "'; document.forms[0].action.value='${elt}sedit'; document.forms[0].submit(); return false;\" title=\"", &translate('Edit'), "\">$IMG_EDIT</a></th>";
+	if ($type eq "src") {
+		print "<th>&nbsp;</th><th>&nbsp;</th>";
+	}
 	if ($sched) {
 		print "<th><a href=\"\" onclick=\"document.forms[0].$elt.value='$key'; document.forms[0].oldvalue.value='", &encode_url("$prefix $CONFIG->{$type}{$key}{$sched}"), "'; document.forms[0].action.value='${elt}sdelete'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Delete'), "\">$IMG_DELETE</a></th>";
 	} else {
