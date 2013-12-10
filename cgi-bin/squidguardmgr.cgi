@@ -2897,7 +2897,7 @@ sub apply_change
 				$CONFIG->{src}{$name}{$type} = $srcval;
 			}
 			if (!exists $CONFIG->{src}{$name}{'position'}) {
-				$CONFIG->{src}{$name}{'position'} = scalar($CONFIG->{src}{$name});
+				$CONFIG->{src}{$name}{'position'} = scalar(keys %{$CONFIG->{'src'}});
 			}
 		}
 		if (!exists $CONFIG->{src}{$name}{within} && !exists $CONFIG->{src}{$name}{outside}) {
