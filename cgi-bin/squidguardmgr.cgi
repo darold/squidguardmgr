@@ -1781,6 +1781,7 @@ sub show_acl
 
 	print "<h2>", &translate('ACLs Configuration'), "</h2>\n";
 	print "<input type=\"hidden\" name=\"acl\" value=\"\" />\n";
+	print "<input type=\"hidden\" name=\"else\" value=\"\" />\n";
 	print "<table width=\"100%\">\n";
 	print "<tr><th>", &translate('Sources'), "</th><th>", &translate('Schedules'), "</th><th>", &translate('Destination'), "</th><th>", &translate('FQDN only'), "</th><th>", &translate('Url rewriting'), "</th><th>", &translate('Redirection'), "</th><th colspan=\"2\">", &translate('Actions'), "</th></tr>\n";
 	print "<tr><th align=\"left\" colspan=\"8\"><hr></th></tr>\n";
@@ -1917,7 +1918,9 @@ sub show_acl
 			$img = $IMG_REDIRECT if ($CONFIG->{acl}{$k}{else}{redirect});
 			$fqdn = '&nbsp;' if ($fqdn eq "");
 			$rewrite = '&nbsp;' if ($rewrite eq "");
-			print "<tr><th align=\"right\">", &translate('else'), "</th><td>&nbsp;</td><td>$allowed<br>$blocked$whitelist$blacklist</td><td style=\"text-align: center;\">$fqdn</td><td>$rewrite</td><td title=\"", $CGI->escapeHTML("$CONFIG->{acl}{$k}{else}{redirect}"), "\" style=\"text-align: center;\">$img</td><th colspan=\"2\">&nbsp;</th></tr>\n";
+			print "<tr><th align=\"right\">", &translate('else'), "</th><td>&nbsp;</td><td>$allowed<br>$blocked$whitelist$blacklist</td><td style=\"text-align: center;\">$fqdn</td><td>$rewrite</td><td title=\"", $CGI->escapeHTML("$CONFIG->{acl}{$k}{else}{redirect}"), "\" style=\"text-align: center;\">$img</td>";
+			print "<th>&nbsp;</th>";
+			print "<th><a href=\"\" onclick=\"document.forms[0].acl.value='$k'; document.forms[0].action.value='aclsdelete'; document.forms[0].else.value='1'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Delete'), "\">$IMG_DELETE</a></th></tr>\n";
 		}
 		print "<tr><th align=\"left\" colspan=\"8\"><hr></th></tr>\n";
 	}
@@ -3072,6 +3075,7 @@ sub apply_change
 	# Update Policies
 	if ($CGI->param('acl')) {
 		my $name = $CGI->param('acl') || '';
+		my $else = $CGI->param('else') || '';
 		$name =~ s/[^a-z0-9\-\_]//ig;
 		if ($ACTION ne 'aclsdelete') {
 			delete $CONFIG->{acl}{$name}{pass};
@@ -3118,7 +3122,11 @@ sub apply_change
 				$CONFIG->{acl}{$name}{extended}{$1} = $2;
 			}
 		} else {
-			delete $CONFIG->{acl}{$name};
+			if (!$else) {
+				delete $CONFIG->{acl}{$name};
+			} else {
+				delete $CONFIG->{acl}{$name}{else};
+			}
 		}
 		$ACTION = 'acl';
 	}
