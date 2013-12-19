@@ -670,7 +670,7 @@ sub smgr_header
 		print "<a href=\"\" onclick=\"window.open('", $CGI->escapeHTML("$ENV{SCRIPT_NAME}?action=squidclamav&view=&lang=$LANG"), "','squidclamav','scrollbars=yes,status=no,toolbar=no,width=900,height=800,resizable=yes,screenX=1,screenY=1,top=1,left=1'); return false;\" target=\"_new\">", &translate('SquidClamav'), "</a> |\n";
 	}
 	if ($SQUID_WRAPPER) {
-		print "<a href=\"\" onclick=\"document.forms[0].oldvalue.value=''; document.forms[0].action.value='squid'; document.forms[0].submit(); return false;\">", &translate('Restart Squid'), "</a> |\n";
+		print "<a href=\"\" onclick=\"if(window.confirm('", &translate('Restart Squid'), "?')){document.forms[0].oldvalue.value=''; document.forms[0].action.value='squid'; document.forms[0].submit();} return false;\">", &translate('Restart Squid'), "</a> |\n";
 	}
 	print "<hr>\n";
 	print "</td></tr></table>\n";
@@ -3627,7 +3627,7 @@ sub sc_smgr_header
 	if ($SQUIDCLAMAV eq 'c-icap') {
 		print "<a href=\"\" onclick=\"document.forms[0].view.value='cicap'; document.forms[0].submit(); return false;\">", &translate('Reload c-icap'), "</a> |\n";
 	} elsif ($SQUID_WRAPPER) {
-		print "<a href=\"\" onclick=\"document.forms[0].view.value='squid'; document.forms[0].submit(); return false;\">", &translate('Restart Squid'), "</a> |\n";
+		print "<a href=\"\" onclick=\"if(window.confirm('", &translate('Restart Squid'), "?')){document.forms[0].view.value='squid'; document.forms[0].submit();} return false;\">", &translate('Restart Squid'), "</a> |\n";
 	}
 	print "<a href=\"\" onclick=\"window.close(); return false;\">", &translate('Close'), "</a> |\n" if ($SQUIDGUARD !~ /^(no|off|disable)/i);
 	print "<hr>\n";
