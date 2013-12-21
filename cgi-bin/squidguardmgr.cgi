@@ -1189,7 +1189,7 @@ sub edit_times
 	print "</td></tr>\n";
 	print "<tr><th colspan=\"2\">&nbsp;</th></tr>\n";
 	print "<tr><th colspan=\"2\"><hr /></th></tr>\n";
-	print "<tr><th align=\"left\" colspan=\"2\">", &translate('Space separated list of date'), "</th></tr>\n";
+	print "<tr><th align=\"left\" colspan=\"2\">", &translate('Space separated list of dates'), "</th></tr>\n";
 	print "<tr><td colspan=\"2\">(Format: yyyy.mm.dd yyyy.mm.dd yyyy.mm.dd-yyyy.mm.dd *.mm.dd *.*.dd *.mm.*)</td></tr>\n";
 	print "<tr><td colspan=\"2\" nowrap=\"1\">\n";
 	print "<input type=\"text\" size=\"80\" name=\"date\" value=\"$days\" />\n";
@@ -2192,7 +2192,7 @@ sub edit_acls
 	}
 	print "</td></tr>\n";
 
-	print "<tr><th align=\"right\">", &translate('Redirect url'), "</th><td><input type=\"text\" size=\"50\" name=\"redirect\" value=\"", $CGI->escapeHTML($CONFIG->{acl}{$name}{redirect}), "\" />";
+	print "<tr><th align=\"right\">", &translate('Redirect URL'), "</th><td><input type=\"text\" size=\"50\" name=\"redirect\" value=\"", $CGI->escapeHTML($CONFIG->{acl}{$name}{redirect}), "\" />";
 	print "&nbsp;<input type=\"button\" name=\"redirectlist\" value=\"", &translate('From list'), "\" onclick=\"window.open('", $CGI->escapeHTML("$ENV{SCRIPT_NAME}?action=redirectlist&acl=$ACL&opener=redirect&lang=$LANG"), "','redlistwin','scrollbars=yes,status=no,toolbar=no,width=600,height=400,resizable=yes'); return false;\">";
 	print "</td></tr>\n";
 	print "<tr><th align=\"right\">", &translate('Log file'), "</th><td><input type=\"text\" size=\"50\" name=\"log\" value=\"$CONFIG->{acl}{$name}{log}\" /></td></tr>\n";
@@ -3806,7 +3806,7 @@ sub sc_show_whitelist
 		$old =~ s/\\/\\\\/g;
 		print "<tr><td><input type=\"text\" size=\"60\" name=\"whitelist$i\" value=\"$CONFIG->{whitelist}[$i]\"/></td><th><a href=\"\" onclick=\"document.forms[0].oldvalue.value='", &encode_url($old), "'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Remove'), "\">$IMG_REMOVE</a></th></tr>";
 	}
-	print "<tr><td align=\"left\">", &translate('List of domain or host to add'), "</td><th>&nbsp;</th></tr>";
+	print "<tr><td align=\"left\">", &translate('List of domains or hosts to add'), "</td><th>&nbsp;</th></tr>";
 	print "<tr><th align=\"left\"><textarea name=\"whitelist$i\" cols=\"50\" rows=\"5\" wrap=\"off\"></textarea></th><th>&nbsp;</th></tr>";
 	print "<tr><th colspan=\"2\"><hr></th></tr>\n";
 	print "<tr><th colspan=\"2\" align=\"right\"><input type=\"button\" name=\"save\" value=\"", &translate('Apply change'), "\" onclick=\"document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\"></th></tr>\n";
@@ -3837,7 +3837,7 @@ sub sc_show_trustuser
 		$old =~ s/\\/\\\\/g;
 		print "<tr><td><input type=\"text\" size=\"60\" name=\"trustuser$i\" value=\"$CONFIG->{trustuser}[$i]\"/></td><th><a href=\"\" onclick=\"document.forms[0].oldvalue.value='", &encode_url($old), "'; document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\" title=\"", &translate('Remove'), "\">$IMG_REMOVE</a></th></tr>";
 	}
-	print "<tr><td align=\"left\">", &translate('List of user to add'), "</td><th>&nbsp;</th></tr>";
+	print "<tr><td align=\"left\">", &translate('List of users to add'), "</td><th>&nbsp;</th></tr>";
 	print "<tr><th align=\"left\"><textarea name=\"trustuser$i\" cols=\"50\" rows=\"5\" wrap=\"off\"></textarea></th><th>&nbsp;</th></tr>";
 	print "<tr><th colspan=\"2\"><hr></th></tr>\n";
 	print "<tr><th colspan=\"2\" align=\"right\"><input type=\"button\" name=\"save\" value=\"", &translate('Apply change'), "\" onclick=\"document.forms[0].apply.value='1'; document.forms[0].submit(); return false;\"></th></tr>\n";

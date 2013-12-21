@@ -3,7 +3,7 @@ Les filtres, destinations ou cibles si vous préférez, sont déclarés par :
 </p>
 <pre>
 	- un optionnelle contrainte de temps à cette definition.
-	- toute combinaision de zéro ou une de chacune des listes de: domains urls et expressions.
+	- toute combinaision de zéro ou une de chacune des listes de: domains URLs et expressions.
 </pre>
 
 <p>
@@ -11,9 +11,9 @@ Les contraintes de temps appliquées à un groupe de destination sont utilisées po
 </p>
 
 <p>
-Vous pouvez, pour chaque groupe de destination définir une url de redirection qui sera utilisée lorsqu'une requête d'un client sera trouvée dans l'une de ces listes (domaines, urls ou expressions). L'Url de redirection déclare l'Url alternative qui doit être utilisée pour un groupe de destination bloqué.
+Vous pouvez, pour chaque groupe de destination définir une URL de redirection qui sera utilisée lorsqu'une requête d'un client sera trouvée dans l'une de ces listes (domaines, URLs ou expressions). L'URL de redirection déclare l'URL alternative qui doit être utilisée pour un groupe de destination bloqué.
 </p>
-<p>SquidGuard a la possibilité de réaliser des subbstitutions de caractères spéciaux à l'intérieur de cette Url:
+<p>SquidGuard a la possibilité de réaliser des subbstitutions de caractères spéciaux à l'intérieur de cette URL:
 </p>
 <pre>
 	%a	est remplacé par l'adresse ip du client.
@@ -21,8 +21,8 @@ Vous pouvez, pour chaque groupe de destination définir une url de redirection qu
 	%i	est remplacé par le nom d'utilisateur (RFC931) ou "unknown" si non disponible.
 	%s 	est remplacé par le groupe source impliqué dans le bloquage  ou "unknown" si non disponible.
 	%t	est remplacé par le groupe de destination ou filtre impliqué dans le bloquage ou "unknown" si non disponible.
-	%u	est remplacé par l'Url demandée.
-	%p	est remplacé par la partie URI de l'Url demandée.
+	%u	est remplacé par l'URL demandée.
+	%p	est remplacé par la partie URI de l'URL demandée.
 	%% 	est remplacé par le caractère "%".
 </pre>
 <p>

@@ -2,25 +2,26 @@
 Time spaces, schedules or zones if you prefer, are declared by days of the week
 or dates with an optional time constraint for the date or day selection.
 </p>
-<p>Each schedule definition can be used as constraint in other object like sources, url rewriting and filters.
+<p>
+Each schedule definition can be used as a constraint in other object like sources, URL rewriting, and filters.
 </p>
 <p>
 Overlaps are OK, and the result is the union.
 </p>
 <p>
 If you use date, you can set a space separated list of dates and/or date range
-with fixed year, month, day or use wildcard instead.
+with fixed year, month, day, or use wildcard instead.
 </p>
 <pre>
-For instance for the chrismas and new year days
+For instance, for the chrismas and new year days
 
 	2010.12.25 2011.01.01
 
-or the week between these days:
+The week between these days:
 
 	2010.12.25-2011.01.01
 
-or these days for all coming years:
+These days for all coming years:
 
 	*.12.25 *.01.01
 </pre>

@@ -2,7 +2,7 @@
 Globals				Général
 Schedules			Horaires
 Sources				Sources
-Url rewriting			Récriture d'URL
+URL rewriting			Récriture d'URL
 Filters				Filtres
 ACLs				Polices
 View Configuration		Voir la configuration
@@ -69,7 +69,7 @@ To				A
 Hours				Heures
 Minutes				Minutes
 Following week days		Selon les jours de la semaine
-Space separated list of date	Liste de dates séparées par un espace
+Space separated list of dates	Liste de dates séparées par un espace
 
 # Sources interface
 Sources Configuration		Configuration des Sources
@@ -89,29 +89,29 @@ Search User in SQL database	Recherche des utilisateurs dans MySQL
 # Filters interface
 Filters Configuration		Configuration des filtres
 Domains				Domaines
-Urls				Urls
+URLs				URLs
 Expressions			Expressions
 Redirection			Redirection
 Log file			Fichier de log
 New Filter			Nouveau Filtre
 Filters Edition			Edition des Filtres
 Search in domains list		Recherche dans la liste de domaines
-Search in Urls list		Recherche dans la liste d'Urls
+Search in URLs list		Recherche dans la liste d'URLs
 Search in expressions list	Recherche dans la liste des expressions
 When found in list above	Lorsque trouvé dans une liste ci-dessus
-Redirect to Url			Redirection vers l'Url
+Redirect to URL			Redirection vers l'URL
 Log to file			Log dans le fichier
 Autocreate			Création automatique
 Autocreate filters from blacklist database	Création automatique des filtres a partir des bases de blacklist
 
-# Url rewrite interface
-Url rewriting Configuration	Configuration des récritures d'Url
+# URL rewrite interface
+URL rewriting Configuration	Configuration des récritures d'URL
 Pattern matching		Chaine de recherche
 Substitution			Chaine de substitution
 Replace				Remplacer
 with				par
 New Rewrite			Nouvelle Récriture
-Url Rewrite Edition		Edition des récritures d'Url
+URL Rewrite Edition		Edition des récritures d'URL
 Rewrite options			Options de récriture
 Case insensitive		Minuscule+Majuscule
 Show move temporary		Signaler comme temporaire
@@ -150,13 +150,13 @@ Desactivate all filters		Desactive tous les filtres
 Policy Edition			Edition de la police
 Source name			Nom de la source
 Select a source			Selectionner une source
-Deny ip addresses in Urls	Interdire les adresses Ips dans les URLs
+Deny ip addresses in URLs	Interdire les adresses Ips dans les URLs
 Allow access to			Autorise l'accès vers
 All Internet			Tout Internet
 Deny access to			Interdire l'accès vers
 Rewrite rules			Régles de récriture
 Default access			Accès par défaut
-Redirect url			URL de redirection
+Redirect URL			URL de redirection
 Only the selected list		Seulement les listes cochées
 
 # SquidClamav Interfaces
@@ -191,9 +191,9 @@ DNS lookup			Activer la résolution de nom
 
 # SquidClamav whitelist interface
 Whitelists definition		Définition des listes blanches
-List of domain or host to add	Liste de nom de domaine ou d'hôte à ajouter
+List of domains or hosts to add	Liste de nom de domaine ou d'hôte à ajouter
 Trusted Users definition	Définition des utilisateurs certifiés
-List of user to add		Liste des utilisateurs certifiés à ajouter
+List of users to add		Liste des utilisateurs certifiés à ajouter
 Trusted Clients definition	Listes des machines certifiées sécurisées
 List of clients to add		Liste de clients certifiées à ajouter
 
