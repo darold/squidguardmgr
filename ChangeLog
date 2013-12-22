@@ -1,7 +1,6 @@
 Sun Dec 22 2013 - v1.13
 
-This release fixes lot of bugs and adds some new interfaces and capabilities in
-blocklists and sources management. Everyone should upgrade.
+This release adds better support to SquidGuard management, adds some new interfaces and capabilities in blocklists or sources management. Some more bugs fix.
 
 	- Fix some translation issues. Thanks to Travis L. Bean for the patch.
 	- Added Squid Restart confirmation. Popup a JavaScript msg box before
