@@ -1,3 +1,86 @@
+Sun Dec 22 2013 - v1.13
+
+This release fixes lot of bugs and adds some new interfaces and capabilities in
+blocklists and sources management. Everyone should upgrade.
+
+	- Fix some translation issues. Thanks to Travis L. Bean for the patch.
+	- Added Squid Restart confirmation. Popup a JavaScript msg box before
+	  actually restart Squid. Patch from Tatsuya Nonogaki.
+	- Added "else" block deletion icon to ACLs Configuration page for
+	  uniform operability with those of Filters, Sources and so on. Patch
+	  from Tatsuya Nonogaki.
+	- Allow sources to be ordered by the user using the up and down arrows
+	  links. Patch from Gilles Darold.
+	- Log content escaping and CSS change to not expands table beyond the
+	  frame. Patch from Tatsuya Nonogaki.
+	- Allow selection of "All the time" to remove time constraint in
+	  edit_sources and edit_rewrites. Patch from Tatsuya Nonogaki.
+	- Lot of cosmetic adjustments and code cleaning. Patches from Tatsuya
+	  Nonogaki.
+	- Big changes in Lists Management page. Patches from Tatsuya Nonogaki.
+	- Made list names in Filter Configuration page hyperlinks to their list
+	  edition page. Patch from Tatsuya Nonogaki.
+	- Had capability to clear blacklists' alias and descriptions. Patch from	  Tatsuya Nonogaki.
+	- Fix "Remove all" icon button didn't remove empty src block from
+	  squidGuard.conf. Now removes the src block if the element in question
+	  was the last one of the source group. The last element of a source
+	  group still in use denies deletion. Patches from Tatsuya Nonogaki.
+	- Add capability to newly create source list file. Patch from Tatsuya
+	  Nonogaki.
+	- Fix rare but potential db file damage when tmp file cannot be put out.
+	  Added description to show_logs help content. Patch from Tatsuya
+	  Nonogaki.
+	- Logrotate saves old log file with gunzip per EPEL squidGuard pkg
+	  default. It's better to prevent binary files from being clicked upon.
+	  Patch from Tatsuya Nonogaki.
+	- Update documentation and add Tatsuya Nonogaki to the authors list.
+	- Fix wrapper chmod arguments in Makefile.PL. Patch from Tatsuya
+	  Nonogaki.
+	- Fix lot of typo in English lang file. Patch from Tatsuya Nonogaki.
+	- File editor window width calibration. Patch from Tatsuya Nonogaki.
+	- Use hash reference instead of global hash variables. Patch from
+	  Tatsuya Nonogaki.
+	- Redirect Picker table width fix. Completely disabled cell wordwrap to
+	  fit the table within the popup window. Patch from Tatsuya Nonogaki.
+	- Added checkbox to explicitly delete else clause from the ACL. Patch
+	  from Tatsuya Nonogaki.
+	- Fix squidguardmgr.css 'header' class missing semicolon. Patch from
+	  Tatsuya Nonogaki.
+	- Fix typo where chown command was replaced by chmod in documentation.
+	  Thanks to Raul Sobon for the report.
+	- Added functionality to input Redirect URLs from a popup window which
+	  shows URLs used somewhere in the squidGuard.conf. Changed cgi and js.
+	  Patch from Tatsuya Nonogaki.
+	- Remove special windows character ^M from the code to avoid diff change
+	  on each pull requests. Patch from Gilles Darold.
+	- Fix impossible set of ALL for else in ACLs. Thanks to Thomas Benoit
+	  for the patch.
+	- Configuration is now displayed asis, without any reordering by
+	  squidguardmgr.cgi. Patch from Tatsuya Nonogaki.
+	- Add escapeHTML to redirect URLs. Patch from Tatsuya Nonogaki.
+	- Fixed bug that inserts unnecessary empty 'else' clause into
+	  squidGuard.conf. Patch from Tatsuya Nonogaki.
+	- Add init parameter file for squidguardmgr httpd daemon. Based on
+	  /etc/sysconfig/httpd distributed with CentOS 6.4. Patch from Tatsuya
+	  Nonogaki.
+	- Change CGI directory setting include-file for squidguardmgr httpd
+	  daemon. Patch from Tatsuya Nonogaki.
+	- Add EL6 sample httpd configuration for squidguardmgr. Patch from
+	  Tatsuya Nonogaki.
+	- Blacklist text and db files should be kept non-world-readable.
+	  Insertion of umask(). Patch from Tatsuya Nonogaki.
+	- Fix source list file edition that was not working properly via IE or
+	  Firefox on Windows machines. Patch from Tatsuya Nonogaki.
+	- Not all ACL objects require "redirect" unless it also has "log" set.
+	  Patch from Tatsuya Nonogaki.
+	- Fix "log" setting for each ACL block in squidGuard.conf that have to
+	  be parsed. Patch from Tatsuya Nonogaki.
+	- Replace direct call to squidguard binary to reload db files by the
+	  call to the rebuild_database() function. Patch from Gilles Darold.
+
+UPGRADE: All files have changes, you must fully override your previous
+installation by using: perl Makefile.PL && make && make install.
+
 Sun Jan 27 2013 - v1.12
 
 	- Add more debug information about squidGuard.conf and squidclamav.conf
