@@ -1,7 +1,7 @@
 # contrib/EL6/README
 This is sample configuration files to drive an Apache 2.2 instance for 
-SquidGuard Manager on RHEL/CentOS 6.x.  Many files were borrowed  from 
-CentOS 6 distribution.
+SquidGuard Manager on RHEL/CentOS 6.x and 5.x.  Many files were borrowed
+from CentOS 6 distribution.
 
 As you may already know, httpd has to be run under user/group 'squid' to
 hold SquidGuard Manager. Most of the time, the effective uid/gid of the
@@ -26,6 +26,8 @@ this httpd or squid cache daemon.
         perl.conf          -- May be provided by distribution's mod_perl pkg.
 /etc/sysconfig/
     squidguardmgr          -- httpd runtime options read by init-file below.
+                              On EL5, you must change PIDFILE variable to
+                              /var/run/squidguardmgr.pid for proper operation.
 /etc/init.d/
     squidguardmgr          -- Init file for httpd driving SquidGuard Manager. 
                               Rename rc_squidguardmgr file and set permission
