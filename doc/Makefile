@@ -9,7 +9,7 @@ OUTFILES = $(MMAN) $(TREADME) $(TINSTALL)
 
 .PHONY: all clean
 
-all: $(OUTFILES)
+all: clean $(OUTFILES)
 
 $(MMAN): $(PODSRC)
 	$(POD2MAN) $< $@
@@ -19,6 +19,8 @@ $(TREADME): $(PODSRC)
 
 $(TINSTALL): $(PODSRC)
 	$(POD2TXT) $< $@
+	perl -i -pe 'BEGIN {undef $$/;} s/\nFEATURES\n.*?(\nREQUIREMENT)/$$1/s;' $@
+	perl -i -pe 'BEGIN {undef $$/; $$r="    See README file.\n";} s/(\nCONFIGURATION\n).*?(\nAUTHORS)/$$1$$r$$2/s;' $@
 
 clean:
 	-rm -f $(OUTFILES)

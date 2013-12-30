@@ -3,9 +3,9 @@
 %define dist .el5
 %endif}
 %{!?_with_squidguard:%{!?_without_squidguard:%define _with_squidguard --with-squidguard}}
-%if 0%{?_with_squidclamavVI:1}
-%undefine _with_squidclamavV
-%define _without_squidclamavV --without-squidclamavV
+%if 0%{?_with_squidclamav6:1}
+%undefine _with_squidclamav5
+%define _without_squidclamav5 --without-squidclamav5
 %endif
 Name:           squidguardmgr
 Version:        1.13
@@ -21,9 +21,9 @@ Vendor:         Gilles Darold <gilles @nospam@ darold.net>
 Packager:       Tatsuya Nonogaki <winfield @nospam@ support.email.ne.jp>
 
 # RPMBUILD USAGE
-# --with squidclamavVI : builds for use with squidclamav 6.x
-# --with squidclamavV  : builds for use with squidclamav 5.x
-# Above two are exclusive. If both are erroneously specified, squidclamavVI wins.
+# --with squidclamav6  : builds for use with squidclamav 6.x
+# --with squidclamav5  : builds for use with squidclamav 5.x
+# Above two are exclusive. If both are erroneously specified, squidclamav6 wins.
 # --without squidguard : doesn't count on squidGuard support - Use in conjunction
 #                        with one of the above
 # By default, only "--with squidguard" is implicitly enabled.
@@ -37,12 +37,12 @@ Packager:       Tatsuya Nonogaki <winfield @nospam@ support.email.ne.jp>
 %define squiduid squid
 %define squidgid squid
 
-BuildRequires:  perl, gcc
+BuildRequires:  perl, perl(ExtUtils::MakeMaker), gcc
 %if 0%{?_with_squidguard:1}
 BuildRequires:  %{squidguard_bin}
 Requires:       %{squidguard_bin}
 %endif
-%if 0%{?_with_squidclamavVI:1} || 0%{?_with_squidclamavV:1}
+%if 0%{?_with_squidclamav6:1} || 0%{?_with_squidclamav5:1}
 BuildRequires:  %{squidclamav_bin}
 Requires:       %{clamd_bin}, %{squidclamav_bin}
 %endif
@@ -63,30 +63,27 @@ configuration files by hand before and after using SquidGuard Manager.
 
 %build
 %{__perl} Makefile.PL \
-%{?_with_squidguard:CONFFILE=/etc/squid/squidGuard.conf} \
-%{?_with_squidguard:DBHOME=/var/squidGuard/blacklists} \
-%{?_with_squidguard:LOGDIR=/var/log/squidGuard} \
+%{?_without_squidguard:SQUIDGUARD=off} \
+%{?_with_squidguard:SQUIDGUARD=%{squidguard_bin}} \
 WWWDIR=/var/www/%{wwwdir} \
 LANGDIR=en_US \
 BASEURL=/squidguardmgr \
 SQUIDUSR=%{squiduid} SQUIDGRP=%{squidgid} \
-%{?_with_squidclamavVI:CICAP_SOCKET=/var/run/c-icap/c-icap.ctl} \
-%{?_with_squidclamavV:%{!?_without_squidclamavV:SQUIDCLAMAV=%{squidclamav_bin}}} \
-%{!?_with_squidclamavVI:%{!?_with_squidclamavV:SQUIDCLAMAV=off}} \
-%{?_with_squidclamavVI:SQUIDCLAMAVCONF=/etc/squidclamav.conf} \
-%{?_with_squidclamavV:%{!?_without_squidclamavV:SQUIDCLAMAVCONF=/etc/squidclamav.conf}} \
+%{!?_with_squidclamav6:%{!?_with_squidclamav5:SQUIDCLAMAV=off}} \
+%{?_with_squidclamav6:CICAP_SOCKET=/var/run/c-icap/c-icap.ctl} \
+%{?_with_squidclamav5:%{!?_without_squidclamav5:SQUIDCLAMAV=%{squidclamav_bin}}} \
 DESTDIR=$RPM_BUILD_ROOT \
-QUIET
+QUIET=1
 
-make
+%{__make}
 
 %install
 %define el6htcont contrib/EL6/httpd
 %if "%{EL_REL}" == "el5"
 %{__perl} -pi.orig -e 's|^(PIDFILE=/var/run)/httpd(/.+)$|$1$2|;' %{el6htcont}/sysconfig/squidguardmgr
 %endif
-rm -rf $RPM_BUILD_ROOT
-make install DESTDIR=$RPM_BUILD_ROOT
+%{__rm} -rf $RPM_BUILD_ROOT
+%{__make} install DESTDIR=$RPM_BUILD_ROOT
 %{__install} -D -m 0644 doc/squidguardmgr.3 $RPM_BUILD_ROOT%{_mandir}/man8/squidguardmgr.8
 %{__install} -d -m 0755 $RPM_BUILD_ROOT%{_localstatedir}/www/squid-gui/
 %{__install} -d -m 0700 $RPM_BUILD_ROOT%{_localstatedir}/log/httpd/squidguardmgr/
@@ -97,7 +94,7 @@ make install DESTDIR=$RPM_BUILD_ROOT
 %{__install} -D -m 0644 %{el6htcont}/logrotate.d/squidguardmgr $RPM_BUILD_ROOT%{_sysconfdir}/logrotate.d/squidguardmgr
 
 %clean
-rm -rf $RPM_BUILD_ROOT
+%{__rm} -rf $RPM_BUILD_ROOT
 
 %post
 /sbin/chkconfig --add squidguardmgr

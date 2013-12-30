@@ -1,6 +1,6 @@
 use ExtUtils::MakeMaker qw(prompt WriteMakefile);
 
-my @ALLOWED_ARGS = ('CONFFILE','DBHOME','CGIDIR','HTMLDIR','DESTDIR','QUIET','LANGDIR','BASEURL','WWWDIR','LOGDIR','SQUIDUSR','SQUIDGRP', 'CICAP_SOCKET','SQUIDCLAMAVCONF');
+my @ALLOWED_ARGS = ('SQUIDGUARD','CONFFILE','DBHOME','CGIDIR','HTMLDIR','DESTDIR','QUIET','LANGDIR','BASEURL','WWWDIR','LOGDIR','SQUIDUSR','SQUIDGRP','SQUIDCLAMAV','CICAP_SOCKET','SQUIDCLAMAVCONF');
 
 # Parse command line arguments and store them as environment variables
 while ($_ = shift) {
@@ -15,6 +15,7 @@ $ENV{DESTDIR} =~ s/\/$//;
 my $DESTDIR = $ENV{DESTDIR} || '';
 $ENV{INSTALLDIRS} ||= 'vendor';
 # Default install path
+my $SQUIDGUARD = $ENV{SQUIDGUARD} || '';
 my $CONFFILE = $ENV{CONFFILE} || ''; # SquidGuard configuration file
 my $DBHOME = $ENV{DBHOME} || ''; # SquidGuard DB directory
 my $LOGDIR = $ENV{LOGDIR} || ''; # SquidGuard logs directory
@@ -69,50 +70,66 @@ if (!$rm) {
 }
 
 # Get the path to squidGuard binary or disable it
-my $squidGuard = `which squidGuard 2>/dev/null`;
-chomp($squidGuard);
-if (!-e $squidGuard) {
-	$squidGuard = prompt('Path to squidGuard program?','off');
-}
-if (!-e $squidGuard && (lc($squidGuard) ne 'off')) {
-	die "NOTICE: This tool requires the system command: squidGuard, can't find it in your path\n";
-}
+my $squidGuard = $SQUIDGUARD || '';
 my $squidGuardConf = $CONFFILE || '';
-if (!$squidGuardConf) {
-	foreach ('/usr/local/squidGuard/squidguard.conf','/usr/local/squidGuard/etc/squidguard.conf','/usr/local/etc/squidguard.conf','/etc/squidguard.conf','/etc/squid/squidguard.conf','/etc/squid/squidGuard.conf') {
-		$squidGuardConf = $_, last if (-e $_);
+if (lc($squidGuard) eq 'off') {
+	$squidGuard = 'off';
+	$squidGuardConf = '';
+} else {
+	if (!$squidGuard) {
+		$squidGuard = `which squidGuard 2>/dev/null`;
+		chomp($squidGuard);
 	}
-	if (lc($squidGuard) eq 'off') {
-		$squidGuard = 'off';
-	} else {
-		if (!-e $squidGuardConf) {
-			$squidGuardConf = prompt('Path to squidGuard configuration file?', '');
+	if (!-e $squidGuard) {
+		$squidGuard = prompt('Path to squidGuard program?','off');
+	}
+	if (!-e $squidGuard && (lc($squidGuard) ne 'off')) {
+		die "NOTICE: This tool requires the system command: squidGuard, can't find it in your path\n";
+	}
+	if (!$squidGuardConf) {
+		foreach ('/usr/local/squidGuard/squidguard.conf','/usr/local/squidGuard/etc/squidguard.conf','/usr/local/etc/squidguard.conf','/etc/squidguard.conf','/etc/squid/squidguard.conf','/etc/squid/squidGuard.conf') {
+			$squidGuardConf = $_, last if (-e $_);
 		}
-		if (!-e $squidGuardConf) {
-			print "NOTICE: can't find squidguard.conf in your system.\n";
+		if (lc($squidGuard) eq 'off') {
+			$squidGuard = 'off';
+		} else {
+			if (!-e $squidGuardConf) {
+				$squidGuardConf = prompt('Path to squidGuard configuration file?', '');
+			}
+			if (!-e $squidGuardConf) {
+				print "NOTICE: can't find squidguard.conf in your system.\n";
+			}
 		}
 	}
-}
-if (-e $squidGuardConf && !$DBHOME) {
-	my $dbhome = `grep "dbhome" $squidGuardConf`;
-	chomp($dbhome);
-	if ($dbhome =~ s/^[^\s\t]+[\s\t]+//) {
-		$DBHOME = $dbhome;
-	}
-}
-if (-e $squidGuardConf && !$LOGDIR) {
-	my $logdir = `grep "logdir" $squidGuardConf`;
-	chomp($logdir);
-	if ($logdir =~ s/^[^\s\t]+[\s\t]+//) {
-		$LOGDIR = $logdir;
+	if (-e $squidGuardConf) {
+		if (!$DBHOME) {
+			my $dbhome = `grep "dbhome" $squidGuardConf`;
+			chomp($dbhome);
+			if ($dbhome =~ s/^[^\s\t]+[\s\t]+//) {
+				$DBHOME = $dbhome;
+			}
+		}
+		if (!$LOGDIR) {
+			my $logdir = `grep "logdir" $squidGuardConf`;
+			chomp($logdir);
+			if ($logdir =~ s/^[^\s\t]+[\s\t]+//) {
+				$LOGDIR = $logdir;
+			}
+		}
 	}
 }
 
 my $squidclamav = $SQUIDCLAMAV || '';
 my $cicapSocket = $CICAP_SOCKET || '';
-if (!$cicapSocket && !$squidclamav) {
+my $squidclamavConf = $SQUIDCLAMAVCONF || '';
+if (lc($squidclamav) eq 'off') {
+	$squidclamav = 'off';
+	$cicapSocket = '';
+	$squidclamavConf = '';
+} elsif (!$cicapSocket && !$squidclamav) {
 	$squidclamav = prompt('Do you use c-icap SquidClamav v6.x services?', 'no');
 	if ($squidclamav && $squidclamav !~ /^no/i) {
+	# Possibility is invoker want to use SquidClamav 6.x
 		$squidclamav = 'c-icap';
 		# Search for the c-icap command socket
 		my $cicapConf = '';
@@ -127,6 +144,7 @@ if (!$cicapSocket && !$squidclamav) {
 			chomp($cicapSocket);
 		}
 	} else {
+	# Possibility is invoker wants to use SquidClamav 5.x or none
 		$squidclamav = `which squidclamav 2>/dev/null`;
 		chomp($squidclamav);
 		if (!-e $squidclamav) {
@@ -141,20 +159,31 @@ if (!$cicapSocket && !$squidclamav) {
 	}
 } elsif ($cicapSocket) {
 	$squidclamav = 'c-icap';
+} else {
+	# Ensure user specified squidclamav existence
+	if (!-e $squidclamav) {
+		$squidclamav = prompt('Path to squidclamav program?', 'off');
+		if (!-e $squidclamav && (lc($squidclamav) ne 'off')) {
+			die "NOTICE: This tool requires the system command: squidclamav, can't find it in your path\n";
+		}
+		if (lc($squidclamav) eq 'off') {
+			$squidclamav = 'off';
+		}
+	}
 }
+
 if ( ($squidclamav eq 'off') && ($squidGuard eq 'off')) {
 	die "FATAL: you must either have squidGuard or SquidClamav installed!\n";
 }
 
-my $squidclamavConf = $SQUIDCLAMAVCONF || '';
-if (!$squidclamavConf) {
+if ( ($squidclamav ne 'off') && !$squidclamavConf) {
 	foreach ('/usr/local/etc/squidclamav.conf','/etc/squidclamav.conf','/etc/squidclamav/squidclamav.conf') {
 		$squidclamavConf = $_, last if (-e $_);
 	}
-	if (!-e $squidclamavConf && ($squidclamav ne 'off')) {
+	if (!-e $squidclamavConf) {
 		$squidclamavConf = prompt('Path to SquidClamav configuration file?', '');
 		if (!-e $squidclamavConf) {
-			die "NOTICE: can't find squidclamav.conf it in your system\n";
+			die "NOTICE: can't find squidclamav.conf in your system\n";
 		}
 	}
 }
@@ -298,7 +327,7 @@ if [ ! -d "$DESTDIR$WWWDIR" ]; then
 fi
 
 if [ -e $DESTDIR$WWWDIR${CGIDIR}squidguardmgr.conf ]; then
-	echo "File squidguardmgr.conf already exists. Rename it into squidguardmgr.conf.old"
+	echo "File squidguardmgr.conf already exists. Renaming it to squidguardmgr.conf.old"
 	mv $DESTDIR$WWWDIR${CGIDIR}squidguardmgr.conf $DESTDIR$WWWDIR${CGIDIR}squidguardmgr.conf.old
 fi
 };

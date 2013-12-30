@@ -79,6 +79,8 @@ INSTALLATION
     You can fully customize this installation by passing the following
     variables to Makefile.PL:
 
+            SQUIDGUARD => Absolute path to the SquidGuard executable. Set to
+                         'off' to disable its support
             CONFFILE => Absolute path to the SquidGuard configuration file
             DBHOME => Absolute path to the SquidGuard DB directory
             LOGDIR => Absolute path to the SquidGuard log directory
@@ -94,14 +96,15 @@ INSTALLATION
                        Manager Web GUI. Default: /squidguardmgr
             SQUIDUSR => User running Squid
             SQUIDGRP => Group running Squid
-            SQUIDCLAMAV => Absolute path to the squidclamav binary (v5.x only)
+            SQUIDCLAMAV => Absolute path to the squidclamav binary (v5.x only).
+                           Set to 'off' if you won't manage neither v5 nor V6.x
             CICAP_SOCKET => c-icap server control socket (v6.x only)
             SQUIDCLAMAVCONF => Absolute path to squidclamav.conf file
 
     For packaging there's two more configuration variables:
 
             DESTDIR => Directory prefix where install will be done
-            QUIET => Do not display the post install message
+            QUIET => Specify with value '1' to suppress post install messages
 
     Example:
 
@@ -114,7 +117,8 @@ INSTALLATION
             LANGDIR=fr_FR BASEURL=/admin \
             SQUIDUSR=squid SQUIDGRP=squid \
             SQUIDCLAMAV=/usr/local/bin/squidclamav \
-            SQUIDCLAMAVCONF=/etc/squidclamav.conf
+            SQUIDCLAMAVCONF=/etc/squidclamav.conf \
+            QUIET=1
 
             make
             su

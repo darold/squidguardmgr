@@ -124,7 +124,7 @@
 .\" ========================================================================
 .\"
 .IX Title "SQUIDGUARDMGR 1"
-.TH SQUIDGUARDMGR 1 "2013-11-27" "perl v5.10.1" "User Contributed Perl Documentation"
+.TH SQUIDGUARDMGR 1 "2013-12-31" "perl v5.10.1" "User Contributed Perl Documentation"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -293,6 +293,8 @@ You can fully customize this installation by passing the following variables
 to Makefile.PL:
 .PP
 .Vb 10
+\&        SQUIDGUARD => Absolute path to the SquidGuard executable. Set to
+\&                     \*(Aqoff\*(Aq to disable its support
 \&        CONFFILE => Absolute path to the SquidGuard configuration file
 \&        DBHOME => Absolute path to the SquidGuard DB directory
 \&        LOGDIR => Absolute path to the SquidGuard log directory
@@ -308,7 +310,8 @@ to Makefile.PL:
 \&                   Manager Web GUI. Default: /squidguardmgr
 \&        SQUIDUSR => User running Squid
 \&        SQUIDGRP => Group running Squid
-\&        SQUIDCLAMAV => Absolute path to the squidclamav binary (v5.x only)
+\&        SQUIDCLAMAV => Absolute path to the squidclamav binary (v5.x only).
+\&                       Set to \*(Aqoff\*(Aq if you won\*(Aqt manage neither v5 nor V6.x
 \&        CICAP_SOCKET => c\-icap server control socket (v6.x only)
 \&        SQUIDCLAMAVCONF => Absolute path to squidclamav.conf file
 .Ve
@@ -317,12 +320,12 @@ For packaging there's two more configuration variables:
 .PP
 .Vb 2
 \&        DESTDIR => Directory prefix where install will be done
-\&        QUIET => Do not display the post install message
+\&        QUIET => Specify with value \*(Aq1\*(Aq to suppress post install messages
 .Ve
 .PP
 Example:
 .PP
-.Vb 10
+.Vb 11
 \&        perl Makefile.PL \e
 \&        CONFFILE=/usr/local/etc/squidguard.conf \e
 \&        DBHOME=/usr/local/squidguard/db \e
@@ -332,7 +335,8 @@ Example:
 \&        LANGDIR=fr_FR BASEURL=/admin \e
 \&        SQUIDUSR=squid SQUIDGRP=squid \e
 \&        SQUIDCLAMAV=/usr/local/bin/squidclamav \e
-\&        SQUIDCLAMAVCONF=/etc/squidclamav.conf
+\&        SQUIDCLAMAVCONF=/etc/squidclamav.conf \e
+\&        QUIET=1
 \&
 \&        make
 \&        su
