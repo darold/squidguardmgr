@@ -32,7 +32,9 @@ Packager:       Tatsuya Nonogaki <winfield @nospam@ support.email.ne.jp>
 
 %define squidguard_bin /usr/bin/squidGuard
 %define clamd_bin /usr/sbin/clamd
+%define c_icap_bin /usr/bin/c-icap
 %define squidclamav_bin /usr/local/bin/squidclamav
+%define squidclamav_lib /usr/lib/c_icap/squidclamav.so
 %define wwwdir sgmgr
 %define squiduid squid
 %define squidgid squid
@@ -42,9 +44,13 @@ BuildRequires:  perl, perl(ExtUtils::MakeMaker), gcc
 BuildRequires:  %{squidguard_bin}
 Requires:       %{squidguard_bin}
 %endif
-%if 0%{?_with_squidclamav6:1} || 0%{?_with_squidclamav5:1}
+%if 0%{?_with_squidclamav5:1}
 BuildRequires:  %{squidclamav_bin}
 Requires:       %{clamd_bin}, %{squidclamav_bin}
+%endif
+%if 0%{?_with_squidclamav6:1}
+BuildRequires:  %{squidclamav_lib}
+Requires:       %{clamd_bin}, %{squidclamav_lib}, %{c_icap_bin}
 %endif
 Requires:       perl, squid
 Requires:       httpd >= 2.2, mod_perl
