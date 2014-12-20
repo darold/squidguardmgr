@@ -695,17 +695,19 @@ sub get_blacklists
 {
 	my $ldir = shift;
 
-	$ldir = '/' . $ldir if ($ldir);
-	if (not opendir(DIR, "$CONFIG->{dbhome}$ldir")) {
-		$ERROR = "Can't open blacklist directory $CONFIG->{dbhome}$ldir: $!\n";
+	$ldir .= '/' if ($ldir);
+	my $dh = undef;
+	if (not opendir($dh, "$CONFIG->{dbhome}/$ldir")) {
+		$ERROR = "Can't open blacklist directory $CONFIG->{dbhome}/$ldir: $!\n";
 		return;
 	}
-	my @dirs = grep { !/^\..*$/ && -d "$CONFIG->{dbhome}$ldir/$_" && !-l "$CONFIG->{dbhome}$ldir/$_" } readdir(DIR);
-	closedir(DIR);
+	my @dirs = grep { !/^\..*$/ && -d "$CONFIG->{dbhome}/$ldir$_" && !-l "$CONFIG->{dbhome}/$ldir$_" } readdir($dh);
+	closedir($dh);
+	map { s#^#$ldir#; } @dirs if ($ldir);
+
 	# search for subdirectories
 	foreach my $d (@dirs) {
-		my @tmpdirs = &get_blacklists("$ldir/$d");
-		map { s/^/$d\//; } @tmpdirs;
+		my @tmpdirs = &get_blacklists($d);
 		push(@dirs, @tmpdirs);
 	}
 
@@ -1578,7 +1580,7 @@ sub show_categories
 		foreach my $type ('domain', 'url', 'expression') {
 			my $list = $CONFIG->{dest}{$k}{$type . 'list'} || '';
 			if ($list) {
-				$list =~ s/\/.*//;
+				$list =~ s/\/[^\/]*$//;
 				my $sbl = $list;
 				$list = $blinfo->{$list}{alias} || $list;
 				print "<td><a href='", $CGI->escapeHTML("$ENV{SCRIPT_NAME}?action=bledit&blacklist=$sbl"), "'>$list</a></td>";
@@ -3525,27 +3527,8 @@ sub autocreate_filters
 	# Read configuration from file squidGuard.conf
 	&get_configuration();
 
-	if (not opendir(DIR, $CONFIG->{dbhome})) {
-		$ERROR = "can't opendir $CONFIG->{dbhome}: $!\n";
-		return;
-	}
-	my @dirs = grep { !/^\./ && -d "$CONFIG->{dbhome}/$_" && !-l "$CONFIG->{dbhome}/$_"} readdir(DIR);
-	my $found = 0;
-	foreach my $name (@dirs) {
-		if (-e "$CONFIG->{dbhome}/$name/domains") {
-			$CONFIG->{dest}{$name}{domainlist} = "$name/domains";
-			$found = 1;
-		}
-		if (-e "$CONFIG->{dbhome}/$name/urls") {
-			$CONFIG->{dest}{$name}{urllist} = "$name/urls";
-			$found = 1;
-		}
-		if (-e "$CONFIG->{dbhome}/$name/expressions") {
-			$CONFIG->{dest}{$name}{expressionlist} = "$name/expressions";
-			$found = 1;
-		}
-	}
-	closedir DIR;
+	# Scab recursively sub directories to find blacklists
+	my $found = &scan_bldb();
 	if (!$found) {
 		$ERROR = "No blocklists found under: $CONFIG->{dbhome}\n";
 	}
@@ -3553,6 +3536,46 @@ sub autocreate_filters
 	$CGI->param('action', 'categories');
 	&save_config();
 }
+
+sub scan_bldb
+{
+	my $start_dir = shift;
+
+	my $dh = undef;
+	my $sname = '';
+	if ($start_dir) {
+		$start_dir .= '/';
+		$sname = $start_dir;
+		$sname =~ s/\//_/g;
+	}
+
+	if (not opendir($dh, "$CONFIG->{dbhome}/$start_dir")) {
+		$ERROR = "can't opendir $CONFIG->{dbhome}/$start_dir: $!\n";
+		return;
+	}
+	my @dirs = grep { !/^\./ && -d "$CONFIG->{dbhome}/$start_dir$_" && !-l "$CONFIG->{dbhome}/$start_dir$_"} readdir($dh);
+	my $found = 0;
+	foreach my $name (@dirs) {
+		if (-e "$CONFIG->{dbhome}/$start_dir$name/domains") {
+			$CONFIG->{dest}{"$sname$name"}{domainlist} = "$start_dir$name/domains";
+			$found = 1;
+		}
+		if (-e "$CONFIG->{dbhome}/$start_dir$name/urls") {
+			$CONFIG->{dest}{"$sname$name"}{urllist} = "$start_dir$name/urls";
+			$found = 1;
+		}
+		if (-e "$CONFIG->{dbhome}/$start_dir$name/expressions") {
+			$CONFIG->{dest}{"$sname$name"}{expressionlist} = "$start_dir$name/expressions";
+			$found = 1;
+		}
+		# Recursive scan
+		&scan_bldb("$start_dir$name");
+	}
+	closedir $dh;
+
+	return $found;
+}
+
 
 sub rebuild_database
 {
