@@ -1554,9 +1554,7 @@ sub show_categories
 
 	print "<h2>", &translate('Filters Configuration'), "</h2>\n";
 	print "<input type=\"hidden\" name=\"category\" value=\"\" />\n";
-	if (!scalar keys %{$CONFIG->{dest}}) {
-		print "<p><input type=\"button\" name=\"autocreate\" value=\"", &translate('Autocreate'), "\" title=\"", &translate('Autocreate filters from blacklist database'), "\" onclick=\"document.forms[0].action.value='autocreate'; document.forms[0].submit(); return false;\"></p>\n";
-	}
+	print "<p><input type=\"button\" name=\"autocreate\" value=\"", &translate('Autocreate'), "\" title=\"", &translate('Autocreate filters from blacklist database'), "\" onclick=\"document.forms[0].action.value='autocreate'; document.forms[0].submit(); return false;\"></p>\n";
 	print "<table align=\"center\" width=\"90%\">\n";
 	print "<tr><th align=\"left\" nowrap=\"1\">", &translate('Rule name'), "</th><th align=\"left\" nowrap=\"1\">", &translate('Schedules'), "</th><th align=\"left\">", &translate('Domains'), "</th><th align=\"left\">", &translate('Urls'), "</th><th align=\"left\">", &translate('Expressions'), "</th><th align=\"center\">", &translate('Redirection'), "</th><th align=\"left\">", &translate('Log file'), "</th><th colspan=\"2\">", &translate('Action'), "</th></tr>\n";
 	print "<tr><th colspan=\"9\"><hr></th></tr>\n";
@@ -3531,7 +3529,7 @@ sub autocreate_filters
 	# Scab recursively sub directories to find blacklists
 	my $found = &scan_bldb();
 	if (!$found) {
-		$ERROR = "No blocklists found under: $CONFIG->{dbhome}\n";
+		$ERROR = "No new blocklists found under: $CONFIG->{dbhome}\n";
 	}
 	$ACTION = 'categories';
 	$CGI->param('action', 'categories');
@@ -3556,16 +3554,18 @@ sub scan_bldb
 	}
 	my @dirs = grep { !/^\./ && -d "$CONFIG->{dbhome}/$start_dir$_" && !-l "$CONFIG->{dbhome}/$start_dir$_"} readdir($dh);
 	my $found = 0;
+	# Create a destination definition when the lists files exists but do not
+	# override existing definition. They need to be removed manually first.
 	foreach my $name (@dirs) {
-		if (-e "$CONFIG->{dbhome}/$start_dir$name/domains") {
+		if (-e "$CONFIG->{dbhome}/$start_dir$name/domains" && !exists $CONFIG->{dest}{"$sname$name"}{domainlist}) {
 			$CONFIG->{dest}{"$sname$name"}{domainlist} = "$start_dir$name/domains";
 			$found = 1;
 		}
-		if (-e "$CONFIG->{dbhome}/$start_dir$name/urls") {
+		if (-e "$CONFIG->{dbhome}/$start_dir$name/urls" && !exists $CONFIG->{dest}{"$sname$name"}{urllist}) {
 			$CONFIG->{dest}{"$sname$name"}{urllist} = "$start_dir$name/urls";
 			$found = 1;
 		}
-		if (-e "$CONFIG->{dbhome}/$start_dir$name/expressions") {
+		if (-e "$CONFIG->{dbhome}/$start_dir$name/expressions" && !exists $CONFIG->{dest}{"$sname$name"}{expressionlist}) {
 			$CONFIG->{dest}{"$sname$name"}{expressionlist} = "$start_dir$name/expressions";
 			$found = 1;
 		}
