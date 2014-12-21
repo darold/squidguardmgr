@@ -3524,6 +3524,7 @@ sub create_default_config
 sub autocreate_filters
 {
 	# Read configuration from file squidGuard.conf
+	%{$CONFIG} = ();
 	&get_configuration();
 
 	# Scab recursively sub directories to find blacklists
