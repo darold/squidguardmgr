@@ -25,7 +25,7 @@ my $SC_PROGRAM  = 'SquidClamav Manager';
 
 # Default SquidGuard installation path
 my $DBHOME = "/var/lib/squidguard/db";
-my $LOGDIR = "/var/log/squid";
+my $LOGDIR = "/var/log/squidguard";
 
 # Variables that can be overidden into the squidguardmgr.conf file
 our $DIFF       = '/usr/bin/diff';
@@ -488,6 +488,7 @@ sub get_configuration
 			$enter_acl = 0;
 			$cur_src = '';
 			$cur_rew = '';
+			$CONFIG->{dest}{$cur_dest} = ();
 			next;
 		}
 		if ($enter_acl && ($l =~ /\belse\b/)) {
