@@ -1480,6 +1480,7 @@ sub edit_sources
 		if ($value =~ s/anonymous[\s\t]+//) {
 			$anon = 'checked="1"';
 		}
+		$value =~ s/"/\&quot;/g;
 		print "<tr><th nowrap=\"1\">", &translate('Log into file'), "</th><td>";
 		print "<input type=\"hidden\" name=\"srctype\" value=\"log\" />\n";
 		print "<input type=\"text\" size=\"50\" name=\"srcval\" value=\"$value\" />\n";
@@ -1531,6 +1532,7 @@ sub edit_sources
 			print "<option value=\"$t\" $sel>", &translate($SRC_ALIAS{$t}), "</option>\n";
 		}
 		print "</select>\n";
+		$value =~ s/"/\&quot;/g;
 		print "<input type=\"text\" size=\"50\" name=\"srcval\" value=\"$value\" /></td></tr>\n";
 	}
 	print "<tr><th colspan=\"2\"><hr></th></tr>\n";
