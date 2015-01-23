@@ -14,7 +14,7 @@ use vars qw($VERSION $AUTHOR $COPYRIGHT $LICENSE);
 
 use strict qw{vars subs};
 
-$VERSION     = '1.13',
+$VERSION     = '1.14',
 $AUTHOR      = 'Gilles DAROLD <gilles AT darold DOT net>';
 $COPYRIGHT   = 'Copyright &copy; 2010-2015 Gilles DAROLD, all rights reserved';
 $LICENSE     = 'GPL v3';

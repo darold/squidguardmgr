@@ -8,7 +8,7 @@
 %define _without_squidclamav5 --without-squidclamav5
 %endif
 Name:           squidguardmgr
-Version:        1.13
+Version:        1.14
 Release:        1%{?dist}
 Summary:        Web GUI for SquidGuard and SquidClamav administration
 

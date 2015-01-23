@@ -1,3 +1,28 @@
+Fri Jan 23 2015 - v1.14
+
+This release allow directory recursion in autocreate filters to support
+blacklist database with subdirectories like shalla lists. It also allow
+permanent auto-creation of filters so that new folders in blocklist directory
+are auto-detected and can be automatically used to create a new filter.
+
+Here is the complete list of change and bug fixes:
+
+	- Fix parameter with doublequote in Sources Edition. Thanks to
+	  marcohald for the report.
+	- Fix case where lines in the rules/classes was doubled when
+	  using Autocreate filters. Thanks to e-gaulue for the report.
+	- Allow permanent autocreation of filters so that new folders
+	  in squidGuard blocklist (/var/lib/squidguard/db) are auto-
+	  detected and automatically create a new filter.
+	- Keep empty rules in squidguard configuration file. Thanks to
+	  e-gaulue for the report.
+	- Allow directory recursion in autocreate filters to support sub-
+	  directories in black lists. Thanks to e-gaulue for the feature
+	  request.
+	- Add RPM spec file. Thanks to Tatsuya-Nonogaki for the patch.
+
+UPGRADE: Replacing squidguardmgr.cgi should be enough.
+
 Sun Dec 22 2013 - v1.13
 
 This release adds better support to SquidGuard management, adds some new interfaces and capabilities in blocklists or sources management. Some more bugs fix.
