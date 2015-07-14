@@ -188,6 +188,13 @@ if ( ($squidclamav ne 'off') && !$squidclamavConf) {
 	}
 }
 
+# Change default path to perl binary
+my $perl = `which perl 2>/dev/null`;
+chomp($perl);
+$perl = quotemeta($perl);
+`perl -p -i -e 's/#\\!\\/usr\\/bin\\/perl/#\!$perl/' cgi-bin/squidguardmgr.cgi`;
+
+# Change default path to squid binary
 my $squid = `which squid 2>/dev/null`;
 chomp($squid);
 $squid ||= `which squid3 2>/dev/null`;
@@ -200,9 +207,7 @@ if (!-e $squid) {
 	}
 }
 $squid =~ s/\//\\\//g;
-# Change default path to squid binary
 `perl -p -i -e 's/#define SQUID_BINARY.*/#define SQUID_BINARY "$squid"/' squid_wrapper/squid_wrapper.c`;
-
 
 my $squid_user = $SQUIDUSR || `ps auxw | grep "(squid)" | grep -v grep | awk '{print \$1}'`;
 chomp($squid_user);
