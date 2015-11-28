@@ -847,7 +847,13 @@ sub save_blacklist
 	my $expressions = '';
 	my $urls = '';
 
-	foreach my $p ($CGI->param()) {
+	my @para = ();
+	eval { @para = $CGI->mutli_param(); };
+	if ($@) {
+		# Old CGI.pm do not have this function
+		@para = $CGI->param();
+	}
+	foreach my $p (@para) {
 		if ($p =~ /^${bl}_domains/) {
 			$domains = $CGI->param($p) || '';
 		} elsif ($p =~ /^${bl}_urls/) {
@@ -3135,7 +3141,17 @@ sub apply_change
 	}
 
 	$OLD = '';
-	foreach ($CGI->param()) {
+
+	# Get list of CGI parameters
+	my @para = ();
+	eval { @para = $CGI->mutli_param(); };
+	if ($@) {
+		# Old CGI.pm do not have this function
+		@para = $CGI->param();
+	}
+
+	# Clear all parameters value
+	foreach (@para) {
 		$CGI->delete($_);
 	}
 
@@ -3952,11 +3968,19 @@ sub sc_apply_change
 		}
 	}
 
+	# Get list of CGI parameters
+	my @para = ();
+	eval { @para = $CGI->mutli_param(); };
+	if ($@) {
+		# Old CGI.pm do not have this function
+		@para = $CGI->param();
+	}
+
 	# Virus Scan abort and abortcontent
 	if ($VIEW eq 'aborts') {
 		delete $CONFIG->{'abort'};
 		delete $CONFIG->{'abortcontent'};
-		foreach my $p ($CGI->param()) {
+		foreach my $p (@para) {
 			next if ($p !~ /^abort/);
 			my $val = $CGI->param($p) || '';
 			next if (!$val);
@@ -3973,7 +3997,7 @@ sub sc_apply_change
 	# Whitelist definitions
 	if ($VIEW eq 'whitelists') {
 		delete $CONFIG->{'whitelist'};
-		foreach my $p ($CGI->param()) {
+		foreach my $p (@para) {
 			next if ($p !~ /^whitelist/);
 			my $tmp = $CGI->param($p);
 			$tmp =~ s/([^\\])\\/$1\\\\/g;
@@ -3986,7 +4010,7 @@ sub sc_apply_change
 	# Trustuser definitions
 	if ($VIEW eq 'trustusers') {
 		delete $CONFIG->{'trustuser'};
-		foreach my $p ($CGI->param()) {
+		foreach my $p (@para) {
 			next if ($p !~ /^trustuser/);
 			my $tmp = $CGI->param($p);
 			$tmp =~ s/([^\\])\\/$1\\\\/g;
@@ -3998,7 +4022,7 @@ sub sc_apply_change
 	# Trustclient definitions
 	if ($VIEW eq 'trustclients') {
 		delete $CONFIG->{'trustclient'};
-		foreach my $p ($CGI->param()) {
+		foreach my $p (@para) {
 			next if ($p !~ /^trustclient/);
 			my $tmp = $CGI->param($p);
 			$tmp =~ s/([^\\])\\/$1\\\\/g;
